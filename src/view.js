@@ -54,6 +54,16 @@ export function render(view) {
 		}
 	}
 
-	context.drawImage(sprites.piece.player, center.x, center.y)
-	context.drawImage(sprites.piece.enemy, center.x + 16, center.y)
+	context.drawImage(sprites.pieces.player.soldier, center.x +  0, center.y)
+	context.drawImage(sprites.pieces.player.fighter, center.x + 16, center.y)
+	context.drawImage(sprites.pieces.player.knight,  center.x + 32, center.y)
+	context.drawImage(sprites.pieces.player.thief,   center.x + 48, center.y)
+	context.drawImage(sprites.pieces.player.mage,    center.x + 64, center.y)
+	context.drawImage(sprites.pieces.player.archer,  center.x + 80, center.y)
+	context.drawImage(sprites.pieces.enemy.soldier,  center.x +  0, center.y + 16)
+	context.drawImage(sprites.pieces.enemy.fighter,  center.x + 16, center.y + 16)
+	context.drawImage(sprites.pieces.enemy.knight,   center.x + 32, center.y + 16)
+	context.drawImage(sprites.pieces.enemy.thief,    center.x + 48, center.y + 16)
+	context.drawImage(sprites.pieces.enemy.mage,     center.x + 64, center.y + 16)
+	context.drawImage(sprites.pieces.enemy.archer,   center.x + 80, center.y + 16)
 }
