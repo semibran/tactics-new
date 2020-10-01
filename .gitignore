@@ -1,0 +1,4 @@
+node_modules
+shrinkwrap.yaml
+dist
+.DS_Store
