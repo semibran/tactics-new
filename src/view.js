@@ -38,19 +38,17 @@ export function init(view) {
 		},
 		press(event) {
 			document.body.classList.add("-dragging")
-			let x = event.pageX || event.touches[0].pageX
-			let y = event.pageY || event.touches[0].pageY
-			pointer.position.x = x
-			pointer.position.y = y
-			pointer.pressed = {
-				x: x - camera.x * view.scale,
-				y: y - camera.y * view.scale
+			pointer.position = getPosition(event)
+			if (pointer.position) {
+				pointer.pressed = {
+					x: pointer.position.x - camera.x * view.scale,
+					y: pointer.position.y - camera.y * view.scale
+				}
 			}
 		},
 		move(event) {
-			pointer.position.x = event.pageX || event.touches[0].pageX
-			pointer.position.y = event.pageY || event.touches[0].pageY
-			if (pointer.pressed) {
+			pointer.position = getPosition(event)
+			if (pointer.position && pointer.pressed) {
 				camera.x = (pointer.position.x - pointer.pressed.x) / view.scale
 				camera.y = (pointer.position.y - pointer.pressed.y) / view.scale
 				render(view)
@@ -60,6 +58,13 @@ export function init(view) {
 			document.body.classList.remove("-dragging")
 			pointer.pressed = null
 		}
+	}
+
+	function getPosition(event) {
+		let x = event.pageX || event.touches && event.touches[0].pageX
+		let y = event.pageY || event.touches && event.touches[0].pageY
+		if (x === undefined || y === undefined) return null
+		return { x, y }
 	}
 
 	actions.resize()
