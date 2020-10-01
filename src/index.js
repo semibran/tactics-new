@@ -9,8 +9,6 @@ function main(sprites) {
 	let view = View.create(160, 160, disasm(sprites))
 	document.body.appendChild(view.element)
 	View.init(view)
-	View.render(view)
-
 	// requestAnimationFrame(loop)
 
 	function loop() {

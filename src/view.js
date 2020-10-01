@@ -6,12 +6,19 @@ export function create(width, height, sprites) {
 		scale: 1,
 		sprites: sprites,
 		element: document.createElement("canvas"),
-		state: {}
+		state: {
+			camera: { x: 0, y: 0 },
+			pointer: {
+				position: { x: 0, y: 0 },
+				pressed: null,
+			}
+		}
 	}
 }
 
 export function init(view) {
-	function resize() {
+	let { camera, pointer } = view.state
+	function onresize() {
 		let scaleX = Math.max(1, Math.floor(window.innerWidth / view.native.width))
 		let scaleY = Math.max(1, Math.floor(window.innerHeight / view.native.height))
 		view.scale = Math.min(scaleX, scaleY)
@@ -24,26 +31,54 @@ export function init(view) {
 		canvas.style.transform = `scale(${ view.scale })`
 	}
 
-	resize()
-	window.addEventListener("resize", _ => {
-		resize()
-		render(view)
-	})
+	let actions = {
+		resize() {
+			onresize()
+			render(view)
+		},
+		press(event) {
+			pointer.position.x = event.pageX
+			pointer.position.y = event.pageY
+			pointer.pressed = {
+				x: event.pageX - camera.x * view.scale,
+				y: event.pageY - camera.y * view.scale
+			}
+		},
+		move(event) {
+			pointer.position.x = event.pageX
+			pointer.position.y = event.pageY
+			if (pointer.pressed) {
+				camera.x = (pointer.position.x - pointer.pressed.x) / view.scale
+				camera.y = (pointer.position.y - pointer.pressed.y) / view.scale
+				render(view)
+			}
+		},
+		release() {
+			pointer.pressed = null
+		}
+	}
+
+	actions.resize()
+	window.addEventListener("resize", actions.resize)
+	window.addEventListener("mousedown", actions.press)
+	window.addEventListener("mousemove", actions.move)
+	window.addEventListener("mouseup", actions.release)
 }
 
 export function render(view) {
 	let sprites = view.sprites
+	let camera = view.state.camera
 	let canvas = view.element
 	let context = canvas.getContext("2d")
-	context.fillStyle = "white"
+	context.fillStyle = "black"
 	context.fillRect(0, 0, canvas.width, canvas.height)
 
 	let center = {
-		x: Math.round(view.width / 2) - 64,
-		y: Math.round(view.height / 2) - 64
+		x: Math.round(view.width / 2 - 64 + camera.x),
+		y: Math.round(view.height / 2 - 64 + camera.y)
 	}
 
-	context.fillStyle = "gainsboro"
+	context.fillStyle = "#112"
 	for (let i = 0; i < 8; i++) {
 		for (let j = 0; j < 8; j++) {
 			if ((j + i) % 2) {
@@ -54,16 +89,16 @@ export function render(view) {
 		}
 	}
 
-	context.drawImage(sprites.pieces.player.soldier, center.x +  0, center.y)
-	context.drawImage(sprites.pieces.player.fighter, center.x + 16, center.y)
-	context.drawImage(sprites.pieces.player.knight,  center.x + 32, center.y)
-	context.drawImage(sprites.pieces.player.thief,   center.x + 48, center.y)
-	context.drawImage(sprites.pieces.player.mage,    center.x + 64, center.y)
-	context.drawImage(sprites.pieces.player.archer,  center.x + 80, center.y)
-	context.drawImage(sprites.pieces.enemy.soldier,  center.x +  0, center.y + 16)
-	context.drawImage(sprites.pieces.enemy.fighter,  center.x + 16, center.y + 16)
-	context.drawImage(sprites.pieces.enemy.knight,   center.x + 32, center.y + 16)
-	context.drawImage(sprites.pieces.enemy.thief,    center.x + 48, center.y + 16)
-	context.drawImage(sprites.pieces.enemy.mage,     center.x + 64, center.y + 16)
-	context.drawImage(sprites.pieces.enemy.archer,   center.x + 80, center.y + 16)
+	context.drawImage(sprites.pieces.player.soldier, center.x +  0, center.y -  1)
+	context.drawImage(sprites.pieces.player.fighter, center.x + 16, center.y -  1)
+	context.drawImage(sprites.pieces.player.knight,  center.x + 32, center.y -  1)
+	context.drawImage(sprites.pieces.player.thief,   center.x + 48, center.y -  1)
+	context.drawImage(sprites.pieces.player.mage,    center.x + 64, center.y -  1)
+	context.drawImage(sprites.pieces.player.archer,  center.x + 80, center.y -  1)
+	context.drawImage(sprites.pieces.enemy.soldier,  center.x +  0, center.y + 15)
+	context.drawImage(sprites.pieces.enemy.fighter,  center.x + 16, center.y + 15)
+	context.drawImage(sprites.pieces.enemy.knight,   center.x + 32, center.y + 15)
+	context.drawImage(sprites.pieces.enemy.thief,    center.x + 48, center.y + 15)
+	context.drawImage(sprites.pieces.enemy.mage,     center.x + 64, center.y + 15)
+	context.drawImage(sprites.pieces.enemy.archer,   center.x + 80, center.y + 15)
 }
