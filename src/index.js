@@ -4,7 +4,11 @@ import * as View from "./view"
 import map from "./maps/test"
 
 let state = (data => {
-	let map = { units: [] }
+	let map = {
+		width: data.width,
+		height: data.height,
+		units: []
+	}
 	for (let unit of data.units) {
 		map.units.push({
 			type: unit.type,

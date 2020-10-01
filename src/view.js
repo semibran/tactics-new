@@ -1,3 +1,5 @@
+const tilesize = 16
+
 export function create(width, height, sprites) {
 	return {
 		width: window.innerWidth,
@@ -9,7 +11,7 @@ export function create(width, height, sprites) {
 		state: {
 			camera: { x: 0, y: 0 },
 			pointer: {
-				position: { x: 0, y: 0 },
+				pos: { x: 0, y: 0 },
 				pressed: null,
 			}
 		},
@@ -40,19 +42,37 @@ export function init(view, app) {
 		},
 		press(event) {
 			document.body.classList.add("-dragging")
-			pointer.position = getPosition(event)
-			if (pointer.position) {
+			pointer.pos = getPosition(event)
+			if (pointer.pos) {
 				pointer.pressed = {
-					x: pointer.position.x - camera.x * view.scale,
-					y: pointer.position.y - camera.y * view.scale
+					x: pointer.pos.x - camera.x * view.scale,
+					y: pointer.pos.y - camera.y * view.scale
 				}
+				let map = app.map
+				// undo scaling
+				let realpos = {
+					x: (pointer.pos.x - window.innerWidth / 2) / view.scale,
+					y: (pointer.pos.y - window.innerHeight / 2) / view.scale,
+				}
+				// relative to top left corner of map
+				let gridpos = {
+					x: realpos.x + map.width * tilesize / 2 - camera.x,
+					y: realpos.y + map.height * tilesize / 2 - camera.y,
+				}
+				// fix to tiles
+				let cursor = {
+					x: Math.floor(gridpos.x / tilesize),
+					y: Math.floor(gridpos.y / tilesize)
+				}
+				let unit = map.units.find(unit => unit.x === cursor.x && unit.y === cursor.y)
+				console.log(unit)
 			}
 		},
 		move(event) {
-			pointer.position = getPosition(event)
-			if (pointer.position && pointer.pressed) {
-				camera.x = (pointer.position.x - pointer.pressed.x) / view.scale
-				camera.y = (pointer.position.y - pointer.pressed.y) / view.scale
+			pointer.pos = getPosition(event)
+			if (pointer.pos && pointer.pressed) {
+				camera.x = (pointer.pos.x - pointer.pressed.x) / view.scale
+				camera.y = (pointer.pos.y - pointer.pressed.y) / view.scale
 				render(view)
 			}
 		},
