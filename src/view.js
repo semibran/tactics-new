@@ -41,32 +41,32 @@ export function init(view, app) {
 			render(view)
 		},
 		press(event) {
+			if (pointer.pressed) return false
 			document.body.classList.add("-dragging")
 			pointer.pos = getPosition(event)
-			if (pointer.pos) {
-				pointer.pressed = {
-					x: pointer.pos.x - camera.x * view.scale,
-					y: pointer.pos.y - camera.y * view.scale
-				}
-				let map = app.map
-				// undo scaling
-				let realpos = {
-					x: (pointer.pos.x - window.innerWidth / 2) / view.scale,
-					y: (pointer.pos.y - window.innerHeight / 2) / view.scale,
-				}
-				// relative to top left corner of map
-				let gridpos = {
-					x: realpos.x + map.width * tilesize / 2 - camera.x,
-					y: realpos.y + map.height * tilesize / 2 - camera.y,
-				}
-				// fix to tiles
-				let cursor = {
-					x: Math.floor(gridpos.x / tilesize),
-					y: Math.floor(gridpos.y / tilesize)
-				}
-				let unit = map.units.find(unit => unit.x === cursor.x && unit.y === cursor.y)
-				console.log(unit)
+			if (!pointer.pos) return false
+			pointer.pressed = {
+				x: pointer.pos.x - camera.x * view.scale,
+				y: pointer.pos.y - camera.y * view.scale
 			}
+			let map = app.map
+			// undo scaling
+			let realpos = {
+				x: (pointer.pos.x - window.innerWidth / 2) / view.scale,
+				y: (pointer.pos.y - window.innerHeight / 2) / view.scale,
+			}
+			// relative to top left corner of map
+			let gridpos = {
+				x: realpos.x + map.width * tilesize / 2 - camera.x,
+				y: realpos.y + map.height * tilesize / 2 - camera.y,
+			}
+			// fix to tiles
+			let cursor = {
+				x: Math.floor(gridpos.x / tilesize),
+				y: Math.floor(gridpos.y / tilesize)
+			}
+			let unit = map.units.find(unit => unit.x === cursor.x && unit.y === cursor.y)
+			console.log(unit)
 		},
 		move(event) {
 			pointer.pos = getPosition(event)
