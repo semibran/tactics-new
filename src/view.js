@@ -37,6 +37,7 @@ export function init(view) {
 			render(view)
 		},
 		press(event) {
+			document.body.classList.add("-dragging")
 			pointer.position.x = event.pageX
 			pointer.position.y = event.pageY
 			pointer.pressed = {
@@ -54,6 +55,7 @@ export function init(view) {
 			}
 		},
 		release() {
+			document.body.classList.remove("-dragging")
 			pointer.pressed = null
 		}
 	}
