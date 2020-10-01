@@ -38,16 +38,18 @@ export function init(view) {
 		},
 		press(event) {
 			document.body.classList.add("-dragging")
-			pointer.position.x = event.pageX
-			pointer.position.y = event.pageY
+			let x = event.pageX || event.touches[0].pageX
+			let y = event.pageY || event.touches[0].pageY
+			pointer.position.x = x
+			pointer.position.y = y
 			pointer.pressed = {
-				x: event.pageX - camera.x * view.scale,
-				y: event.pageY - camera.y * view.scale
+				x: x - camera.x * view.scale,
+				y: y - camera.y * view.scale
 			}
 		},
 		move(event) {
-			pointer.position.x = event.pageX
-			pointer.position.y = event.pageY
+			pointer.position.x = event.pageX || event.touches[0].pageX
+			pointer.position.y = event.pageY || event.touches[0].pageY
 			if (pointer.pressed) {
 				camera.x = (pointer.position.x - pointer.pressed.x) / view.scale
 				camera.y = (pointer.position.y - pointer.pressed.y) / view.scale
@@ -65,6 +67,9 @@ export function init(view) {
 	window.addEventListener("mousedown", actions.press)
 	window.addEventListener("mousemove", actions.move)
 	window.addEventListener("mouseup", actions.release)
+	window.addEventListener("touchstart", actions.press)
+	window.addEventListener("touchmove", actions.move)
+	window.addEventListener("touchend", actions.release)
 }
 
 export function render(view) {
