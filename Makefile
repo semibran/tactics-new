@@ -26,7 +26,7 @@ js:
 	rollup src/index.js -o dist/index.js -f iife -c -m
 
 assets:
-	bin/sprites.js $(shell find src/assets/ -type f -name '*.png')
+	bin/sprites.js $(shell find src/assets -type f -name '*.png')
 
 serve: all
 	serve dist

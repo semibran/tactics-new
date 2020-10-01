@@ -26,5 +26,8 @@
     "rollup": "^2.28.2",
     "serve": "^11.3.2",
     "uglify-js": "^3.11.0"
+  },
+  "dependencies": {
+    "img-load": "^2.0.0"
   }
 }

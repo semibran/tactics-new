@@ -22,8 +22,6 @@ export function init(view) {
 		canvas.width = view.width
 		canvas.height = view.height
 		canvas.style.transform = `scale(${ view.scale })`
-
-		console.log(view)
 	}
 
 	resize()
@@ -34,13 +32,17 @@ export function init(view) {
 }
 
 export function render(view) {
+	let sprites = view.sprites
 	let canvas = view.element
 	let context = canvas.getContext("2d")
 	context.fillStyle = "white"
 	context.fillRect(0, 0, canvas.width, canvas.height)
 
-	let center = { x: view.width / 2 - 64, y: view.height / 2 - 64 }
-
+	let center = {
+		x: Math.round(view.width / 2) - 64,
+		y: Math.round(view.height / 2) - 64
+	}
+	
 	context.fillStyle = "gainsboro"
 	for (let i = 0; i < 8; i++) {
 		for (let j = 0; j < 8; j++) {
@@ -51,4 +53,7 @@ export function render(view) {
 			}
 		}
 	}
+
+	context.drawImage(sprites.palette, center.x, center.y)
+	context.drawImage(sprites.piece, center.x + 16, center.y)
 }

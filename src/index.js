@@ -1,10 +1,12 @@
+import loadImage from "img-load"
+import disasm from "./sprites"
 import * as View from "./view"
 
 let state = {}
-main()
+loadImage("sprites.png").then(main)
 
-function main() {
-	let view = View.create(160, 160)
+function main(sprites) {
+	let view = View.create(160, 160, disasm(sprites))
 	document.body.appendChild(view.element)
 	View.init(view)
 	View.render(view)
