@@ -12,12 +12,14 @@ export function create(width, height, sprites) {
 				position: { x: 0, y: 0 },
 				pressed: null,
 			}
-		}
+		},
+		app: null
 	}
 }
 
-export function init(view) {
+export function init(view, app) {
 	let { camera, pointer } = view.state
+	view.app = app
 	function onresize() {
 		let scaleX = Math.max(1, Math.floor(window.innerWidth / view.native.width))
 		let scaleY = Math.max(1, Math.floor(window.innerHeight / view.native.height))
@@ -94,23 +96,16 @@ export function render(view) {
 	for (let i = 0; i < 8; i++) {
 		for (let j = 0; j < 8; j++) {
 			if ((j + i) % 2) {
-				let x = Math.round(j * 16 + center.x)
-				let y = Math.round(i * 16 + center.y)
+				let x = j * 16 + center.x
+				let y = i * 16 + center.y
 				context.fillRect(x, y, 16, 16)
 			}
 		}
 	}
 
-	context.drawImage(sprites.pieces.player.soldier, center.x +  0, center.y -  1)
-	context.drawImage(sprites.pieces.player.fighter, center.x + 16, center.y -  1)
-	context.drawImage(sprites.pieces.player.knight,  center.x + 32, center.y -  1)
-	context.drawImage(sprites.pieces.player.thief,   center.x + 48, center.y -  1)
-	context.drawImage(sprites.pieces.player.mage,    center.x + 64, center.y -  1)
-	context.drawImage(sprites.pieces.player.archer,  center.x + 80, center.y -  1)
-	context.drawImage(sprites.pieces.enemy.soldier,  center.x +  0, center.y + 15)
-	context.drawImage(sprites.pieces.enemy.fighter,  center.x + 16, center.y + 15)
-	context.drawImage(sprites.pieces.enemy.knight,   center.x + 32, center.y + 15)
-	context.drawImage(sprites.pieces.enemy.thief,    center.x + 48, center.y + 15)
-	context.drawImage(sprites.pieces.enemy.mage,     center.x + 64, center.y + 15)
-	context.drawImage(sprites.pieces.enemy.archer,   center.x + 80, center.y + 15)
+	let app = view.app
+	for (let unit of app.map.units) {
+		let sprite = sprites.pieces[unit.faction][unit.type]
+		context.drawImage(sprite, center.x + unit.x * 16, center.y + unit.y * 16 - 1)
+	}
 }
