@@ -42,7 +42,7 @@ export function render(view) {
 		x: Math.round(view.width / 2) - 64,
 		y: Math.round(view.height / 2) - 64
 	}
-	
+
 	context.fillStyle = "gainsboro"
 	for (let i = 0; i < 8; i++) {
 		for (let j = 0; j < 8; j++) {
@@ -54,6 +54,6 @@ export function render(view) {
 		}
 	}
 
-	context.drawImage(sprites.palette, center.x, center.y)
-	context.drawImage(sprites.piece, center.x + 16, center.y)
+	context.drawImage(sprites.piece.player, center.x, center.y)
+	context.drawImage(sprites.piece.enemy, center.x + 16, center.y)
 }
