@@ -1,21 +1,18 @@
-let canvas = document.createElement("canvas")
-canvas.width = 320
-canvas.height = 568
-document.body.appendChild(canvas)
-
-let context = canvas.getContext("2d")
-context.fillRect(0, 0, canvas.width, canvas.height)
+import * as View from "./view"
 
 let state = {}
-let actions = {}
+main()
 
 function main() {
-	let view = View.create(320, 568)
-	document.appendChild(view.element)
-	requestAnimationFrame(loop)
+	let view = View.create(160, 160)
+	document.body.appendChild(view.element)
+	View.init(view)
+	View.render(view)
+
+	// requestAnimationFrame(loop)
 
 	function loop() {
-		View.render(view)
+		View.init(view)
 		requestAnimationFrame(loop)
 	}
 }
