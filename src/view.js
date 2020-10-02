@@ -188,7 +188,7 @@ export function render(view) {
 	let content = selection.unit
 		? selection.unit.name
 		: "(Select a unit!)"
-	let text = renderText(content, sprites.fonts.standardBold)
+	let text = renderText(content, sprites.fonts.serif)
 	let y = view.height - text.height - 2
 	if (selection.unit) {
 		let iconname = iconnames.units[selection.unit.type]

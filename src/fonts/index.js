@@ -1,1 +1,2 @@
-exports.standardBold = require("./standard-bold")
+exports.standard = require("./standard")
+exports.serif = require("./serif")

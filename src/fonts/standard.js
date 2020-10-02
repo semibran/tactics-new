@@ -1,5 +1,5 @@
 module.exports = {
-	id: "standard-bold",
+	id: "standard",
 	cellsize: { width: 10, height: 9 },
 	charsize: { width:  6, height: 7 },
 	exceptions: {
