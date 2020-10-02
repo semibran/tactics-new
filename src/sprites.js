@@ -59,7 +59,11 @@ function disasmPieces(base, icons, palette) {
 		tmp.putImageData(template, 0, 0)
 		piece.drawImage(tmp.canvas, 5, 5)
 
-		pixels.replace(template, colors.light, colors.dark)
+		tmp = Canvas(8, 8)
+		template = icon.getContext("2d")
+			.getImageData(0, 0, icon.width, icon.height)
+
+		pixels.replace(template, palette.white, colors.dark)
 		tmp.putImageData(template, 0, 0)
 		piece.drawImage(tmp.canvas, 5, 4)
 
