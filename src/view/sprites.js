@@ -1,6 +1,7 @@
 import srcmap from "../../dist/tmp/sprites.json"
 import extract from "../../lib/img-extract"
 import Canvas from "../../lib/canvas"
+import rgb from "../../lib/rgb"
 import * as pixels from "../../lib/pixels"
 import * as iconnames from "./icons"
 import disasmPalette from "./palette"
@@ -13,6 +14,7 @@ export default function normalize(spritesheet) {
 	let icons = disasmIcons(images)
 	return {
 		icons,
+		badges: disasmBadges(palette),
 		select: disasmSelect(images.select, palette),
 		pieces: disasmPieces(images.piece, icons, palette),
 		fonts: disasmFonts(images, fonts, palette)
@@ -51,6 +53,18 @@ function disasmIcons(sprites) {
 		shield: sprites["icon-shield"],
 		sword: sprites["icon-sword"],
 	}
+}
+
+function disasmBadges(palette) {
+	let badges = {}
+	for (let faction in palette.factions) {
+		let subpal = palette.factions[faction]
+		let badge = Canvas(2, 2)
+		badge.fillStyle = rgb(...subpal.normal)
+		badge.fillRect(0, 0, 2, 2)
+		badges[faction] = badge.canvas
+	}
+	return badges
 }
 
 function disasmSelect(image, palette) {
