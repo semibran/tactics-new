@@ -86,12 +86,12 @@ export function init(view, app) {
 				pointer.clicking = false
 				let cursor = snapToGrid(pointer.pressed)
 				let unit = Map.unitAt(app.map, cursor)
-				if (unit) {
+				if (selection.unit) {
+					selection.unit = null
+					render(view)
+				} else if (unit) {
 					selection.unit = unit
 					console.log(unit)
-					render(view)
-				} else if (selection.unit) {
-					selection.unit = null
 					render(view)
 				}
 			}
@@ -193,7 +193,9 @@ export function render(view) {
 	if (selection.unit) {
 		let iconname = iconnames.units[selection.unit.type]
 		let icon = sprites.icons[iconname]
+		let badge = sprites.badges[selection.unit.faction]
 		context.drawImage(icon, 4, y + 1)
+		context.drawImage(badge, 4 + icon.width - 1, y)
 		context.drawImage(text, 14, y)
 	} else {
 		context.drawImage(text, 4, y)
