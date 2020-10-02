@@ -21,7 +21,10 @@ module.exports = {
 		",": { width: 2, height: 8 },
 		".": { width: 2 },
 		"!": { width: 2 },
-		"?": { width: 6 }
+		"?": { width: 6 },
+		"'": { width: 2 },
+		"(": { width: 4 },
+		")": { width: 4 },
 	},
 	spacing: {
 		char: 1,
@@ -35,6 +38,6 @@ module.exports = {
 		"UVWXYZ,.!?",
 		"abcdefghij",
 		"klmnopqrst",
-		"uvwxyz"
+		"uvwxyz'()"
 	]
 }

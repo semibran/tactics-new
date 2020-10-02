@@ -156,7 +156,7 @@ export function render(view) {
 
 	let content = selection.unit
 		? selection.unit.name
-		: "Select a unit!"
+		: "(Select a unit!)"
 	let text = renderText(content, sprites.fonts.standardBold)
 	context.drawImage(text, 4, view.height - text.height - 4)
 
