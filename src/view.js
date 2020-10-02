@@ -28,6 +28,7 @@ export function create(width, height, sprites) {
 
 export function init(view, app) {
 	let { camera, pointer, selection } = view.state
+	
 	view.app = app
 	function onresize() {
 		let scaleX = Math.max(1, Math.floor(window.innerWidth / view.native.width))
@@ -51,20 +52,36 @@ export function init(view, app) {
 			if (pointer.pressed) return false
 			pointer.pos = getPosition(event)
 			if (!pointer.pos) return false
-			document.body.classList.add("-drag")
-			pointer.clicking = true
+			let cursor = snapToGrid(pointer.pos)
+			pointer.clicking = Map.unitAt(app.map, cursor)
 			pointer.pressed = pointer.pos
 			pointer.offset = {
 				x: camera.x * view.scale,
 				y: camera.y * view.scale
 			}
+			if (!pointer.clicking) {
+				updateBodyClass("drag")
+			}
 		},
 		move(event) {
 			pointer.pos = getPosition(event)
+			let cursor = snapToGrid(pointer.pos)
+			let bodyclass = "hover"
+			if (!pointer.pressed) {
+				if (Map.unitAt(app.map, cursor)) {
+					bodyclass = "click"
+				} else {
+					bodyclass = "hover"
+				}
+			} else if (pointer.clicking) {
+				bodyclass = "click"
+			} else {
+				bodyclass = "drag"
+			}
+			updateBodyClass(bodyclass)
 			if (!pointer.pos || !pointer.pressed) return
 			if (pointer.clicking) {
 				let origin = snapToGrid(pointer.pressed)
-				let cursor = snapToGrid(pointer.pos)
 				if (!Cell.equals(origin, cursor)) {
 					pointer.clicking = false
 				}
@@ -93,6 +110,15 @@ export function init(view, app) {
 		}
 	}
 
+	actions.resize()
+	window.addEventListener("resize", actions.resize)
+	window.addEventListener("mousedown", actions.press)
+	window.addEventListener("mousemove", actions.move)
+	window.addEventListener("mouseup", actions.release)
+	window.addEventListener("touchstart", actions.press)
+	window.addEventListener("touchmove", actions.move)
+	window.addEventListener("touchend", actions.release)
+
 	function getPosition(event) {
 		let x = event.pageX || event.touches && event.touches[0].pageX
 		let y = event.pageY || event.touches && event.touches[0].pageY
@@ -119,14 +145,9 @@ export function init(view, app) {
 		}
 	}
 
-	actions.resize()
-	window.addEventListener("resize", actions.resize)
-	window.addEventListener("mousedown", actions.press)
-	window.addEventListener("mousemove", actions.move)
-	window.addEventListener("mouseup", actions.release)
-	window.addEventListener("touchstart", actions.press)
-	window.addEventListener("touchmove", actions.move)
-	window.addEventListener("touchend", actions.release)
+	function updateBodyClass(className) {
+		document.body.className = "-" + className
+	}
 }
 
 export function render(view) {

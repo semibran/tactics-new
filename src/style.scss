@@ -9,8 +9,12 @@ body {
 	overflow: hidden;
 }
 
-.-hover {
+.-click {
 	cursor: pointer;
+}
+
+.-hover {
+	cursor: grab;
 }
 
 .-drag {
