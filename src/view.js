@@ -18,7 +18,8 @@ export function create(width, height, sprites) {
 			pointer: {
 				pos: null,
 				clicking: false,
-				pressed: null
+				pressed: null,
+				offset: null
 			}
 		},
 		app: null
@@ -52,9 +53,10 @@ export function init(view, app) {
 			if (!pointer.pos) return false
 			document.body.classList.add("-drag")
 			pointer.clicking = true
-			pointer.pressed = {
-				x: pointer.pos.x - camera.x * view.scale,
-				y: pointer.pos.y - camera.y * view.scale
+			pointer.pressed = pointer.pos
+			pointer.offset = {
+				x: camera.x * view.scale,
+				y: camera.y * view.scale
 			}
 		},
 		move(event) {
@@ -67,8 +69,8 @@ export function init(view, app) {
 					pointer.clicking = false
 				}
 			}
-			camera.x = (pointer.pos.x - pointer.pressed.x) / view.scale
-			camera.y = (pointer.pos.y - pointer.pressed.y) / view.scale
+			camera.x = (pointer.pos.x - pointer.pressed.x + pointer.offset.x) / view.scale
+			camera.y = (pointer.pos.y - pointer.pressed.y + pointer.offset.y) / view.scale
 			render(view)
 		},
 		release(event) {
@@ -102,8 +104,8 @@ export function init(view, app) {
 		let map = app.map
 		// undo scaling
 		let realpos = {
-			x: (pointer.pos.x - window.innerWidth / 2) / view.scale,
-			y: (pointer.pos.y - window.innerHeight / 2) / view.scale,
+			x: (pos.x - window.innerWidth / 2) / view.scale,
+			y: (pos.y - window.innerHeight / 2) / view.scale,
 		}
 		// relative to top left corner of map
 		let gridpos = {
@@ -157,7 +159,6 @@ export function render(view) {
 		let x = center.x + unit.x * 16
 		let y = center.y + unit.y * 16
 		if (unit === selection.unit) {
-			console.log("selection!")
 			context.drawImage(sprites.select, x - 2, y - 2)
 		}
 		context.drawImage(sprite, x, y - 1)
