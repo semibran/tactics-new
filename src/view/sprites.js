@@ -1,16 +1,21 @@
-import srcmap from "../dist/tmp/sprites.json"
-import extract from "../lib/img-extract"
-import Canvas from "../lib/canvas"
-import * as pixels from "../lib/pixels"
+import srcmap from "../../dist/tmp/sprites.json"
+import extract from "../../lib/img-extract"
+import Canvas from "../../lib/canvas"
+import * as pixels from "../../lib/pixels"
 import * as iconnames from "./icons"
-import matchPalette from "./palette"
+import disasmPalette from "./palette"
+import fonts from "../fonts"
+import Font from "./font"
 
 export default function normalize(spritesheet) {
-	let sprites = disasm(spritesheet, srcmap)
-	let palette = matchPalette(sprites.palette)
-	let icons = disasmIcons(sprites)
-	let pieces = disasmPieces(sprites.piece, icons, palette)
-	return { pieces, select: sprites.select }
+	let images = disasm(spritesheet, srcmap)
+	let palette = disasmPalette(images.palette)
+	let icons = disasmIcons(images)
+	return {
+		pieces: disasmPieces(images.piece, icons, palette),
+		fonts: disasmFonts(images, fonts, palette),
+		select: images.select
+	}
 }
 
 function disasm(sheet, srcmap) {
@@ -24,6 +29,27 @@ function disasm(sheet, srcmap) {
 		}
 	}
 	return sprites
+}
+
+function disasmFonts(images, fonts, palette) {
+	let result = {}
+	for (let fontname in fonts) {
+		let font = fonts[fontname]
+		let image = images["font-" + font.id]
+		result[fontname] = Font(image, font, palette)
+	}
+	return result
+}
+
+function disasmIcons(sprites) {
+	return {
+		axe: sprites["icon-axe"],
+		bow: sprites["icon-bow"],
+		dagger: sprites["icon-dagger"],
+		hat: sprites["icon-hat"],
+		shield: sprites["icon-shield"],
+		sword: sprites["icon-sword"],
+	}
 }
 
 function disasmPieces(base, icons, palette) {
@@ -68,16 +94,5 @@ function disasmPieces(base, icons, palette) {
 		piece.drawImage(tmp.canvas, 5, 4)
 
 		return piece.canvas
-	}
-}
-
-function disasmIcons(sprites) {
-	return {
-		axe: sprites["icon-axe"],
-		bow: sprites["icon-bow"],
-		dagger: sprites["icon-dagger"],
-		hat: sprites["icon-hat"],
-		shield: sprites["icon-shield"],
-		sword: sprites["icon-sword"],
 	}
 }

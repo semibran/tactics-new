@@ -1,4 +1,4 @@
-import * as pixels from "../lib/pixels"
+import * as pixels from "../../lib/pixels"
 
 const matrix = [
 	[ "white", "cyan", "blue", "navy"   ],

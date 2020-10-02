@@ -1,5 +1,6 @@
 import * as Map from "./game/map"
 import * as Cell from "../lib/cell"
+import renderText from "./view/text"
 const tilesize = 16
 
 export function create(width, height, sprites) {
@@ -152,6 +153,12 @@ export function render(view) {
 			}
 		}
 	}
+
+	let content = selection.unit
+		? selection.unit.name
+		: "Select a unit!"
+	let text = renderText(content, sprites.fonts.standardBold)
+	context.drawImage(text, 4, view.height - text.height - 4)
 
 	let app = view.app
 	for (let unit of app.map.units) {

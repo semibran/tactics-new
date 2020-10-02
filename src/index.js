@@ -1,5 +1,5 @@
 import loadImage from "img-load"
-import disasm from "./sprites"
+import disasm from "./view/sprites"
 import * as View from "./view"
 import map from "./maps/test"
 import * as Map from "./game/map"
