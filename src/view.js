@@ -1,6 +1,5 @@
 import * as Map from "./game/map"
 import * as Cell from "../lib/cell"
-import * as iconnames from "./view/icons"
 import renderText from "./view/text"
 const tilesize = 16
 
@@ -191,12 +190,11 @@ export function render(view) {
 	let text = renderText(content, sprites.fonts.serif)
 	let y = view.height - text.height - 2
 	if (selection.unit) {
-		let iconname = iconnames.units[selection.unit.type]
-		let icon = sprites.icons[iconname]
+		let icon = sprites.icons[selection.unit.type]
 		let badge = sprites.badges[selection.unit.faction]
 		context.drawImage(icon, 4, y + 1)
-		context.drawImage(badge, 4 + icon.width - 1, y)
-		context.drawImage(text, 14, y)
+		context.drawImage(badge, 4 + icon.width - 2, y)
+		context.drawImage(text, 4 + icon.width + 4, y)
 	} else {
 		context.drawImage(text, 4, y)
 	}

@@ -3,7 +3,6 @@ import extract from "../../lib/img-extract"
 import Canvas from "../../lib/canvas"
 import rgb from "../../lib/rgb"
 import * as pixels from "../../lib/pixels"
-import * as iconnames from "./icons"
 import disasmPalette from "./palette"
 import fonts from "../fonts"
 import Font from "./font"
@@ -44,24 +43,37 @@ function disasmFonts(images, fonts, palette) {
 	return result
 }
 
-function disasmIcons(sprites) {
-	return {
-		axe: sprites["icon-axe"],
-		bow: sprites["icon-bow"],
-		dagger: sprites["icon-dagger"],
-		hat: sprites["icon-hat"],
-		shield: sprites["icon-shield"],
-		sword: sprites["icon-sword"],
+function disasmIcons(images) {
+	let icons = {
+		small: {},
+		types: {
+			axe: "fighter",
+			bow: "archer",
+			dagger: "thief",
+			hat: "mage",
+			shield: "knight",
+			sword: "soldier"
+		}
 	}
+	console.log(images)
+	for (let name in icons.types) {
+		let type = icons.types[name]
+		icons.small[name] = images["icon6-" + name]
+		icons.small[type] = images["icon6-" + name]
+		icons[name] = images["icon8-" + name]
+		icons[type] = images["icon8-" + name]
+	}
+	console.log(icons)
+	return icons
 }
 
 function disasmBadges(palette) {
 	let badges = {}
 	for (let faction in palette.factions) {
 		let subpal = palette.factions[faction]
-		let badge = Canvas(2, 2)
+		let badge = Canvas(3, 3)
 		badge.fillStyle = rgb(...subpal.normal)
-		badge.fillRect(0, 0, 2, 2)
+		badge.fillRect(0, 0, 3, 3)
 		badges[faction] = badge.canvas
 	}
 	return badges
@@ -90,9 +102,10 @@ function disasmPieces(base, icons, palette) {
 	for (let faction in palette.factions) {
 		pieces[faction] = {}
 		let subpal = palette.factions[faction]
-		for (let unittype in iconnames.units) {
-			let iconname = iconnames.units[unittype]
-			let icon = icons[iconname]
+		for (let iconname in icons.types) {
+			let unittype = icons.types[iconname]
+			let icon = icons.small[iconname]
+			console.log(iconname, unittype, icon)
 			let piece = Piece(base, icon, subpal)
 			pieces[faction][unittype] = piece
 		}
