@@ -1,3 +1,5 @@
+import * as Map from "./game/map"
+import * as Cell from "../lib/cell"
 const tilesize = 16
 
 export function create(width, height, sprites) {
@@ -11,7 +13,8 @@ export function create(width, height, sprites) {
 		state: {
 			camera: { x: 0, y: 0 },
 			pointer: {
-				pos: { x: 0, y: 0 },
+				pos: null,
+				clicking: false,
 				pressed: null,
 			}
 		},
@@ -42,42 +45,40 @@ export function init(view, app) {
 		},
 		press(event) {
 			if (pointer.pressed) return false
-			document.body.classList.add("-dragging")
 			pointer.pos = getPosition(event)
 			if (!pointer.pos) return false
+			document.body.classList.add("-drag")
+			pointer.clicking = true
 			pointer.pressed = {
 				x: pointer.pos.x - camera.x * view.scale,
 				y: pointer.pos.y - camera.y * view.scale
 			}
-			let map = app.map
-			// undo scaling
-			let realpos = {
-				x: (pointer.pos.x - window.innerWidth / 2) / view.scale,
-				y: (pointer.pos.y - window.innerHeight / 2) / view.scale,
-			}
-			// relative to top left corner of map
-			let gridpos = {
-				x: realpos.x + map.width * tilesize / 2 - camera.x,
-				y: realpos.y + map.height * tilesize / 2 - camera.y,
-			}
-			// fix to tiles
-			let cursor = {
-				x: Math.floor(gridpos.x / tilesize),
-				y: Math.floor(gridpos.y / tilesize)
-			}
-			let unit = map.units.find(unit => unit.x === cursor.x && unit.y === cursor.y)
-			console.log(unit)
 		},
 		move(event) {
 			pointer.pos = getPosition(event)
-			if (pointer.pos && pointer.pressed) {
-				camera.x = (pointer.pos.x - pointer.pressed.x) / view.scale
-				camera.y = (pointer.pos.y - pointer.pressed.y) / view.scale
-				render(view)
+			if (!pointer.pos || !pointer.pressed) return
+			if (pointer.clicking) {
+				let origin = snapToGrid(pointer.pressed)
+				let cursor = snapToGrid(pointer.pos)
+				if (!Cell.equals(origin, cursor)) {
+					pointer.clicking = false
+				}
 			}
+			camera.x = (pointer.pos.x - pointer.pressed.x) / view.scale
+			camera.y = (pointer.pos.y - pointer.pressed.y) / view.scale
+			render(view)
 		},
-		release() {
-			document.body.classList.remove("-dragging")
+		release(event) {
+			if (!pointer.pressed) return false
+			document.body.classList.remove("-drag")
+			if (pointer.clicking) {
+				pointer.clicking = false
+				let cursor = snapToGrid(pointer.pressed)
+				let unit = Map.unitAt(app.map, cursor)
+				if (unit) {
+					console.log(unit)
+				}
+			}
 			pointer.pressed = null
 		}
 	}
@@ -87,6 +88,25 @@ export function init(view, app) {
 		let y = event.pageY || event.touches && event.touches[0].pageY
 		if (x === undefined || y === undefined) return null
 		return { x, y }
+	}
+
+	function snapToGrid(pos) {
+		let map = app.map
+		// undo scaling
+		let realpos = {
+			x: (pointer.pos.x - window.innerWidth / 2) / view.scale,
+			y: (pointer.pos.y - window.innerHeight / 2) / view.scale,
+		}
+		// relative to top left corner of map
+		let gridpos = {
+			x: realpos.x + map.width * tilesize / 2 - camera.x,
+			y: realpos.y + map.height * tilesize / 2 - camera.y,
+		}
+		// fix to tiles
+		return {
+			x: Math.floor(gridpos.x / tilesize),
+			y: Math.floor(gridpos.y / tilesize)
+		}
 	}
 
 	actions.resize()

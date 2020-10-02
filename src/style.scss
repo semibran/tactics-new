@@ -9,7 +9,11 @@ body {
 	overflow: hidden;
 }
 
-.-dragging {
+.-hover {
+	cursor: pointer;
+}
+
+.-drag {
 	cursor: grabbing;
 }
 

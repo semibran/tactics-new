@@ -2,25 +2,9 @@ import loadImage from "img-load"
 import disasm from "./sprites"
 import * as View from "./view"
 import map from "./maps/test"
+import * as Map from "./game/map"
 
-let state = (data => {
-	let map = {
-		width: data.width,
-		height: data.height,
-		units: []
-	}
-	for (let unit of data.units) {
-		map.units.push({
-			type: unit.type,
-			name: unit.name,
-			faction: unit.faction,
-			x: unit.position[0],
-			y: unit.position[1]
-		})
-	}
-
-	return { map }
-})(map)
+let state = { map: Map.init(map) }
 
 loadImage("sprites.png").then(main)
 

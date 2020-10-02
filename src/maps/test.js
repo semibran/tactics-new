@@ -1,4 +1,5 @@
 export default {
+	id: "test",
 	width: 8,
 	height: 8,
 	units: [
