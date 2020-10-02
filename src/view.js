@@ -184,16 +184,20 @@ export function render(view) {
 		context.drawImage(sprite, x, y - 1)
 	}
 
-	let content = selection.unit
-		? selection.unit.name
+	let unit = selection.unit
+	let content = unit
+		? unit.name
 		: "(Select a unit!)"
 	let text = renderText(content, sprites.fonts.serif)
 	let y = view.height - text.height - 2
-	if (selection.unit) {
-		let icon = sprites.icons[selection.unit.type]
-		let badge = sprites.badges[selection.unit.faction]
+	if (unit) {
+		let icon = sprites.icons[unit.type]
+		let badge = sprites.badges[unit.faction]
+		let badgeX = unit.type === "mage"
+			? 3
+			: 4 + icon.width - 2
 		context.drawImage(icon, 4, y + 1)
-		context.drawImage(badge, 4 + icon.width - 2, y)
+		context.drawImage(badge, badgeX, y)
 		context.drawImage(text, 4 + icon.width + 4, y)
 	} else {
 		context.drawImage(text, 4, y)
