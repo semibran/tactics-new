@@ -36,6 +36,7 @@ module.exports = {
 		r: { width: 7 },
 		s: { width: 6 },
 		t: { width: 5 },
+		v: { width: 7 },
 		w: { width: 12 },
 		x: { width: 7 },
 		y: { width: 8, height: 11 },
