@@ -9,18 +9,6 @@ body {
 	overflow: hidden;
 }
 
-.-click {
-	cursor: pointer;
-}
-
-.-hover {
-	cursor: grab;
-}
-
-.-drag {
-	cursor: grabbing;
-}
-
 canvas {
 	position: absolute;
 	transform-origin: top left;
