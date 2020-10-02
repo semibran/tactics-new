@@ -1,5 +1,6 @@
 import * as Map from "./game/map"
 import * as Cell from "../lib/cell"
+import * as iconnames from "./view/icons"
 import renderText from "./view/text"
 const tilesize = 16
 
@@ -154,12 +155,6 @@ export function render(view) {
 		}
 	}
 
-	let content = selection.unit
-		? selection.unit.name
-		: "(Select a unit!)"
-	let text = renderText(content, sprites.fonts.standardBold)
-	context.drawImage(text, 4, view.height - text.height - 4)
-
 	let app = view.app
 	for (let unit of app.map.units) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
@@ -169,5 +164,19 @@ export function render(view) {
 			context.drawImage(sprites.select, x - 2, y - 2)
 		}
 		context.drawImage(sprite, x, y - 1)
+	}
+
+	let content = selection.unit
+		? selection.unit.name
+		: "(Select a unit!)"
+	let text = renderText(content, sprites.fonts.standardBold)
+	let y = view.height - text.height - 2
+	if (selection.unit) {
+		let iconname = iconnames.units[selection.unit.type]
+		let icon = sprites.icons[iconname]
+		context.drawImage(icon, 4, y + 1)
+		context.drawImage(text, 14, y)
+	} else {
+		context.drawImage(text, 4, y)
 	}
 }
