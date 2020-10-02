@@ -55,7 +55,6 @@ function disasmIcons(images) {
 			sword: "soldier"
 		}
 	}
-	console.log(images)
 	for (let name in icons.types) {
 		let type = icons.types[name]
 		icons.small[name] = images["icon6-" + name]
@@ -63,7 +62,6 @@ function disasmIcons(images) {
 		icons[name] = images["icon8-" + name]
 		icons[type] = images["icon8-" + name]
 	}
-	console.log(icons)
 	return icons
 }
 
@@ -105,7 +103,6 @@ function disasmPieces(base, icons, palette) {
 		for (let iconname in icons.types) {
 			let unittype = icons.types[iconname]
 			let icon = icons.small[iconname]
-			console.log(iconname, unittype, icon)
 			let piece = Piece(base, icon, subpal)
 			pieces[faction][unittype] = piece
 		}
