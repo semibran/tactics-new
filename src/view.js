@@ -12,10 +12,13 @@ export function create(width, height, sprites) {
 		element: document.createElement("canvas"),
 		state: {
 			camera: { x: 0, y: 0 },
+			selection: {
+				unit: null
+			},
 			pointer: {
 				pos: null,
 				clicking: false,
-				pressed: null,
+				pressed: null
 			}
 		},
 		app: null
@@ -23,7 +26,7 @@ export function create(width, height, sprites) {
 }
 
 export function init(view, app) {
-	let { camera, pointer } = view.state
+	let { camera, pointer, selection } = view.state
 	view.app = app
 	function onresize() {
 		let scaleX = Math.max(1, Math.floor(window.innerWidth / view.native.width))
@@ -76,7 +79,12 @@ export function init(view, app) {
 				let cursor = snapToGrid(pointer.pressed)
 				let unit = Map.unitAt(app.map, cursor)
 				if (unit) {
+					selection.unit = unit
 					console.log(unit)
+					render(view)
+				} else if (selection.unit) {
+					selection.unit = null
+					render(view)
 				}
 			}
 			pointer.pressed = null
@@ -121,12 +129,12 @@ export function init(view, app) {
 
 export function render(view) {
 	let sprites = view.sprites
-	let camera = view.state.camera
 	let canvas = view.element
 	let context = canvas.getContext("2d")
 	context.fillStyle = "black"
 	context.fillRect(0, 0, canvas.width, canvas.height)
 
+	let { camera, selection } = view.state
 	let center = {
 		x: Math.round(view.width / 2 - 64 + camera.x),
 		y: Math.round(view.height / 2 - 64 + camera.y)
@@ -146,6 +154,12 @@ export function render(view) {
 	let app = view.app
 	for (let unit of app.map.units) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
-		context.drawImage(sprite, center.x + unit.x * 16, center.y + unit.y * 16 - 1)
+		let x = center.x + unit.x * 16
+		let y = center.y + unit.y * 16
+		if (unit === selection.unit) {
+			console.log("selection!")
+			context.drawImage(sprites.select, x - 2, y - 2)
+		}
+		context.drawImage(sprite, x, y - 1)
 	}
 }

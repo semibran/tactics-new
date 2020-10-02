@@ -10,7 +10,7 @@ export default function normalize(spritesheet) {
 	let palette = matchPalette(sprites.palette)
 	let icons = disasmIcons(sprites)
 	let pieces = disasmPieces(sprites.piece, icons, palette)
-	return { pieces }
+	return { pieces, select: sprites.select }
 }
 
 function disasm(sheet, srcmap) {
