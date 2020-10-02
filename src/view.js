@@ -45,12 +45,16 @@ export function init(view, app) {
 		canvas.style.transform = `scale(${ view.scale })`
 	}
 
+	let device = null
 	let actions = {
 		resize() {
 			onresize()
 			render(view)
 		},
 		press(event) {
+			if (!device) {
+				device = switchDevice(event)
+			}
 			if (pointer.pressed) return false
 			pointer.pos = getPosition(event)
 			if (!pointer.pos) return false
@@ -103,6 +107,21 @@ export function init(view, app) {
 	window.addEventListener("touchstart", actions.press)
 	window.addEventListener("touchmove", actions.move)
 	window.addEventListener("touchend", actions.release)
+
+	function switchDevice(event) {
+		let device = "desktop"
+		if (event.touches) {
+			device = "mobile"
+			window.removeEventListener("mousedown", actions.press)
+			window.removeEventListener("mousemove", actions.move)
+			window.removeEventListener("mouseup", actions.release)
+		} else {
+			window.removeEventListener("touchstart", actions.press)
+			window.removeEventListener("touchmove", actions.move)
+			window.removeEventListener("touchend", actions.release)
+		}
+		return device
+	}
 
 	function getPosition(event) {
 		let x = event.pageX || event.touches && event.touches[0].pageX
