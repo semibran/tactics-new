@@ -180,7 +180,7 @@ export function render(view) {
 		let x = center.x + unit.x * 16
 		let y = center.y + unit.y * 16
 		if (unit === selection.unit) {
-			context.drawImage(sprites.select, x - 2, y - 2)
+			context.drawImage(sprites.select[selection.unit.faction], x - 2, y - 2)
 		}
 		context.drawImage(sprite, x, y - 1)
 	}

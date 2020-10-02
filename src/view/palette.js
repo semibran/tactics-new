@@ -6,7 +6,7 @@ const matrix = [
 ]
 
 const mappings = {
-	pieces: {
+	factions: {
 		player: {
 			light: "cyan",
 			normal: "blue",

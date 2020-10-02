@@ -13,7 +13,7 @@ export default function normalize(spritesheet) {
 	let icons = disasmIcons(images)
 	return {
 		icons,
-		select: images.select,
+		select: disasmSelect(images.select, palette),
 		pieces: disasmPieces(images.piece, icons, palette),
 		fonts: disasmFonts(images, fonts, palette)
 	}
@@ -53,11 +53,29 @@ function disasmIcons(sprites) {
 	}
 }
 
+function disasmSelect(image, palette) {
+	let select = {}
+	for (let faction in palette.factions) {
+		let subpal = palette.factions[faction]
+		let sprite = image
+			.getContext("2d")
+			.getImageData(0, 0, image.width, image.height)
+		pixels.replace(sprite, palette.white, subpal.light)
+
+		let ring = Canvas(image.width, image.height + 1)
+		ring.putImageData(sprite, 0, 1)
+		ring.drawImage(image, 0, 0)
+
+		select[faction] = ring.canvas
+	}
+	return select
+}
+
 function disasmPieces(base, icons, palette) {
 	let pieces = {}
-	for (let faction in palette.pieces) {
+	for (let faction in palette.factions) {
 		pieces[faction] = {}
-		let subpal = palette.pieces[faction]
+		let subpal = palette.factions[faction]
 		for (let unittype in iconnames.units) {
 			let iconname = iconnames.units[unittype]
 			let icon = icons[iconname]
