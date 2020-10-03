@@ -34,6 +34,7 @@ export function create(width, height, sprites) {
 
 export function init(view, app) {
 	let state = view.state
+	let cache = view.cache
 	let { camera, pointer } = state
 
 	view.app = app
@@ -105,6 +106,15 @@ export function init(view, app) {
 
 	function loop() {
 		state.time++
+		if (state.selection) {
+			let elapsed = state.time - state.selection.time
+			let t = elapsed / 8
+			if (t <= 1) {
+				state.dirty = true
+			}
+		} else if (cache.selection) {
+
+		}
 		if (state.dirty) {
 			state.dirty = false
 			render(view)
@@ -184,6 +194,7 @@ function deselect(view) {
 export function render(view) {
 	let sprites = view.sprites
 	let palette = sprites.palette
+	let state = view.state
 	let cache = view.cache
 	let canvas = view.element
 	let context = canvas.getContext("2d")
@@ -211,6 +222,12 @@ export function render(view) {
 
 	if (selection) {
 		let preview = cache.unitpreview
-		context.drawImage(preview, 4, view.height - preview.height - 4)
+		let a = -preview.width
+		let b = 4
+		let d = 8
+		let e = state.time - state.selection.time
+		let t = e / d
+		let x = a + (b - a) * t
+		context.drawImage(preview, x, view.height - preview.height - 4)
 	}
 }
