@@ -2,6 +2,7 @@ import * as Map from "./game/map"
 import * as Cell from "../lib/cell"
 import * as pixels from "../lib/pixels"
 import * as Canvas from "../lib/canvas"
+import rgb from "../lib/rgb"
 import renderText from "./view/text"
 const tilesize = 16
 
@@ -212,7 +213,7 @@ export function render(view) {
 	// }
 	if (selection.unit) {
 		let unit = selection.unit
-		let box = renderBox(74, 16)
+		let box = renderBox(74, 24)
 		let text = renderText(unit.name, {
 			font: sprites.fonts.serif,
 			color: palette.white,
@@ -231,9 +232,21 @@ export function render(view) {
 			}
 			return result.canvas
 		})()
-		let content = Canvas.create(icon.width + 1 + text.width, text.height)
+		let hpbar = (_ => {
+			let bar = Canvas.create(68, 6)
+			let subpal = palette.factions[unit.faction]
+			bar.fillStyle = rgb(...palette.jet)
+			bar.fillRect(0, 0, 68, 6)
+			bar.fillStyle = rgb(...subpal.normal)
+			bar.fillRect(1, 1, 66, 4)
+			return bar.canvas
+		})()
+
+		let content = Canvas.create(hpbar.width + 1, icon.height + 2 + hpbar.height)
 		content.drawImage(icon, 0, 0)
 		content.drawImage(text, icon.width + 1, 0)
+		content.drawImage(hpbar, 1, icon.height + 2)
+
 		let shadow = Canvas.recolor(content.canvas, palette.cyan)
 		let x = 4
 		let y = view.height - box.height - 4
