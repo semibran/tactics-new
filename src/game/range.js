@@ -50,7 +50,7 @@ export default function findRange(unit, map) {
 				// no unit here, square is free for movement
 				range.squares.push({ type: "move", cell: neighbor })
 			} else if (!Unit.allied(unit, target)
-			&& range.squares.find(square =>
+			&& !range.squares.find(square =>
 				square.type === "attack"
 				&& Cell.equals(neighbor, square.cell))
 			) {
@@ -90,7 +90,7 @@ export default function findRange(unit, map) {
 			// to disable consistency visual, only
 			// cells with enemies should be targeted
 			let target = Map.unitAt(map, neighbor)
-			if (!target || !Unit.allied(map, target)) {
+			if (!target || !Unit.allied(unit, target)) {
 				if (range.squares.find(square => Cell.equals(neighbor, square.cell))) {
 					continue
 				}
