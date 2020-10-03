@@ -1,10 +1,6 @@
 import * as Map from "./game/map"
 import * as Cell from "../lib/cell"
-import * as pixels from "../lib/pixels"
-import * as Canvas from "../lib/canvas"
-import rgb from "../lib/rgb"
-import renderText from "./view/text"
-import outline from "./view/outline"
+import renderUnitPreview from "./view/unit-preview"
 const tilesize = 16
 
 export function create(width, height, sprites) {
@@ -191,114 +187,7 @@ export function render(view) {
 
 	let unit = selection.unit
 	if (selection.unit) {
-		let unit = selection.unit
-		let text = renderText(unit.name, {
-			font: sprites.fonts.serif,
-			color: palette.white,
-			stroke: palette.jet
-		})
-
-		let icon = (_ => {
-			let icon = sprites.badges[unit.type]
-			let orb = sprites.badges[unit.faction]
-			let result = Canvas.create(icon.width + 2, icon.height + 1)
-			if (unit.type === "mage") {
-				result.drawImage(icon, 1, 1)
-				result.drawImage(orb, 0, 0)
-			} else {
-				result.drawImage(icon, 1, 1)
-				result.drawImage(orb, icon.width - orb.width + 2, 0)
-			}
-			return result.canvas
-		})()
-
-		let hpbar = (_ => {
-			let bar = Canvas.create(68, 11)
-			let subpal = palette.factions[unit.faction]
-			bar.fillStyle = rgb(...palette.jet)
-			bar.fillRect(0, 0, 68, 6)
-
-			let gradient = bar.createLinearGradient(0, 3, 68, 3)
-			gradient.addColorStop(0, rgb(...subpal.normal))
-			gradient.addColorStop(1, rgb(...subpal.light))
-			bar.fillStyle = gradient
-			bar.fillRect(1, 1, 66, 4)
-
-			let label = renderText("HP", {
-				font: sprites.fonts.smallcaps,
-				color: palette.white,
-				stroke: palette.jet
-			})
-			let value = renderText(unit.hp, {
-				font: sprites.fonts.standard,
-				color: palette.white,
-				stroke: palette.jet
-			})
-			let max = renderText("/" + unit.hp, {
-				font: sprites.fonts.smallcapsBold,
-				color: palette.white,
-				stroke: palette.jet
-			})
-			bar.drawImage(label, 3, 2)
-			bar.drawImage(max, bar.canvas.width - max.width - 3, 2)
-			bar.drawImage(value, bar.canvas.width - max.width - 3 - value.width, 2)
-			return bar.canvas
-		})()
-
-		let stats = (_ => {
-			let style = {
-				font: sprites.fonts.numbers,
-				color: palette.white,
-				stroke: palette.jet
-			}
-			let atk = renderText(unit.atk, style)
-			let def = renderText(unit.def, style)
-			let sword = outline(sprites.icons.small.sword, palette.jet)
-			let shield = outline(sprites.icons.small.shield, palette.jet)
-			let width = sword.width + atk.width + 3 + shield.width + def.width
-			let stats = Canvas.create(width, 8)
-			stats.drawImage(sword, 0, 0)
-			stats.drawImage(atk, sword.width, 0)
-			stats.drawImage(shield, sword.width + atk.width + 2, 0)
-			stats.drawImage(def, sword.width + atk.width + 2 + shield.width, 0)
-			return stats.canvas
-		})()
-
-		let element = (_ => {
-			let icon = sprites.icons[unit.element]
-			let element = Canvas.create(icon.width + 6, icon.height)
-			element.fillStyle = rgb(...palette.cyan)
-			element.fillRect(0, 2, icon.width + 6, icon.height - 4)
-			element.fillRect(1, 1, icon.width + 4, icon.height - 2)
-			element.fillStyle = "white"
-			element.fillRect(1, 2, icon.width + 4, icon.height - 4)
-			element.drawImage(icon, 3, 0)
-			return element.canvas
-		})()
-
-		let width = hpbar.width + 1
-		let height = icon.height + 2 + hpbar.height + 3 + stats.height + 1
-		let content = Canvas.create(width, height)
-		content.drawImage(icon, 0, 0)
-		content.drawImage(text, icon.width + 1, 0)
-		content.drawImage(hpbar, 1, icon.height + 2)
-		content.drawImage(stats, 4, icon.height + 2 + hpbar.height + 3)
-		content.drawImage(element, width - element.width, icon.height + 3 + hpbar.height + 1)
-
-		let box = renderBox(content.canvas.width + 8, content.canvas.height + 5 )
-		let shadow = Canvas.recolor(content.canvas, palette.cyan)
-		let x = 4
-		let y = view.height - box.height - 4
-		context.drawImage(box, x, y)
-		context.drawImage(shadow, x + 3, y + 3)
-		context.drawImage(content.canvas, x + 2, y + 2)
+		let preview = renderUnitPreview(unit, sprites)
+		context.drawImage(preview, 4, view.height - preview.height - 4)
 	}
-}
-
-function renderBox(width, height) {
-	let box = Canvas.create(width, height)
-	box.fillStyle = "white"
-	box.fillRect(1, 0, width - 2, height)
-	box.fillRect(0, 1, width, height - 2)
-	return box.canvas
 }
