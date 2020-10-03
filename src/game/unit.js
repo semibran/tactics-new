@@ -1,3 +1,5 @@
+import * as Map from "./map"
+
 export function create(name, type, faction, cell, stats) {
 	return {
 		name: name,
@@ -5,6 +7,15 @@ export function create(name, type, faction, cell, stats) {
 		faction: faction,
 		cell: cell,
 		stats: stats,
+	}
+}
+
+export function move(unit, dest, map) {
+	if (Map.walkable(map, unit.cell, dest)) {
+		unit.cell = dest
+		return true
+	} else {
+		return false
 	}
 }
 

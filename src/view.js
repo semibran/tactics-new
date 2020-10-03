@@ -89,7 +89,7 @@ export function init(view, app) {
 			let cursor = pointer.pos
 			if (pointer.clicking) {
 				let origin = pointer.pressed
-				if (!Cell.equals(origin, cursor)) {
+				if (Cell.distance(origin, cursor) > 3) {
 					pointer.clicking = false
 				}
 			}
@@ -116,8 +116,15 @@ export function init(view, app) {
 			if (pointer.clicking) {
 				pointer.clicking = false
 				let cursor = snapToGrid(pointer.pressed)
-				let unit = Map.unitAt(app.map, cursor)
+				let unit = Map.unitAt(map, cursor)
 				if (state.selection) {
+					if (cache.range) {
+						let square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
+						if (square && square.type === "move") {
+							Unit.move(state.selection.unit, cursor, map)
+							deselect()
+						}
+					}
 					if (!animating(state.concurs, "PreviewEnter")) {
 						deselect()
 					}
