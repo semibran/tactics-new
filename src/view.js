@@ -118,10 +118,10 @@ export function init(view, app) {
 				let cursor = snapToGrid(pointer.pressed)
 				let unit = Map.unitAt(app.map, cursor)
 				if (state.selection) {
-					if (!animating("PreviewEnter")) {
+					if (!animating(state.concurs, "PreviewEnter")) {
 						deselect()
 					}
-				} else if (unit && !animating("PreviewExit")) {
+				} else if (unit && !animating(state.concurs, "PreviewExit")) {
 					select(unit)
 				}
 			}
