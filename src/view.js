@@ -255,24 +255,37 @@ export function render(view) {
 			let def = renderText(unit.def, style)
 			let sword = outline(sprites.icons.small.sword, palette.jet)
 			let shield = outline(sprites.icons.small.shield, palette.jet)
-			let width = sword.width + atk.width + 4 + shield.width + def.width
+			let width = sword.width + atk.width + 3 + shield.width + def.width
 			let stats = Canvas.create(width, 8)
 			stats.drawImage(sword, 0, 0)
 			stats.drawImage(atk, sword.width, 0)
-			stats.drawImage(shield, sword.width + atk.width + 4, 0)
-			stats.drawImage(def, sword.width + atk.width + 4 + shield.width, 0)
+			stats.drawImage(shield, sword.width + atk.width + 2, 0)
+			stats.drawImage(def, sword.width + atk.width + 2 + shield.width, 0)
 			return stats.canvas
 		})()
 
+		let element = (_ => {
+			let icon = sprites.icons[unit.element]
+			let element = Canvas.create(icon.width + 6, icon.height)
+			element.fillStyle = rgb(...palette.cyan)
+			element.fillRect(0, 2, icon.width + 6, icon.height - 4)
+			element.fillRect(1, 1, icon.width + 4, icon.height - 2)
+			element.fillStyle = "white"
+			element.fillRect(1, 2, icon.width + 4, icon.height - 4)
+			element.drawImage(icon, 3, 0)
+			return element.canvas
+		})()
+
 		let width = hpbar.width + 1
-		let height = icon.height + 2 + hpbar.height + 2 + stats.height
+		let height = icon.height + 2 + hpbar.height + 3 + stats.height + 1
 		let content = Canvas.create(width, height)
 		content.drawImage(icon, 0, 0)
 		content.drawImage(text, icon.width + 1, 0)
 		content.drawImage(hpbar, 1, icon.height + 2)
-		content.drawImage(stats, 4, icon.height + 2 + hpbar.height + 2)
+		content.drawImage(stats, 4, icon.height + 2 + hpbar.height + 3)
+		content.drawImage(element, width - element.width, icon.height + 3 + hpbar.height + 1)
 
-		let box = renderBox(content.canvas.width + 8, content.canvas.height + 6)
+		let box = renderBox(content.canvas.width + 8, content.canvas.height + 5 )
 		let shadow = Canvas.recolor(content.canvas, palette.cyan)
 		let x = 4
 		let y = view.height - box.height - 4

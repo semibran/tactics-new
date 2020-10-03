@@ -54,7 +54,13 @@ function disasmIcons(images) {
 			hat: "mage",
 			shield: "knight",
 			sword: "soldier"
-		}
+		},
+		fire: images["icon-fire"],
+		ice: images["icon-ice"],
+		volt: images["icon-volt"],
+		plant: images["icon-plant"],
+		holy: images["icon-holy"],
+		dark: images["icon-dark"]
 	}
 	for (let name in icons.types) {
 		let type = icons.types[name]
@@ -71,7 +77,7 @@ function disasmBadges(palette, icons) {
 	for (let faction in palette.factions) {
 		let subpal = palette.factions[faction]
 		let badge = Canvas.create(5, 5)
-		badge.fillStyle = rgb(...subpal.dark)
+		badge.fillStyle = rgb(...palette.jet)
 		badge.fillRect(1, 0, 3, 5)
 		badge.fillRect(0, 1, 5, 3)
 		badge.fillStyle = rgb(...subpal.normal)
