@@ -218,14 +218,28 @@ export function render(view) {
 			color: palette.white,
 			stroke: palette.jet
 		})
-		let shadow = Canvas.recolor(text, palette.cyan)
-		let badge = sprites.badges.base
+		let icon = (_ => {
+			let icon = sprites.badges[unit.type]
+			let orb = sprites.badges[unit.faction]
+			let result = Canvas.create(icon.width + 2, icon.height + 1)
+			if (unit.type === "mage") {
+				result.drawImage(icon, 1, 1)
+				result.drawImage(orb, 0, 0)
+			} else {
+				result.drawImage(icon, 1, 1)
+				result.drawImage(orb, icon.width - orb.width + 2, 0)
+			}
+			return result.canvas
+		})()
+		let content = Canvas.create(icon.width + 1 + text.width, text.height)
+		content.drawImage(icon, 0, 0)
+		content.drawImage(text, icon.width + 1, 0)
+		let shadow = Canvas.recolor(content.canvas, palette.cyan)
 		let x = 4
 		let y = view.height - box.height - 4
 		context.drawImage(box, x, y)
-		context.drawImage(badge, x + 3, y + 3)
-		context.drawImage(shadow, x + 3 + badge.width + 2 + 1, y + 3)
-		context.drawImage(text, x + 3 + badge.width + 2, y + 2)
+		context.drawImage(shadow, x + 3, y + 3)
+		context.drawImage(content.canvas, x + 2, y + 2)
 	}
 }
 
