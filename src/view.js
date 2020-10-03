@@ -276,7 +276,7 @@ export function render(view) {
 		let preview = cache.preview
 		const margin = 4
 		let x = Math.round(lerp(-preview.image.width, margin, preview.anim.x))
-		let y = view.height - preview.image.height - margin
+		let y = view.height - preview.image.height + 1 - margin
 		context.drawImage(preview.image, x, y)
 	}
 }
