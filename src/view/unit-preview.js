@@ -48,12 +48,12 @@ export default function renderUnitPreview(unit, sprites) {
 			color: palette.white,
 			stroke: palette.jet
 		})
-		let value = renderText(unit.hp, {
+		let value = renderText(unit.stats.hp, {
 			font: fonts.standard,
 			color: palette.white,
 			stroke: palette.jet
 		})
-		let max = renderText("/" + unit.hp, {
+		let max = renderText("/" + unit.stats.hp, {
 			font: fonts.smallcaps,
 			color: palette.white,
 			stroke: palette.jet
@@ -71,8 +71,8 @@ export default function renderUnitPreview(unit, sprites) {
 			color: palette.white,
 			stroke: palette.jet
 		}
-		let atk = renderText(unit.atk, style)
-		let def = renderText(unit.def, style)
+		let atk = renderText(unit.stats.atk, style)
+		let def = renderText(unit.stats.def, style)
 		let sword = drawOutline(sprites.icons.small.sword, palette.jet)
 		let shield = drawOutline(sprites.icons.small.shield, palette.jet)
 		let width = sword.width + atk.width + 3 + shield.width + def.width
@@ -86,7 +86,7 @@ export default function renderUnitPreview(unit, sprites) {
 
 	// element badge
 	let element = (_ => {
-		let icon = sprites.icons[unit.element]
+		let icon = sprites.icons[unit.stats.element]
 		let element = Canvas.create(icon.width + 6, icon.height)
 		element.fillStyle = rgb(...palette.cyan)
 		element.fillRect(0, 2, icon.width + 6, icon.height - 4)

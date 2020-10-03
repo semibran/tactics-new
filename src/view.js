@@ -236,8 +236,8 @@ export function render(view) {
 	let app = view.app
 	for (let unit of app.map.units) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
-		let x = origin.x + unit.x * tilesize
-		let y = origin.y + unit.y * tilesize
+		let x = origin.x + unit.cell.x * tilesize
+		let y = origin.y + unit.cell.y * tilesize
 		if (selection && unit === selection.unit) {
 			context.drawImage(sprites.select[selection.unit.faction], x - 2, y - 2)
 		}
