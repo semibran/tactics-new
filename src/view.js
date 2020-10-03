@@ -216,14 +216,16 @@ export function render(view) {
 		let text = renderText(unit.name, {
 			font: sprites.fonts.serif,
 			color: palette.white,
-			stroke: palette.black
+			stroke: palette.jet
 		})
 		let shadow = Canvas.recolor(text, palette.cyan)
+		let badge = sprites.badges.base
 		let x = 4
 		let y = view.height - box.height - 4
 		context.drawImage(box, x, y)
-		context.drawImage(shadow, x + 4, y + 3)
-		context.drawImage(text, x + 3, y + 2)
+		context.drawImage(badge, x + 3, y + 3)
+		context.drawImage(shadow, x + 3 + badge.width + 3 + 1, y + 3)
+		context.drawImage(text, x + 3 + badge.width + 3, y + 2)
 	}
 }
 

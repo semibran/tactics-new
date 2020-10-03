@@ -74,6 +74,15 @@ function disasmBadges(palette) {
 		badge.fillRect(0, 0, 3, 3)
 		badges[faction] = badge.canvas
 	}
+
+	let base = Canvas(10, 10)
+	base.fillStyle = rgb(...palette.jet)
+	base.fillRect(1, 0, 8, 10)
+	base.fillRect(0, 1, 10, 8)
+	base.fillStyle = rgb(...palette.gray)
+	base.fillRect(1, 1, 8, 8)
+	badges.base = base.canvas
+
 	return badges
 }
 
