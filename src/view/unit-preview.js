@@ -54,13 +54,13 @@ export default function renderUnitPreview(unit, sprites) {
 			stroke: palette.jet
 		})
 		let max = renderText("/" + unit.hp, {
-			font: fonts.smallcapsBold,
+			font: fonts.smallcaps,
 			color: palette.white,
 			stroke: palette.jet
 		})
 		bar.drawImage(label, 3, 2)
 		bar.drawImage(value, 3 + label.width + 2, 2)
-		bar.drawImage(max, 3 + label.width + 2 + value.width, 2)
+		bar.drawImage(max, 3 + label.width + 2 + value.width - 1, 2)
 		return bar.canvas
 	})()
 
