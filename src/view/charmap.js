@@ -3,6 +3,9 @@ import outline from "./outline"
 import extract from "../../lib/img-extract"
 
 export default function makeCharmap(image, font, color, stroke) {
+	if (!image) {
+		throw new Error(`No image found for font ${font.id}. Try rebuilding your spritesheet.`)
+	}
 	let charmap = {}
 	let cols = image.width / font.cellsize.width
 	let rows = image.height / font.cellsize.height

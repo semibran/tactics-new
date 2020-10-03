@@ -10,8 +10,10 @@ export function init(data) {
 			name: unit.name,
 			faction: unit.faction,
 			hp: unit.hp,
-			x: unit.position[0],
-			y: unit.position[1]
+			atk: unit.atk,
+			def: unit.def,
+			x: unit.pos[0],
+			y: unit.pos[1]
 		})
 	}
 	return map

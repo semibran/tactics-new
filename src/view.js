@@ -4,6 +4,7 @@ import * as pixels from "../lib/pixels"
 import * as Canvas from "../lib/canvas"
 import rgb from "../lib/rgb"
 import renderText from "./view/text"
+import outline from "./view/outline"
 const tilesize = 16
 
 export function create(width, height, sprites) {
@@ -191,12 +192,12 @@ export function render(view) {
 	let unit = selection.unit
 	if (selection.unit) {
 		let unit = selection.unit
-		let box = renderBox(74, 28)
 		let text = renderText(unit.name, {
 			font: sprites.fonts.serif,
 			color: palette.white,
 			stroke: palette.jet
 		})
+
 		let icon = (_ => {
 			let icon = sprites.badges[unit.type]
 			let orb = sprites.badges[unit.faction]
@@ -210,8 +211,9 @@ export function render(view) {
 			}
 			return result.canvas
 		})()
+
 		let hpbar = (_ => {
-			let bar = Canvas.create(68, 11  )
+			let bar = Canvas.create(68, 11)
 			let subpal = palette.factions[unit.faction]
 			bar.fillStyle = rgb(...palette.jet)
 			bar.fillRect(0, 0, 68, 6)
@@ -227,7 +229,7 @@ export function render(view) {
 				color: palette.white,
 				stroke: palette.jet
 			})
-			let value = renderText(unit.hp.toString(), {
+			let value = renderText(unit.hp, {
 				font: sprites.fonts.standard,
 				color: palette.white,
 				stroke: palette.jet
@@ -243,11 +245,34 @@ export function render(view) {
 			return bar.canvas
 		})()
 
-		let content = Canvas.create(hpbar.width + 1, icon.height + 2 + hpbar.height)
+		let stats = (_ => {
+			let style = {
+				font: sprites.fonts.numbers,
+				color: palette.white,
+				stroke: palette.jet
+			}
+			let atk = renderText(unit.atk, style)
+			let def = renderText(unit.def, style)
+			let sword = outline(sprites.icons.small.sword, palette.jet)
+			let shield = outline(sprites.icons.small.shield, palette.jet)
+			let width = sword.width + atk.width + 4 + shield.width + def.width
+			let stats = Canvas.create(width, 8)
+			stats.drawImage(sword, 0, 0)
+			stats.drawImage(atk, sword.width, 0)
+			stats.drawImage(shield, sword.width + atk.width + 4, 0)
+			stats.drawImage(def, sword.width + atk.width + 4 + shield.width, 0)
+			return stats.canvas
+		})()
+
+		let width = hpbar.width + 1
+		let height = icon.height + 2 + hpbar.height + 2 + stats.height
+		let content = Canvas.create(width, height)
 		content.drawImage(icon, 0, 0)
 		content.drawImage(text, icon.width + 1, 0)
 		content.drawImage(hpbar, 1, icon.height + 2)
+		content.drawImage(stats, 4, icon.height + 2 + hpbar.height + 2)
 
+		let box = renderBox(content.canvas.width + 8, content.canvas.height + 6)
 		let shadow = Canvas.recolor(content.canvas, palette.cyan)
 		let x = 4
 		let y = view.height - box.height - 4

@@ -3,11 +3,17 @@ export default {
 	width: 8,
 	height: 8,
 	units: [
-		{ type: "soldier", name: "Arthur",   faction: "enemy",  position: [ 1, 4 ], hp: 11 },
-		{ type: "knight",  name: "Percy",    faction: "enemy",  position: [ 3, 3 ], hp: 13 },
-		{ type: "mage",    name: "Morgan",   faction: "enemy",  position: [ 2, 6 ], hp:  7 },
-		{ type: "fighter", name: "Gilda",    faction: "player", position: [ 5, 5 ], hp: 14 },
-		{ type: "thief",   name: "Kid",      faction: "player", position: [ 6, 2 ], hp:  8 },
-		{ type: "archer",  name: "Napi",     faction: "player", position: [ 4, 1 ], hp:  9 }
+		{ type: "soldier", name: "Arthur", faction: "enemy",  pos: [ 1, 4 ],
+		  hp: 11, atk: 13, def: 10 },
+		{ type: "knight",  name: "Percy",  faction: "enemy",  pos: [ 3, 3 ],
+		  hp: 12, atk:  9, def: 11 },
+		{ type: "mage",    name: "Morgan", faction: "enemy",  pos: [ 2, 6 ],
+		  hp:  7, atk: 11, def:  3 },
+		{ type: "fighter", name: "Gilda",  faction: "player", pos: [ 5, 5 ],
+		  hp: 13, atk: 14, def:  7 },
+		{ type: "thief",   name: "Kid",    faction: "player", pos: [ 6, 2 ],
+		  hp:  8, atk:  7, def:  5 },
+		{ type: "archer",  name: "Napi",   faction: "player", pos: [ 4, 1 ],
+		  hp:  9, atk: 12, def:  9 }
 	]
 }
