@@ -188,7 +188,12 @@ export function render(view) {
 	let content = unit
 		? unit.name
 		: "(Select a unit!)"
-	let text = renderText(content, sprites.fonts.serif)
+	let style = {
+		font: sprites.fonts.serif,
+		color: sprites.palette.black,
+		stroke: sprites.palette.white
+	}
+	let text = renderText(content, style)
 	let y = view.height - text.height - 2
 	if (unit) {
 		let icon = sprites.icons[unit.type]

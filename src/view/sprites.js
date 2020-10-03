@@ -12,7 +12,7 @@ export default function normalize(spritesheet) {
 	let palette = disasmPalette(images.palette)
 	let icons = disasmIcons(images)
 	return {
-		icons,
+		icons, palette,
 		badges: disasmBadges(palette),
 		select: disasmSelect(images.select, palette),
 		pieces: disasmPieces(images.piece, icons, palette),

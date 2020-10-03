@@ -1,23 +1,41 @@
 import Canvas from "../../lib/canvas"
 import findTextWidth from "./textwidth"
+import makeCharmap from "./charmap"
 
-export default function renderText(content, font, color, width) {
-	let cache = font.cache[color] || font.cache.default
-	if (!width) {
-		width = findTextWidth(content, font)
+export default function renderText(content, style, width) {
+	let font = style.font
+	let id = style.color
+		? style.stroke
+			? style.color + "+" + style.stroke
+			: style.color
+		: "default"
+	if (!font.cache[id]) {
+		font.cache[id] = makeCharmap(font.image, font.data, style.color, style.stroke)
 	}
-	let text = Canvas(width, font.data.cellsize.height)
+	let cached = font.cache[id]
+	if (!width) {
+		width = findTextWidth(content, font, style.stroke)
+	}
+	let height = font.data.cellsize.height
+	if (style.stroke) {
+		height += 2
+	}
+	let text = Canvas(width, height)
 	let x = 0
+	let kerning = font.data.spacing.char
+	if (style.stroke) {
+		kerning -= 2
+	}
 	for (let char of content) {
 		if (char === " ") {
 			x += font.data.spacing.word
 			continue
 		}
-		let image = cache[char]
-		if (!image) image = cache[char.toUpperCase()]
+		let image = cached[char]
+		if (!image) image = cached[char.toUpperCase()]
 		if (!image) continue
 		text.drawImage(image, x, 0)
-		x += image.width + font.data.spacing.char
+		x += image.width + kerning
 	}
 	return text.canvas
 }
