@@ -1,5 +1,6 @@
 dependencies:
   img-load: 2.0.0
+  lerp: 1.0.3
   manhattan: 1.0.0
 devDependencies:
   '@rollup/plugin-commonjs': 15.1.0_rollup@2.28.2
@@ -3151,6 +3152,10 @@ packages:
     optional: true
     resolution:
       integrity: sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==
+  /lerp/1.0.3:
+    dev: false
+    resolution:
+      integrity: sha1-oYyJaPkXiW3hXM/MKNVaa3Med24=
   /line-column/1.0.2:
     dependencies:
       isarray: 1.0.0
@@ -5190,6 +5195,7 @@ specifiers:
   img-load: ^2.0.0
   jimp: ^0.16.1
   key-state: ^1.0.1
+  lerp: ^1.0.3
   manhattan: ^1.0.0
   node-sass: ^4.14.1
   pack: ^2.2.0

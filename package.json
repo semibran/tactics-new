@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "img-load": "^2.0.0",
+    "lerp": "^1.0.3",
     "manhattan": "^1.0.0"
   }
 }

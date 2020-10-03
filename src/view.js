@@ -5,7 +5,7 @@ import * as Cell from "../lib/cell"
 import renderMap from "./view/map"
 import renderUnitPreview from "./view/unit-preview"
 import anims from "./anims"
-import { easeOut } from "../lib/exponential"
+import lerp from "lerp"
 const tilesize = 16
 
 export function create(width, height, sprites) {
@@ -129,60 +129,46 @@ export function init(view, app) {
 
 	function select(unit) {
 		let range = findRange(unit, map)
-		let anim = anims.RangeExpand.create(range)
-		state.concurs.push(anim)
-		state.selection = {
-			unit: unit,
-			time: state.time
+		let preview = renderUnitPreview(unit, sprites)
+		let expand = anims.RangeExpand.create(range)
+		let enter = anims.PreviewEnter.create()
+		state.concurs.push(expand, enter)
+		state.selection = { unit }
+		cache.selection = { unit }
+		cache.range = expand.range
+		cache.preview = {
+			image: preview,
+			anim: enter
 		}
-		cache.selection = {
-			unit: unit,
-			time: 0,
-			preview: renderUnitPreview(unit, sprites)
-		}
-		cache.range = anim.range
-		state.dirty = true
 	}
 
 	function deselect() {
-		let anim = anims.RangeShrink.create(cache.range)
-		state.concurs.push(anim)
-		cache.selection.time = state.time
+		let shrink = anims.RangeShrink.create(cache.range)
+		let exit = anims.PreviewExit.create()
+		state.concurs.push(shrink, exit)
+		cache.preview.anim = exit
 		state.selection = null
-		state.dirty = true
 	}
 
 	function update() {
 		state.time++
+		if (state.dirty) {
+			state.dirty = false
+			render(view)
+		}
 		for (let i = 0; i < state.concurs.length; i++) {
 			let anim = state.concurs[i]
 			anims[anim.type].update(anim)
 			if (anim.done) {
 				state.concurs.splice(i--, 1)
+				// TODO: move these into actual hooks?
 				if (anim.type === "RangeShrink") {
 					cache.range = null
+				} else if (anim.type === "PreviewExit") {
+					cache.preview = null
 				}
 			}
 			state.dirty = true
-		}
-		if (state.selection) {
-			let elapsed = state.time - state.selection.time
-			let t = elapsed / 10
-			if (t <= 1) {
-				state.dirty = true
-			}
-		} else if (cache.selection) {
-			let elapsed = state.time - cache.selection.time
-			let t = elapsed / 5
-			if (t <= 1) {
-				state.dirty = true
-			} else {
-				cache.selection = null
-			}
-		}
-		if (state.dirty) {
-			state.dirty = false
-			render(view)
 		}
 		requestAnimationFrame(update)
 	}
@@ -286,23 +272,11 @@ export function render(view) {
 		context.drawImage(sprite, x, y - 1)
 	}
 
-	if (selection) {
-		let preview = cache.selection.preview
-		let a = -preview.width
-		let b = 4
-		let d = 10
-		let e = Math.min(d, state.time - state.selection.time)
-		let t = easeOut(e / d)
-		let x = Math.round(a + (b - a) * t)
-		context.drawImage(preview, x, view.height - preview.height - 4)
-	} else if (cache.selection) {
-		let preview = cache.selection.preview
-		let a = 4
-		let b = -preview.width
-		let d = 5
-		let e = Math.min(d, state.time - cache.selection.time)
-		let t = e / d
-		let x = Math.round(a + (b - a) * t)
-		context.drawImage(preview, x, view.height - preview.height - 4)
+	if (cache.preview) {
+		let preview = cache.preview
+		const margin = 4
+		let x = Math.round(lerp(-preview.image.width, margin, preview.anim.x))
+		let y = view.height - preview.image.height - margin
+		context.drawImage(preview.image, x, y)
 	}
 }
