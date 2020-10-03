@@ -224,8 +224,8 @@ export function render(view) {
 		let y = view.height - box.height - 4
 		context.drawImage(box, x, y)
 		context.drawImage(badge, x + 3, y + 3)
-		context.drawImage(shadow, x + 3 + badge.width + 3 + 1, y + 3)
-		context.drawImage(text, x + 3 + badge.width + 3, y + 2)
+		context.drawImage(shadow, x + 3 + badge.width + 2 + 1, y + 3)
+		context.drawImage(text, x + 3 + badge.width + 2, y + 2)
 	}
 }
 
