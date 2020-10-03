@@ -118,8 +118,10 @@ export function init(view, app) {
 				let cursor = snapToGrid(pointer.pressed)
 				let unit = Map.unitAt(app.map, cursor)
 				if (state.selection) {
-					deselect()
-				} else if (unit) {
+					if (!animating("PreviewEnter")) {
+						deselect()
+					}
+				} else if (unit && !animating("PreviewExit")) {
 					select(unit)
 				}
 			}
@@ -128,15 +130,6 @@ export function init(view, app) {
 	}
 
 	function select(unit) {
-		let animating = false
-		for (let i = 0; i < state.concurs.length; i++) {
-			let anim = state.concurs[i]
-			if (anim.type === "PreviewExit") {
-				animating = true
-				break
-			}
-		}
-		if (animating) return
 		let range = findRange(unit, map)
 		let preview = renderUnitPreview(unit, sprites)
 		let expand = anims.RangeExpand.create(range)
@@ -156,15 +149,6 @@ export function init(view, app) {
 	}
 
 	function deselect() {
-		let animating = false
-		for (let i = 0; i < state.concurs.length; i++) {
-			let anim = state.concurs[i]
-			if (anim.type === "PreviewEnter") {
-				animating = true
-				break
-			}
-		}
-		if (animating) return
 		let shrink = anims.RangeShrink.create(cache.range)
 		let exit = anims.PreviewExit.create(cache.preview.anim.x)
 		let drop = anims.PieceDrop.create(cache.selection.anim.y)
@@ -172,6 +156,16 @@ export function init(view, app) {
 		cache.preview.anim = exit
 		cache.selection.anim = drop
 		state.selection = null
+	}
+
+	function animating(anims, type) {
+		if (!type) return !!anims.length
+		for (let anim of anims) {
+			if (anim.type === type) {
+				return true
+			}
+		}
+		return false
 	}
 
 	function update() {
