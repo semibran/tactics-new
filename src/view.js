@@ -237,9 +237,15 @@ export function render(view) {
 
 	if (selection) {
 		let range = cache.selection.range
+		context.globalAlpha = 0.125
 		context.fillStyle = "blue"
-		context.globalAlpha = 0.25
 		for (let cell of range.move) {
+			let x = origin.x + cell.x * tilesize
+			let y = origin.y + cell.y * tilesize
+			context.fillRect(x, y, tilesize - 1, tilesize - 1)
+		}
+		context.fillStyle = "red"
+		for (let cell of range.attack) {
 			let x = origin.x + cell.x * tilesize
 			let y = origin.y + cell.y * tilesize
 			context.fillRect(x, y, tilesize - 1, tilesize - 1)

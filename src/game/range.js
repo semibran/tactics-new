@@ -41,8 +41,10 @@ export default function findRange(unit, map) {
 			if (!target) {
 				// no unit here, square is free for movement
 				range.move.push(neighbor)
-			} else if (!Unit.allied(unit, target)) {
-				// different factions, we can attack
+			} else if (!Unit.allied(unit, target)
+			&& range.attack.find(cell => Cell.equals(neighbor, cell))
+			) {
+				// different factions and not a duplicate. we can attack
 				range.attack.push(neighbor)
 			}
 			// maximum steps
@@ -79,10 +81,13 @@ export default function findRange(unit, map) {
 			// cells with enemies should be targeted
 			let target = Map.unitAt(map, neighbor)
 			if (!target || !Unit.allied(map, target)) {
-				// if not a duplicate, add to attack range
-				if (!range.attack.find(cell => Cell.equals(neighbor, cell))) {
-					range.attack.push(neighbor)
+				if (range.move.find(cell => Cell.equals(neighbor, cell))) {
+					continue
 				}
+				if (range.attack.find(cell => Cell.equals(neighbor, cell))) {
+					continue
+				}
+				range.attack.push(neighbor)
 			}
 		}
 	}
