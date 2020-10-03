@@ -59,8 +59,8 @@ export default function renderUnitPreview(unit, sprites) {
 			stroke: palette.jet
 		})
 		bar.drawImage(label, 3, 2)
-		bar.drawImage(max, bar.canvas.width - max.width - 3, 2)
-		bar.drawImage(value, bar.canvas.width - max.width - 3 - value.width, 2)
+		bar.drawImage(value, 3 + label.width + 2, 2)
+		bar.drawImage(max, 3 + label.width + 2 + value.width, 2)
 		return bar.canvas
 	})()
 
@@ -101,7 +101,7 @@ export default function renderUnitPreview(unit, sprites) {
 	let height = badge.height + 2 + hpbar.height + 3 + stats.height + 1
 	let content = Canvas.create(width, height)
 	content.drawImage(badge, 0, 0)
-	content.drawImage(name, badge.width + 1, 0)
+	content.drawImage(name, badge.width + 2, 0)
 	content.drawImage(hpbar, 1, badge.height + 2)
 	content.drawImage(stats, 4, badge.height + 2 + hpbar.height + 3)
 	content.drawImage(element, width - element.width, badge.height + 3 + hpbar.height + 1)
