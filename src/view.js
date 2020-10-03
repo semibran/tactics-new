@@ -128,13 +128,15 @@ export function init(view, app) {
 	}
 
 	function select(unit) {
+		let animating = false
 		for (let i = 0; i < state.concurs.length; i++) {
 			let anim = state.concurs[i]
-			if (anim.type === "RangeShrink") {
-				anim.splice(i, 1)
+			if (anim.type === "PreviewExit") {
+				animating = true
 				break
 			}
 		}
+		if (animating) return
 		let range = findRange(unit, map)
 		let preview = renderUnitPreview(unit, sprites)
 		let expand = anims.RangeExpand.create(range)
@@ -154,6 +156,15 @@ export function init(view, app) {
 	}
 
 	function deselect() {
+		let animating = false
+		for (let i = 0; i < state.concurs.length; i++) {
+			let anim = state.concurs[i]
+			if (anim.type === "PreviewEnter") {
+				animating = true
+				break
+			}
+		}
+		if (animating) return
 		let shrink = anims.RangeShrink.create(cache.range)
 		let exit = anims.PreviewExit.create(cache.preview.anim.x)
 		let drop = anims.PieceDrop.create(cache.selection.anim.y)
