@@ -1,4 +1,4 @@
-export function init(data) {
+export function create(data) {
 	let map = {
 		width: data.width,
 		height: data.height,

@@ -1,7 +1,7 @@
 export default {
 	id: "test",
-	width: 8,
-	height: 8,
+	width: 9,
+	height: 9,
 	units: [
 		{ type: "soldier", name: "Arthur", faction: "enemy",  pos: [ 1, 4 ],
 		  hp: 11, atk: 13, def: 10, element: "holy" },

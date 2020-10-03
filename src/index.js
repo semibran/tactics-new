@@ -4,7 +4,7 @@ import * as View from "./view"
 import map from "./maps/test"
 import * as Map from "./game/map"
 
-let state = { map: Map.init(map) }
+let state = { map: Map.create(map) }
 
 loadImage("sprites.png").then(main)
 

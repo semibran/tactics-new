@@ -1,17 +1,20 @@
 import * as Map from "./game/map"
 import * as Cell from "../lib/cell"
+import renderMap from "./view/map"
 import renderUnitPreview from "./view/unit-preview"
 const tilesize = 16
 
 export function create(width, height, sprites) {
 	return {
+		native: { width, height },
 		width: window.innerWidth,
 		height: window.innerHeight,
-		native: { width, height },
 		scale: 1,
 		sprites: sprites,
 		element: document.createElement("canvas"),
 		state: {
+			time: 0,
+			dirty: false,
 			camera: { x: 0, y: 0 },
 			selection: null,
 			pointer: {
@@ -21,14 +24,21 @@ export function create(width, height, sprites) {
 				offset: null
 			}
 		},
+		cache: {
+			map: null,
+			unitpreview: null
+		},
 		app: null
 	}
 }
 
 export function init(view, app) {
-	let { camera, pointer } = view.state
+	let state = view.state
+	let { camera, pointer } = state
 
 	view.app = app
+	view.cache.map = renderMap(app.map, tilesize)
+
 	function onresize() {
 		let scaleX = Math.max(1, Math.floor(window.innerWidth / view.native.width))
 		let scaleY = Math.max(1, Math.floor(window.innerHeight / view.native.height))
@@ -46,7 +56,7 @@ export function init(view, app) {
 	let events = {
 		resize() {
 			onresize()
-			render(view)
+			state.dirty = true
 		},
 		press(event) {
 			if (!device) {
@@ -75,7 +85,7 @@ export function init(view, app) {
 			}
 			camera.x = (pointer.pos.x - pointer.pressed.x + pointer.offset.x) / view.scale
 			camera.y = (pointer.pos.y - pointer.pressed.y + pointer.offset.y) / view.scale
-			render(view)
+			view.state.dirty = true
 		},
 		release(event) {
 			if (!pointer.pressed) return false
@@ -93,6 +103,15 @@ export function init(view, app) {
 		}
 	}
 
+	function loop() {
+		state.time++
+		if (state.dirty) {
+			state.dirty = false
+			render(view)
+		}
+		requestAnimationFrame(loop)
+	}
+
 	events.resize()
 	window.addEventListener("resize", events.resize)
 	window.addEventListener("mousedown", events.press)
@@ -101,6 +120,7 @@ export function init(view, app) {
 	window.addEventListener("touchstart", events.press)
 	window.addEventListener("touchmove", events.move)
 	window.addEventListener("touchend", events.release)
+	requestAnimationFrame(loop)
 
 	function switchDevice(event) {
 		let device = "desktop"
@@ -117,6 +137,8 @@ export function init(view, app) {
 		return device
 	}
 
+	// diagnoses the pointer position from an event.
+	// detects both clicks and taps
 	function getPosition(event) {
 		let x = event.pageX || event.touches && event.touches[0].pageX
 		let y = event.pageY || event.touches && event.touches[0].pageY
@@ -147,46 +169,40 @@ export function init(view, app) {
 function select(view, unit) {
 	view.state.selection = {
 		unit: unit,
-		preview: renderUnitPreview(unit, view.sprites)
+		time: view.state.time
 	}
-	render(view)
+	view.cache.unitpreview = renderUnitPreview(unit, view.sprites)
+	view.state.dirty = true
 }
 
 function deselect(view) {
 	view.state.selection = null
-	render(view)
+	view.cache.unitpreview = null
+	view.state.dirty = true
 }
 
 export function render(view) {
 	let sprites = view.sprites
 	let palette = sprites.palette
+	let cache = view.cache
 	let canvas = view.element
 	let context = canvas.getContext("2d")
 	context.fillStyle = "black"
 	context.fillRect(0, 0, canvas.width, canvas.height)
 
 	let { camera, selection } = view.state
-	let center = {
-		x: Math.round(view.width / 2 - 64 + camera.x),
-		y: Math.round(view.height / 2 - 64 + camera.y)
+	let origin = {
+		x: Math.round(view.width / 2 - cache.map.width / 2 + camera.x),
+		y: Math.round(view.height / 2 - cache.map.width / 2 + camera.y)
 	}
 
-	context.fillStyle = "#112"
-	for (let i = 0; i < 8; i++) {
-		for (let j = 0; j < 8; j++) {
-			if ((j + i) % 2) {
-				let x = j * 16 + center.x
-				let y = i * 16 + center.y
-				context.fillRect(x, y, 16, 16)
-			}
-		}
-	}
+	context.drawImage(cache.map, origin.x, origin.y)
 
 	let app = view.app
 	for (let unit of app.map.units) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
-		let x = center.x + unit.x * 16
-		let y = center.y + unit.y * 16
+		let x = origin.x + unit.x * tilesize
+		let y = origin.y + unit.y * tilesize
 		if (selection && unit === selection.unit) {
 			context.drawImage(sprites.select[selection.unit.faction], x - 2, y - 2)
 		}
@@ -194,7 +210,7 @@ export function render(view) {
 	}
 
 	if (selection) {
-		let preview = selection.preview
+		let preview = cache.unitpreview
 		context.drawImage(preview, 4, view.height - preview.height - 4)
 	}
 }
