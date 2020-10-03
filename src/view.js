@@ -77,8 +77,8 @@ export function init(view, app) {
 		},
 		move(event) {
 			pointer.pos = getPosition(event)
-			let cursor = snapToGrid(pointer.pos)
 			if (!pointer.pos || !pointer.pressed) return
+			let cursor = snapToGrid(pointer.pos)
 			if (pointer.clicking) {
 				let origin = snapToGrid(pointer.pressed)
 				if (!Cell.equals(origin, cursor)) {
@@ -87,6 +87,20 @@ export function init(view, app) {
 			}
 			camera.x = (pointer.pos.x - pointer.pressed.x + pointer.offset.x) / view.scale
 			camera.y = (pointer.pos.y - pointer.pressed.y + pointer.offset.y) / view.scale
+			let left = view.width / 2
+			let right = -view.width / 2
+			let top = view.height / 2
+			let bottom = -view.height / 2
+			if (camera.x > left) {
+				camera.x = left
+			} else if (camera.x < right) {
+				camera.x = right
+			}
+			if (camera.y > top) {
+				camera.y = top
+			} else if (camera.y < bottom) {
+				camera.y = bottom
+			}
 			view.state.dirty = true
 		},
 		release(event) {
