@@ -132,21 +132,27 @@ export function init(view, app) {
 		let preview = renderUnitPreview(unit, sprites)
 		let expand = anims.RangeExpand.create(range)
 		let enter = anims.PreviewEnter.create()
-		state.concurs.push(expand, enter)
+		let lift = anims.PieceLift.create()
+		state.concurs.push(expand, enter, lift)
 		state.selection = { unit }
-		cache.selection = { unit }
-		cache.range = expand.range
+		cache.selection = {
+			unit: unit,
+			anim: lift
+		}
 		cache.preview = {
 			image: preview,
 			anim: enter
 		}
+		cache.range = expand.range
 	}
 
 	function deselect() {
 		let shrink = anims.RangeShrink.create(cache.range)
 		let exit = anims.PreviewExit.create()
-		state.concurs.push(shrink, exit)
+		let drop = anims.PieceDrop.create(cache.selection.anim.y)
+		state.concurs.push(shrink, exit, drop)
 		cache.preview.anim = exit
+		cache.selection.anim = drop
 		state.selection = null
 	}
 
@@ -266,10 +272,14 @@ export function render(view) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let x = origin.x + unit.cell.x * tilesize
 		let y = origin.y + unit.cell.y * tilesize
+		let z = 0
+		if (cache.selection && cache.selection.unit === unit) {
+			z = Math.round(cache.selection.anim.y)
+		}
 		if (selection && unit === selection.unit) {
 			context.drawImage(sprites.select[selection.unit.faction], x - 2, y - 2)
 		}
-		context.drawImage(sprite, x, y - 1)
+		context.drawImage(sprite, x, y - 1 - z)
 	}
 
 	if (cache.preview) {
