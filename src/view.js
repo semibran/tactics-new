@@ -2,6 +2,7 @@ import * as Map from "./game/map"
 import * as Cell from "../lib/cell"
 import renderMap from "./view/map"
 import renderUnitPreview from "./view/unit-preview"
+import { easeOut } from "../lib/exponential"
 const tilesize = 16
 
 export function create(width, height, sprites) {
@@ -26,7 +27,7 @@ export function create(width, height, sprites) {
 		},
 		cache: {
 			map: null,
-			unitpreview: null
+			selection: null
 		},
 		app: null
 	}
@@ -108,12 +109,18 @@ export function init(view, app) {
 		state.time++
 		if (state.selection) {
 			let elapsed = state.time - state.selection.time
-			let t = elapsed / 8
+			let t = elapsed / 10
 			if (t <= 1) {
 				state.dirty = true
 			}
 		} else if (cache.selection) {
-
+			let elapsed = state.time - cache.selection.time
+			let t = elapsed / 5
+			if (t <= 1) {
+				state.dirty = true
+			} else {
+				cache.selection = null
+			}
 		}
 		if (state.dirty) {
 			state.dirty = false
@@ -181,13 +188,16 @@ function select(view, unit) {
 		unit: unit,
 		time: view.state.time
 	}
-	view.cache.unitpreview = renderUnitPreview(unit, view.sprites)
+	view.cache.selection = {
+		time: 0,
+		preview: renderUnitPreview(unit, view.sprites)
+	}
 	view.state.dirty = true
 }
 
 function deselect(view) {
+	view.cache.selection.time = view.state.time
 	view.state.selection = null
-	view.cache.unitpreview = null
 	view.state.dirty = true
 }
 
@@ -221,13 +231,22 @@ export function render(view) {
 	}
 
 	if (selection) {
-		let preview = cache.unitpreview
+		let preview = cache.selection.preview
 		let a = -preview.width
 		let b = 4
-		let d = 8
-		let e = state.time - state.selection.time
+		let d = 10
+		let e = Math.min(d, state.time - state.selection.time)
+		let t = easeOut(e / d)
+		let x = Math.round(a + (b - a) * t)
+		context.drawImage(preview, x, view.height - preview.height - 4)
+	} else if (cache.selection) {
+		let preview = cache.selection.preview
+		let a = 4
+		let b = -preview.width
+		let d = 5
+		let e = Math.min(d, state.time - cache.selection.time)
 		let t = e / d
-		let x = a + (b - a) * t
+		let x = Math.round(a + (b - a) * t)
 		context.drawImage(preview, x, view.height - preview.height - 4)
 	}
 }
