@@ -189,31 +189,9 @@ export function render(view) {
 	}
 
 	let unit = selection.unit
-	// let content = unit
-	// 	? unit.name
-	// 	: "(Select a unit!)"
-	// let style = {
-	// 	font: sprites.fonts.serif,
-	// 	color: sprites.palette.white,
-	// 	stroke: sprites.palette.black
-	// }
-	// let text = renderText(content, style)
-	// let y = view.height - text.height - 2
-	// if (unit) {
-	// 	let icon = sprites.icons[unit.type]
-	// 	let badge = sprites.badges[unit.faction]
-	// 	let badgeX = unit.type === "mage"
-	// 		? 3
-	// 		: 4 + icon.width - 2
-	// 	context.drawImage(icon, 4, y + 1)
-	// 	context.drawImage(badge, badgeX, y)
-	// 	context.drawImage(text, 4 + icon.width + 4, y)
-	// } else {
-	// 	context.drawImage(text, 4, y)
-	// }
 	if (selection.unit) {
 		let unit = selection.unit
-		let box = renderBox(74, 24)
+		let box = renderBox(74, 28)
 		let text = renderText(unit.name, {
 			font: sprites.fonts.serif,
 			color: palette.white,
@@ -233,12 +211,23 @@ export function render(view) {
 			return result.canvas
 		})()
 		let hpbar = (_ => {
-			let bar = Canvas.create(68, 6)
+			let bar = Canvas.create(68, 10)
 			let subpal = palette.factions[unit.faction]
 			bar.fillStyle = rgb(...palette.jet)
 			bar.fillRect(0, 0, 68, 6)
-			bar.fillStyle = rgb(...subpal.normal)
+
+			let gradient = bar.createLinearGradient(0, 3, 68, 3)
+			gradient.addColorStop(0, rgb(...subpal.normal))
+			gradient.addColorStop(1, rgb(...subpal.light))
+			bar.fillStyle = gradient
 			bar.fillRect(1, 1, 66, 4)
+
+			let text = renderText("HP", {
+				font: sprites.fonts.smallcaps,
+				color: palette.white,
+				stroke: palette.jet
+			})
+			bar.drawImage(text, 3, 3)
 			return bar.canvas
 		})()
 
