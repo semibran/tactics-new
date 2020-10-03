@@ -13,9 +13,7 @@ export function create(width, height, sprites) {
 		element: document.createElement("canvas"),
 		state: {
 			camera: { x: 0, y: 0 },
-			selection: {
-				unit: null
-			},
+			selection: null,
 			pointer: {
 				pos: null,
 				clicking: false,
@@ -28,7 +26,7 @@ export function create(width, height, sprites) {
 }
 
 export function init(view, app) {
-	let { camera, pointer, selection } = view.state
+	let { camera, pointer } = view.state
 
 	view.app = app
 	function onresize() {
@@ -45,7 +43,7 @@ export function init(view, app) {
 	}
 
 	let device = null
-	let actions = {
+	let events = {
 		resize() {
 			onresize()
 			render(view)
@@ -85,39 +83,36 @@ export function init(view, app) {
 				pointer.clicking = false
 				let cursor = snapToGrid(pointer.pressed)
 				let unit = Map.unitAt(app.map, cursor)
-				if (selection.unit) {
-					selection.unit = null
-					render(view)
+				if (view.state.selection) {
+					deselect(view)
 				} else if (unit) {
-					selection.unit = unit
-					console.log(unit)
-					render(view)
+					select(view, unit)
 				}
 			}
 			pointer.pressed = null
 		}
 	}
 
-	actions.resize()
-	window.addEventListener("resize", actions.resize)
-	window.addEventListener("mousedown", actions.press)
-	window.addEventListener("mousemove", actions.move)
-	window.addEventListener("mouseup", actions.release)
-	window.addEventListener("touchstart", actions.press)
-	window.addEventListener("touchmove", actions.move)
-	window.addEventListener("touchend", actions.release)
+	events.resize()
+	window.addEventListener("resize", events.resize)
+	window.addEventListener("mousedown", events.press)
+	window.addEventListener("mousemove", events.move)
+	window.addEventListener("mouseup", events.release)
+	window.addEventListener("touchstart", events.press)
+	window.addEventListener("touchmove", events.move)
+	window.addEventListener("touchend", events.release)
 
 	function switchDevice(event) {
 		let device = "desktop"
 		if (event.touches) {
 			device = "mobile"
-			window.removeEventListener("mousedown", actions.press)
-			window.removeEventListener("mousemove", actions.move)
-			window.removeEventListener("mouseup", actions.release)
+			window.removeEventListener("mousedown", events.press)
+			window.removeEventListener("mousemove", events.move)
+			window.removeEventListener("mouseup", events.release)
 		} else {
-			window.removeEventListener("touchstart", actions.press)
-			window.removeEventListener("touchmove", actions.move)
-			window.removeEventListener("touchend", actions.release)
+			window.removeEventListener("touchstart", events.press)
+			window.removeEventListener("touchmove", events.move)
+			window.removeEventListener("touchend", events.release)
 		}
 		return device
 	}
@@ -147,6 +142,19 @@ export function init(view, app) {
 			y: Math.floor(gridpos.y / tilesize)
 		}
 	}
+}
+
+function select(view, unit) {
+	view.state.selection = {
+		unit: unit,
+		preview: renderUnitPreview(unit, view.sprites)
+	}
+	render(view)
+}
+
+function deselect(view) {
+	view.state.selection = null
+	render(view)
 }
 
 export function render(view) {
@@ -179,15 +187,14 @@ export function render(view) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let x = center.x + unit.x * 16
 		let y = center.y + unit.y * 16
-		if (unit === selection.unit) {
+		if (selection && unit === selection.unit) {
 			context.drawImage(sprites.select[selection.unit.faction], x - 2, y - 2)
 		}
 		context.drawImage(sprite, x, y - 1)
 	}
 
-	let unit = selection.unit
-	if (selection.unit) {
-		let preview = renderUnitPreview(unit, sprites)
+	if (selection) {
+		let preview = selection.preview
 		context.drawImage(preview, 4, view.height - preview.height - 4)
 	}
 }
