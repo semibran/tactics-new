@@ -1,3 +1,4 @@
+import findRange from "./game/range"
 import * as Map from "./game/map"
 import * as Cell from "../lib/cell"
 import renderMap from "./view/map"
@@ -204,6 +205,7 @@ function select(view, unit) {
 	}
 	view.cache.selection = {
 		time: 0,
+		range: findRange(unit, view.app.map),
 		preview: renderUnitPreview(unit, view.sprites)
 	}
 	view.state.dirty = true
@@ -232,6 +234,18 @@ export function render(view) {
 	}
 
 	context.drawImage(cache.map, origin.x, origin.y)
+
+	if (selection) {
+		let range = cache.selection.range
+		context.fillStyle = "blue"
+		context.globalAlpha = 0.25
+		for (let cell of range.move) {
+			let x = origin.x + cell.x * tilesize
+			let y = origin.y + cell.y * tilesize
+			context.fillRect(x, y, tilesize - 1, tilesize - 1)
+		}
+		context.globalAlpha = 1
+	}
 
 	let app = view.app
 	for (let unit of app.map.units) {

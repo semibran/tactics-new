@@ -1,21 +1,21 @@
-import * as Map from "./map"
+import * as Cell from "../../lib/cell"
 import * as Unit from "./unit"
-import * as Cell from "./cell"
+import * as Map from "./map"
 
-// findRange(map, unit)
+// findRange(unit, map)
 // > finds the unit range (diamond shape)
 // > in the format {
 // >   move: [ ...cell ]
 // >   attack: [ ...cell ]
 // > }
-export default function findRange(map, unit) {
+export default function findRange(unit, map) {
 	let range = {
 		move: [ unit.cell ],
 		attack: [],
 	}
 
-	let mov = Unit.mov(unit.type)
-	let rng = Unit.rng(unit.type)
+	let mov = Unit.mov(unit)
+	let rng = Unit.rng(unit)
 	let start = { steps: 0, cell: unit.cell }
 	let queue = [ start ]
 	let edges = []
@@ -33,7 +33,7 @@ export default function findRange(map, unit) {
 				continue
 			}
 			// avoid duplicates
-			if (range.move.find(cell => Cell.equals(cell, neighbor))) {
+			if (range.move.find(cell => Cell.equals(neighbor, cell))) {
 				continue
 			}
 			// check if cell is occupied
@@ -67,11 +67,12 @@ export default function findRange(map, unit) {
 	// without this section, we wouldn't be able to attack enemies
 	// unless they are `mov` steps away from the central unit
 	for (let edge of edges) {
-		for (let neighbor of Cell.neighbors(edge, rng)) {
+		for (let neighbor of Cell.neighborhood(edge, rng)) {
 			if (!Map.contains(map, neighbor)
-			 || !Map.walkable(map, neighbor, cell)
+			 || !Map.walkable(map, neighbor, edge)
 			 || Cell.equals(unit.cell, neighbor)
 			) continue // can't attack out of bounds, walls, or self
+
 			// if cell doesn't contain an ally,
 			// it is within attack range.
 			// to disable consistency visual, only
@@ -79,7 +80,7 @@ export default function findRange(map, unit) {
 			let target = Map.unitAt(map, neighbor)
 			if (!target || !Unit.allied(map, target)) {
 				// if not a duplicate, add to attack range
-				if (!range.attack.find(cell => Cell.equals(cell, neighbor))) {
+				if (!range.attack.find(cell => Cell.equals(neighbor, cell))) {
 					range.attack.push(neighbor)
 				}
 			}
