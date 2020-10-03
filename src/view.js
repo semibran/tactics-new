@@ -79,9 +79,9 @@ export function init(view, app) {
 		move(event) {
 			pointer.pos = getPosition(event)
 			if (!pointer.pos || !pointer.pressed) return
-			let cursor = snapToGrid(pointer.pos)
+			let cursor = pointer.pos
 			if (pointer.clicking) {
-				let origin = snapToGrid(pointer.pressed)
+				let origin = pointer.pressed
 				if (!Cell.equals(origin, cursor)) {
 					pointer.clicking = false
 				}
