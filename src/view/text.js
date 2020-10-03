@@ -9,6 +9,7 @@ export default function renderText(content, style, width) {
 			? style.color + "+" + style.stroke
 			: style.color
 		: "default"
+	if (!font) throw new Error(`Attempting to render an unregistered font. Is your font exported by fonts/index.js?`)
 	if (!font.cache[id]) {
 		font.cache[id] = makeCharmap(font.image, font.data, style.color, style.stroke)
 	}

@@ -9,6 +9,7 @@ export function init(data) {
 			type: unit.type,
 			name: unit.name,
 			faction: unit.faction,
+			hp: unit.hp,
 			x: unit.position[0],
 			y: unit.position[1]
 		})

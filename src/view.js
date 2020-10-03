@@ -211,7 +211,7 @@ export function render(view) {
 			return result.canvas
 		})()
 		let hpbar = (_ => {
-			let bar = Canvas.create(68, 10)
+			let bar = Canvas.create(68, 9)
 			let subpal = palette.factions[unit.faction]
 			bar.fillStyle = rgb(...palette.jet)
 			bar.fillRect(0, 0, 68, 6)
@@ -222,12 +222,18 @@ export function render(view) {
 			bar.fillStyle = gradient
 			bar.fillRect(1, 1, 66, 4)
 
-			let text = renderText("HP", {
+			let label = renderText("HP", {
 				font: sprites.fonts.smallcaps,
 				color: palette.white,
 				stroke: palette.jet
 			})
-			bar.drawImage(text, 3, 3)
+			let value = renderText(unit.hp.toString(), {
+				font: sprites.fonts.smallcapsBold,
+				color: palette.white,
+				stroke: palette.jet
+			})
+			bar.drawImage(label, 3, 2)
+			bar.drawImage(value, bar.canvas.width - value.width - 3, 2)
 			return bar.canvas
 		})()
 

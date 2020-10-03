@@ -3,6 +3,7 @@ module.exports = {
 	cellsize: { width: 5, height: 5 },
 	charsize: { width: 5, height: 5 },
 	exceptions: {
+		1: { width: 3 },
 		",": { width: 1 },
 		".": { width: 1 },
 		"!": { width: 1 }
