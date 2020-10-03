@@ -1,8 +1,10 @@
 import findRange from "./game/range"
 import * as Map from "./game/map"
+import * as Unit from "./game/unit"
 import * as Cell from "../lib/cell"
 import renderMap from "./view/map"
 import renderUnitPreview from "./view/unit-preview"
+import anims from "./anims"
 import { easeOut } from "../lib/exponential"
 const tilesize = 16
 
@@ -15,6 +17,8 @@ export function create(width, height, sprites) {
 		sprites: sprites,
 		element: document.createElement("canvas"),
 		state: {
+			consecs: [],
+			concurs: [],
 			time: 0,
 			dirty: false,
 			camera: { x: 0, y: 0 },
@@ -37,10 +41,12 @@ export function create(width, height, sprites) {
 export function init(view, app) {
 	let state = view.state
 	let cache = view.cache
+	let sprites = view.sprites
 	let { camera, pointer } = state
 
+	let map = app.map
 	view.app = app
-	view.cache.map = renderMap(app.map, tilesize)
+	view.cache.map = renderMap(map, tilesize)
 
 	function onresize() {
 		let scaleX = Math.max(1, Math.floor(window.innerWidth / view.native.width))
@@ -111,17 +117,49 @@ export function init(view, app) {
 				let cursor = snapToGrid(pointer.pressed)
 				let unit = Map.unitAt(app.map, cursor)
 				if (view.state.selection) {
-					deselect(view)
+					deselect()
 				} else if (unit) {
-					select(view, unit)
+					select(unit)
 				}
 			}
 			pointer.pressed = null
 		}
 	}
 
-	function loop() {
+	function select(unit) {
+		let range = findRange(unit, map)
+		let radius = Unit.mov(unit) + Unit.rng(unit)
+		let anim = anims.RangeExpand.create(range, unit.cell, radius)
+		state.selection = {
+			unit: unit,
+			time: state.time
+		}
+		cache.selection = {
+			time: 0,
+			range: range,
+			squares: anim.squares,
+			preview: renderUnitPreview(unit, sprites)
+		}
+		state.concurs.push(anim)
+		state.dirty = true
+	}
+
+	function deselect() {
+		cache.selection.time = state.time
+		state.selection = null
+		state.dirty = true
+	}
+
+	function update() {
 		state.time++
+		for (let i = 0; i < state.concurs.length; i++) {
+			let anim = state.concurs[i]
+			anims[anim.type].update(anim)
+			if (anim.done) {
+				state.concurs.splice(i--, 1)
+			}
+			state.dirty = true
+		}
 		if (state.selection) {
 			let elapsed = state.time - state.selection.time
 			let t = elapsed / 10
@@ -141,7 +179,7 @@ export function init(view, app) {
 			state.dirty = false
 			render(view)
 		}
-		requestAnimationFrame(loop)
+		requestAnimationFrame(update)
 	}
 
 	events.resize()
@@ -152,7 +190,7 @@ export function init(view, app) {
 	window.addEventListener("touchstart", events.press)
 	window.addEventListener("touchmove", events.move)
 	window.addEventListener("touchend", events.release)
-	requestAnimationFrame(loop)
+	requestAnimationFrame(update)
 
 	function switchDevice(event) {
 		let device = "desktop"
@@ -198,25 +236,6 @@ export function init(view, app) {
 	}
 }
 
-function select(view, unit) {
-	view.state.selection = {
-		unit: unit,
-		time: view.state.time
-	}
-	view.cache.selection = {
-		time: 0,
-		range: findRange(unit, view.app.map),
-		preview: renderUnitPreview(unit, view.sprites)
-	}
-	view.state.dirty = true
-}
-
-function deselect(view) {
-	view.cache.selection.time = view.state.time
-	view.state.selection = null
-	view.state.dirty = true
-}
-
 export function render(view) {
 	let sprites = view.sprites
 	let palette = sprites.palette
@@ -236,18 +255,16 @@ export function render(view) {
 	context.drawImage(cache.map, origin.x, origin.y)
 
 	if (selection) {
-		let range = cache.selection.range
+		let squares = cache.selection.squares
 		context.globalAlpha = 0.125
-		context.fillStyle = "blue"
-		for (let cell of range.move) {
-			let x = origin.x + cell.x * tilesize
-			let y = origin.y + cell.y * tilesize
-			context.fillRect(x, y, tilesize - 1, tilesize - 1)
-		}
-		context.fillStyle = "red"
-		for (let cell of range.attack) {
-			let x = origin.x + cell.x * tilesize
-			let y = origin.y + cell.y * tilesize
+		for (let square of squares) {
+			let x = origin.x + square.cell.x * tilesize
+			let y = origin.y + square.cell.y * tilesize
+			if (square.type === "move") {
+				context.fillStyle = "blue"
+			} else if (square.type === "attack") {
+				context.fillStyle = "red"
+			}
 			context.fillRect(x, y, tilesize - 1, tilesize - 1)
 		}
 		context.globalAlpha = 1

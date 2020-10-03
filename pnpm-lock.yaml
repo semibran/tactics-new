@@ -1,5 +1,6 @@
 dependencies:
   img-load: 2.0.0
+  manhattan: 1.0.0
 devDependencies:
   '@rollup/plugin-commonjs': 15.1.0_rollup@2.28.2
   '@rollup/plugin-json': 4.1.0_rollup@2.28.2
@@ -3272,6 +3273,10 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==
+  /manhattan/1.0.0:
+    dev: false
+    resolution:
+      integrity: sha512-PIHWL7/v3GAgNS+aBq3reCkBZZCC5btsyRjAUsbInkNjKpN5VRQAjTnU/+jr9AEeEi8dLy4e7Jrc3Z6iyVu3Sw==
   /map-cache/0.2.2:
     dev: true
     engines:
@@ -5185,6 +5190,7 @@ specifiers:
   img-load: ^2.0.0
   jimp: ^0.16.1
   key-state: ^1.0.1
+  manhattan: ^1.0.0
   node-sass: ^4.14.1
   pack: ^2.2.0
   postcss: ^8.1.1
