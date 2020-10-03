@@ -1,5 +1,7 @@
 import * as Map from "./game/map"
 import * as Cell from "../lib/cell"
+import * as pixels from "../lib/pixels"
+import * as Canvas from "../lib/canvas"
 import renderText from "./view/text"
 const tilesize = 16
 
@@ -151,6 +153,7 @@ export function init(view, app) {
 
 export function render(view) {
 	let sprites = view.sprites
+	let palette = sprites.palette
 	let canvas = view.element
 	let context = canvas.getContext("2d")
 	context.fillStyle = "black"
@@ -185,26 +188,49 @@ export function render(view) {
 	}
 
 	let unit = selection.unit
-	let content = unit
-		? unit.name
-		: "(Select a unit!)"
-	let style = {
-		font: sprites.fonts.serif,
-		color: sprites.palette.black,
-		stroke: sprites.palette.white
+	// let content = unit
+	// 	? unit.name
+	// 	: "(Select a unit!)"
+	// let style = {
+	// 	font: sprites.fonts.serif,
+	// 	color: sprites.palette.white,
+	// 	stroke: sprites.palette.black
+	// }
+	// let text = renderText(content, style)
+	// let y = view.height - text.height - 2
+	// if (unit) {
+	// 	let icon = sprites.icons[unit.type]
+	// 	let badge = sprites.badges[unit.faction]
+	// 	let badgeX = unit.type === "mage"
+	// 		? 3
+	// 		: 4 + icon.width - 2
+	// 	context.drawImage(icon, 4, y + 1)
+	// 	context.drawImage(badge, badgeX, y)
+	// 	context.drawImage(text, 4 + icon.width + 4, y)
+	// } else {
+	// 	context.drawImage(text, 4, y)
+	// }
+	if (selection.unit) {
+		let unit = selection.unit
+		let box = renderBox(74, 16)
+		let text = renderText(unit.name, {
+			font: sprites.fonts.serif,
+			color: palette.white,
+			stroke: palette.black
+		})
+		let shadow = Canvas.recolor(text, palette.cyan)
+		let x = 4
+		let y = view.height - box.height - 4
+		context.drawImage(box, x, y)
+		context.drawImage(shadow, x + 4, y + 3)
+		context.drawImage(text, x + 3, y + 2)
 	}
-	let text = renderText(content, style)
-	let y = view.height - text.height - 2
-	if (unit) {
-		let icon = sprites.icons[unit.type]
-		let badge = sprites.badges[unit.faction]
-		let badgeX = unit.type === "mage"
-			? 3
-			: 4 + icon.width - 2
-		context.drawImage(icon, 4, y + 1)
-		context.drawImage(badge, badgeX, y)
-		context.drawImage(text, 4 + icon.width + 4, y)
-	} else {
-		context.drawImage(text, 4, y)
-	}
+}
+
+function renderBox(width, height) {
+	let box = Canvas.create(width, height)
+	box.fillStyle = "white"
+	box.fillRect(1, 0, width - 2, height)
+	box.fillRect(0, 1, width, height - 2)
+	return box.canvas
 }
