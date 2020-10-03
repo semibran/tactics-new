@@ -211,7 +211,7 @@ export function render(view) {
 			return result.canvas
 		})()
 		let hpbar = (_ => {
-			let bar = Canvas.create(68, 9)
+			let bar = Canvas.create(68, 11  )
 			let subpal = palette.factions[unit.faction]
 			bar.fillStyle = rgb(...palette.jet)
 			bar.fillRect(0, 0, 68, 6)
@@ -228,12 +228,18 @@ export function render(view) {
 				stroke: palette.jet
 			})
 			let value = renderText(unit.hp.toString(), {
+				font: sprites.fonts.standard,
+				color: palette.white,
+				stroke: palette.jet
+			})
+			let max = renderText("/" + unit.hp, {
 				font: sprites.fonts.smallcapsBold,
 				color: palette.white,
 				stroke: palette.jet
 			})
 			bar.drawImage(label, 3, 2)
-			bar.drawImage(value, bar.canvas.width - value.width - 3, 2)
+			bar.drawImage(max, bar.canvas.width - max.width - 3, 2)
+			bar.drawImage(value, bar.canvas.width - max.width - 3 - value.width, 2)
 			return bar.canvas
 		})()
 

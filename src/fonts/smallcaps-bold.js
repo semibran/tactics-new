@@ -9,7 +9,7 @@ module.exports = {
 		",": { width: 2 },
 		".": { width: 2 },
 		"!": { width: 2 },
-		"?": { width: 6 }
+		"/": { width: 3 }
 	},
 	spacing: {
 		char: 1,
@@ -20,6 +20,6 @@ module.exports = {
 		"0123456789",
 		"ABCDEFGHIJ",
 		"KLMNOPQRST",
-		"UVWXYZ,.!?"
+		"UVWXYZ,.!/"
 	]
 }
