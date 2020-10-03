@@ -2,20 +2,27 @@ import * as Cell from "../../lib/cell"
 import * as Unit from "./unit"
 import * as Map from "./map"
 
-// findRange(unit, map)
-// > finds the unit range (diamond shape)
-// > in the format {
-// >   move: [ ...cell ]
-// >   attack: [ ...cell ]
+// findRange(unit, map) -> range
+// > calculates the squares that a unit can act on
+// > where range: {
+// >   center: cell
+// >   radius: int
+// >   squares: [ ...square ]
+// > }
+// > where square: {
+// >   type: move | attack
+// >   cell: cell
 // > }
 export default function findRange(unit, map) {
-	let range = {
-		move: [ unit.cell ],
-		attack: [],
-	}
-
 	let mov = Unit.mov(unit)
 	let rng = Unit.rng(unit)
+	let radius = mov + rng
+	let range = {
+		center: unit.cell,
+		radius: radius,
+		squares: []
+	}
+
 	let start = { steps: 0, cell: unit.cell }
 	let queue = [ start ]
 	let edges = []
@@ -33,19 +40,22 @@ export default function findRange(unit, map) {
 				continue
 			}
 			// avoid duplicates
-			if (range.move.find(cell => Cell.equals(neighbor, cell))) {
-				continue
-			}
+			if (range.squares.find(square =>
+				square.type === "move"
+				&& Cell.equals(neighbor, square.cell))
+			) continue
 			// check if cell is occupied
 			let target = Map.unitAt(map, neighbor)
 			if (!target) {
 				// no unit here, square is free for movement
-				range.move.push(neighbor)
+				range.squares.push({ type: "move", cell: neighbor })
 			} else if (!Unit.allied(unit, target)
-			&& range.attack.find(cell => Cell.equals(neighbor, cell))
+			&& range.squares.find(square =>
+				square.type === "attack"
+				&& Cell.equals(neighbor, square.cell))
 			) {
 				// different factions and not a duplicate. we can attack
-				range.attack.push(neighbor)
+				range.squares.push({ type: "attack", cell: neighbor })
 			}
 			// maximum steps
 			if (node.steps < mov - 1) {
@@ -71,8 +81,8 @@ export default function findRange(unit, map) {
 	for (let edge of edges) {
 		for (let neighbor of Cell.neighborhood(edge, rng)) {
 			if (!Map.contains(map, neighbor)
-			 || !Map.walkable(map, neighbor, edge)
-			 || Cell.equals(unit.cell, neighbor)
+				|| !Map.walkable(map, neighbor, edge)
+				|| Cell.equals(unit.cell, neighbor)
 			) continue // can't attack out of bounds, walls, or self
 
 			// if cell doesn't contain an ally,
@@ -81,13 +91,10 @@ export default function findRange(unit, map) {
 			// cells with enemies should be targeted
 			let target = Map.unitAt(map, neighbor)
 			if (!target || !Unit.allied(map, target)) {
-				if (range.move.find(cell => Cell.equals(neighbor, cell))) {
+				if (range.squares.find(square => Cell.equals(neighbor, square.cell))) {
 					continue
 				}
-				if (range.attack.find(cell => Cell.equals(neighbor, cell))) {
-					continue
-				}
-				range.attack.push(neighbor)
+				range.squares.push({ type: "attack", cell: neighbor })
 			}
 		}
 	}

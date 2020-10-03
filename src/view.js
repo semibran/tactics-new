@@ -34,6 +34,7 @@ export function create(width, height, sprites) {
 			map: null,
 			selection: null
 		},
+		range: null,
 		app: null
 	}
 }
@@ -116,7 +117,7 @@ export function init(view, app) {
 				pointer.clicking = false
 				let cursor = snapToGrid(pointer.pressed)
 				let unit = Map.unitAt(app.map, cursor)
-				if (view.state.selection) {
+				if (state.selection) {
 					deselect()
 				} else if (unit) {
 					select(unit)
@@ -128,23 +129,24 @@ export function init(view, app) {
 
 	function select(unit) {
 		let range = findRange(unit, map)
-		let radius = Unit.mov(unit) + Unit.rng(unit)
-		let anim = anims.RangeExpand.create(range, unit.cell, radius)
+		let anim = anims.RangeExpand.create(range)
+		state.concurs.push(anim)
 		state.selection = {
 			unit: unit,
 			time: state.time
 		}
 		cache.selection = {
+			unit: unit,
 			time: 0,
-			range: range,
-			squares: anim.squares,
 			preview: renderUnitPreview(unit, sprites)
 		}
-		state.concurs.push(anim)
+		cache.range = anim.range
 		state.dirty = true
 	}
 
 	function deselect() {
+		let anim = anims.RangeShrink.create(cache.range)
+		state.concurs.push(anim)
 		cache.selection.time = state.time
 		state.selection = null
 		state.dirty = true
@@ -157,6 +159,9 @@ export function init(view, app) {
 			anims[anim.type].update(anim)
 			if (anim.done) {
 				state.concurs.splice(i--, 1)
+				if (anim.type === "RangeShrink") {
+					cache.range = null
+				}
 			}
 			state.dirty = true
 		}
@@ -254,10 +259,10 @@ export function render(view) {
 
 	context.drawImage(cache.map, origin.x, origin.y)
 
-	if (selection) {
-		let squares = cache.selection.squares
+	if (cache.range) {
+		let range = cache.range
 		context.globalAlpha = 0.125
-		for (let square of squares) {
+		for (let square of range.squares) {
 			let x = origin.x + square.cell.x * tilesize
 			let y = origin.y + square.cell.y * tilesize
 			if (square.type === "move") {
