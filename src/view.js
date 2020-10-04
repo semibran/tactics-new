@@ -126,10 +126,10 @@ export function init(view, app) {
 					}
 					if (square && square.type === "move") {
 						move(unit, cursor)
-					} else if (!animating(state.concurs, "PreviewEnter")) {
+					} else if (!animating(state.concurs, "PreviewEnter") && !animating(state.concurs, "PieceMove")) {
 						deselect()
 					}
-				} else if (unit && !animating(state.concurs, "PreviewExit")) {
+				} else if (unit && !animating(state.concurs, "PreviewExit") && !animating(state.concurs, "PieceMove")) {
 					select(unit)
 				}
 			}
@@ -175,15 +175,22 @@ export function init(view, app) {
 	}
 
 	function move(unit, cursor) {
+		if (cache.range) {
+			let shrink = anims.RangeShrink.create(cache.range)
+			state.concurs.push(shrink)
+		}
+		if (cache.preview) {
+			let exit = anims.PreviewExit.create(cache.preview.anim.x)
+			cache.preview.anim = exit
+			state.concurs.push(exit)
+		}
 		let path = pathfind(unit.cell, cursor, map)
-		let exit = anims.PreviewExit.create(cache.preview.anim.x)
 		let move = anims.PieceMove.create(path)
 		Unit.move(unit, cursor, map)
 		cache.selection.anim.done = true
 		cache.selection.anim = move
 		cache.selection.path = path
-		cache.range = null
-		state.concurs.push(move, exit)
+		state.concurs.push(move)
 	}
 
 	function update() {
