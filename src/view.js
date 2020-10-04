@@ -20,8 +20,7 @@ export function create(width, height, sprites) {
 		element: document.createElement("canvas"),
 		game: null,
 		state: {
-			consecs: [],
-			concurs: [],
+			anims: [],
 			time: 0,
 			dirty: false,
 			camera: {
@@ -38,9 +37,7 @@ export function create(width, height, sprites) {
 		},
 		cache: {
 			map: null,
-			selection: null,
-			camera: { x: 0, y: 0 },
-			cursor: null
+			camera: { x: 0, y: 0 }
 		},
 		layers: {
 			map: [],
@@ -96,25 +93,27 @@ export function init(view, game) {
 				x: camera.pos.x * view.scale,
 				y: camera.pos.y * view.scale
 			}
-			if (state.selection) {
-				let unit = state.selection.unit
-				let cursor = snapToGrid(pointer.pos)
-				let square = null
-				if (game.phase.pending.includes(unit)) {
-					square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
-				}
-				if (square) {
-					let path = pathfind(unit.cell, cursor, {
-						width: map.width,
-						height: map.height,
-						blacklist: map.units
-							.filter(other => !Unit.allied(unit, other))
-							.map(unit => unit.cell)
-					})
-					cache.cursor = cursor
-					cache.arrow = sprites.Arrow(path, unit.faction)
-					cache.path = path
-				}
+			let select = state.select
+			if (!select) return
+			let unit = select.unit
+			let cursor = snapToGrid(pointer.pos)
+			let square = null
+			// if unit hasn't moved yet
+			if (game.phase.pending.includes(unit)) {
+				// check if the user is selecting a square
+				square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
+			}
+			if (square) {
+				let path = pathfind(unit.cell, cursor, {
+					width: map.width,
+					height: map.height,
+					blacklist: map.units // make enemy units unwalkable
+						.filter(other => !Unit.allied(unit, other))
+						.map(unit => unit.cell)
+				})
+				select.cursor = cursor
+				select.arrow = sprites.Arrow(path, unit.faction)
+				select.path = path
 			}
 		},
 		move(event) {
@@ -127,7 +126,93 @@ export function init(view, game) {
 					pointer.clicking = false
 				}
 			}
+			actions.pan(camera, pointer)
+		},
+		release(event) {
+			if (!pointer.pressed) return false
+			if (pointer.clicking) {
+				pointer.clicking = false
+				let cursor = snapToGrid(pointer.pressed)
+				let unit = Map.unitAt(map, cursor)
+				if (state.select) {
+					let select = state.select
+					let unit = select.unit
+					let square = null
+					if (cache.range && game.phase.pending.includes(unit)) {
+						square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
+					}
+					if (square && square.type === "move") {
+						actions.move(unit, cursor)
+					} else if (!state.anims.find(anim => anim.blocking)) {
+						actions.deselect()
+					}
+				} else if (unit && !state.anims.find(anim => anim.blocking)) {
+					actions.select(unit)
+				}
+			}
+			pointer.pressed = null
+		}
+	}
 
+	let actions = {
+		select(unit) {
+			let range = findRange(unit, map)
+			let preview = renderUnitPreview(unit, sprites)
+			let expand = anims.RangeExpand.create(range)
+			let enter = anims.PreviewEnter.create()
+			let lift = anims.PieceLift.create()
+			state.anims.push(expand, enter, lift)
+			state.select = {
+				unit: unit,
+				anim: lift,
+				path: null,
+				arrow: null,
+				cursor: null
+			}
+			cache.range = expand.range
+			cache.preview = {
+				image: preview,
+				anim: enter
+			}
+		},
+		deselect() {
+			if (!state.select) return false
+			let select = state.select
+			select.anim.done = true
+			if (cache.range) {
+				let shrink = anims.RangeShrink.create(cache.range)
+				state.anims.push(shrink)
+			}
+			if (cache.preview) {
+				let exit = anims.PreviewExit.create(cache.preview.anim.x)
+				state.anims.push(exit)
+				cache.preview.anim = exit
+			}
+			let drop = anims.PieceDrop.create(select.anim.y)
+			state.anims.push(drop)
+			select.anim = drop
+		},
+		move(unit, cursor) {
+			if (!state.select) return false
+			let select = state.select
+			if (cache.range) {
+				let shrink = anims.RangeShrink.create(cache.range)
+				state.anims.push(shrink)
+			}
+			if (cache.preview) {
+				let exit = anims.PreviewExit.create(cache.preview.anim.x)
+				cache.preview.anim.done = true
+				cache.preview.anim = exit
+				state.anims.push(exit)
+			}
+			if (select.path) {
+				let move = anims.PieceMove.create(select.path)
+				select.anim.done = true
+				select.anim = move
+				state.anims.push(move)
+			}
+		},
+		pan(camera, pointer) {
 			camera.target.x = (pointer.pos.x - pointer.pressed.x + pointer.offset.x) / view.scale
 			camera.target.y = (pointer.pos.y - pointer.pressed.y + pointer.offset.y) / view.scale
 
@@ -145,89 +230,7 @@ export function init(view, game) {
 			} else if (camera.target.y < bottom) {
 				camera.target.y = bottom
 			}
-		},
-		release(event) {
-			if (!pointer.pressed) return false
-			if (pointer.clicking) {
-				pointer.clicking = false
-				let cursor = snapToGrid(pointer.pressed)
-				let unit = Map.unitAt(map, cursor)
-				if (state.selection) {
-					let unit = state.selection.unit
-					let square = null
-					if (cache.range && game.phase.pending.includes(unit)) {
-						square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
-					}
-					if (square && square.type === "move") {
-						move(unit, cursor)
-					} else if (!animating(state.concurs, "PreviewEnter")
-					&& !animating(state.concurs, "PieceMove")) {
-						deselect()
-					}
-				} else if (unit
-				&& !animating(state.concurs, "PreviewExit")
-				&& !animating(state.concurs, "PieceMove")
-				) {
-					select(unit)
-				}
-			}
-			pointer.pressed = null
 		}
-	}
-
-	function select(unit) {
-		let range = findRange(unit, map)
-		let preview = renderUnitPreview(unit, sprites)
-		let expand = anims.RangeExpand.create(range)
-		let enter = anims.PreviewEnter.create()
-		let lift = anims.PieceLift.create()
-		state.concurs.push(expand, enter, lift)
-		state.selection = { unit }
-		cache.selection = {
-			unit: unit,
-			anim: lift
-		}
-		cache.preview = {
-			image: preview,
-			anim: enter
-		}
-		cache.range = expand.range
-	}
-
-	function deselect() {
-		cache.selection.anim.done = true
-		if (cache.range) {
-			let shrink = anims.RangeShrink.create(cache.range)
-			state.concurs.push(shrink)
-		}
-		if (cache.preview) {
-			let exit = anims.PreviewExit.create(cache.preview.anim.x)
-			cache.preview.anim = exit
-			state.concurs.push(exit)
-		}
-		if (cache.selection) {
-			let drop = anims.PieceDrop.create(cache.selection.anim.y)
-			state.concurs.push(drop)
-			cache.selection.anim = drop
-		}
-		state.selection = null
-	}
-
-	function move(unit, cursor) {
-		if (cache.range) {
-			let shrink = anims.RangeShrink.create(cache.range)
-			state.concurs.push(shrink)
-		}
-		if (cache.preview) {
-			let exit = anims.PreviewExit.create(cache.preview.anim.x)
-			cache.preview.anim = exit
-			state.concurs.push(exit)
-		}
-		let move = anims.PieceMove.create(cache.path)
-		cache.selection.anim.done = true
-		cache.selection.anim = move
-		cache.selection.path = cache.path
-		state.concurs.push(move)
 	}
 
 	function update() {
@@ -247,33 +250,27 @@ export function init(view, game) {
 			state.dirty = true
 		}
 
-		for (let i = 0; i < state.concurs.length; i++) {
-			let anim = state.concurs[i]
+		for (let i = 0; i < state.anims.length; i++) {
+			let anim = state.anims[i]
 			anims[anim.type].update(anim)
 			if (anim.done) {
-				state.concurs.splice(i--, 1)
+				state.anims.splice(i--, 1)
 				// TODO: move these into actual hooks?
 				if (anim.type === "RangeShrink") {
 					cache.range = null
 				} else if (anim.type === "PreviewExit") {
 					cache.preview = null
 				} else if (anim.type === "PieceDrop") {
-					cache.selection = null
-					cache.cursor = null
-					cache.path = null
+					state.select = null
 				} else if (anim.type === "PieceMove") {
-					let unit = state.selection.unit
+					let unit = state.select.unit
+					state.select = null
 					Unit.move(unit, anim.cell, map)
 					Game.endTurn(unit, game)
-					state.selection = null
-					cache.selection = null
-					cache.cursor = null
-					cache.path = null
 				}
 			}
 			state.dirty = true
 		}
-		let anim = state.consecs[0]
 		requestAnimationFrame(update)
 	}
 
@@ -348,25 +345,29 @@ export function render(view) {
 	let cache = view.cache
 	let canvas = view.element
 	let layers = view.layers
+	let game = view.game
 	let context = canvas.getContext("2d")
 	context.fillStyle = "black"
 	context.fillRect(0, 0, canvas.width, canvas.height)
 
-	let { camera, selection } = view.state
+	// find top left corner of grid for drawing grid-bound elements
+	let { camera, select } = state
 	let origin = {
 		x: Math.round(view.width / 2 - cache.map.width / 2 + camera.pos.x),
 		y: Math.round(view.height / 2 - cache.map.width / 2 + camera.pos.y)
 	}
 
+	// clear layers
 	for (let name in layers) {
 		layers[name].length = 0
 	}
 
+	// queue map
 	layers.map.push({ image: cache.map, x: origin.x, y: origin.y })
 
+	// queue range
 	if (cache.range) {
-		let range = cache.range
-		for (let square of range.squares) {
+		for (let square of cache.range.squares) {
 			let sprite = sprites.squares[square.type]
 			let x = origin.x + square.cell.x * tilesize
 			let y = origin.y + square.cell.y * tilesize
@@ -374,38 +375,37 @@ export function render(view) {
 		}
 	}
 
-	let game = view.game
-	if (cache.cursor) {
+	// queue cursor
+	if (select && select.cursor
+	&& select.anim.type !== "PieceMove") {
 		let sprite = sprites.select.cursor[game.phase.faction]
-		let cell = cache.cursor
-		let x = origin.x + cell.x * tilesize - 1
-		let y = origin.y + cell.y * tilesize - 1
-		if (!cache.selection.path) {
-			layers.selection.push({ image: sprite, x, y })
-		}
+		let x = origin.x + select.cursor.x * tilesize - 1
+		let y = origin.y + select.cursor.y * tilesize - 1
+		layers.selection.push({ image: sprite, x, y })
 	}
 
-	if (cache.path) {
-		for (let node of cache.arrow) {
+	// queue arrow
+	if (select && select.path
+	&& (select.anim.type !== "PieceMove" || state.time % 2)) {
+		for (let node of select.arrow) {
 			let image = node.image
 			let x = origin.x + node.x
 			let y = origin.y + node.y
-			if (!cache.selection.path || state.time % 2) {
-				layers.markers.push({ image, x, y })
-			}
+			layers.markers.push({ image, x, y })
 		}
 	}
 
+	// queue units
 	for (let unit of game.map.units) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let cell = unit.cell
 		let x = origin.x + cell.x * tilesize
 		let y = origin.y + cell.y * tilesize
 		let z = 0
-		let layer = "pieces"
+		let layer = null
 		if (game.phase.faction === unit.faction) {
 			if (game.phase.pending.includes(unit)) {
-				if (!cache.selection || cache.selection.unit !== unit) {
+				if (!select || select.unit !== unit) {
 					let glow = sprites.select.glow[unit.faction]
 					layers.pieces.push({ image: glow, x, y: y - 2, z })
 				}
@@ -413,19 +413,21 @@ export function render(view) {
 				sprite = sprites.pieces.done[unit.faction][unit.type]
 			}
 		}
-		if (cache.selection && cache.selection.unit === unit) {
-			layer = "selection"
-			if (!cache.selection.path || state.time % 2) {
+		if (select && select.unit === unit) {
+			let anim = select.anim
+			if (anim.type !== "PieceMove" || state.time % 2) {
 				let ring = sprites.select.ring[unit.faction]
 				layers.markers.push({ image: ring, x: x - 2, y: y - 2, z: 0 })
 			}
-			if (cache.selection.path) {
-				let anim = cache.selection.anim
+			if (anim.type === "PieceMove") {
 				x = origin.x + anim.cell.x * tilesize
 				y = origin.y + anim.cell.y * tilesize
 			} else {
-				z = Math.round(cache.selection.anim.y)
+				z = Math.round(anim.y)
 			}
+			layer = "selection"
+		} else {
+			layer = "pieces"
 		}
 		layers[layer].push({
 			image: sprite,
@@ -440,6 +442,7 @@ export function render(view) {
 		})
 	}
 
+	// queue unit preview
 	if (cache.preview) {
 		let preview = cache.preview
 		const margin = 4
@@ -448,6 +451,7 @@ export function render(view) {
 		layers.ui.push({ image: preview.image, x, y })
 	}
 
+	// render layers
 	for (let layername in layers) {
 		let layer = layers[layername]
 		layer.sort(zsort)

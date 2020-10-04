@@ -5,6 +5,7 @@ const d = 5
 export function create(x) {
 	return {
 		type: "PreviewExit",
+		blocking: true,
 		done: false,
 		x: x || 1
 	}

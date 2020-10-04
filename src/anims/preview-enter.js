@@ -5,6 +5,7 @@ const d = 10
 export function create() {
 	return {
 		type: "PreviewEnter",
+		blocking: true,
 		done: false,
 		x: 0,
 		time: 0
