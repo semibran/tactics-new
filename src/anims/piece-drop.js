@@ -3,6 +3,7 @@ import { height } from "./piece-lift"
 export function create(y) {
 	return {
 		type: "PieceDrop",
+		done: false,
 		y: y || height
 	}
 }

@@ -9,6 +9,7 @@ export const height = 4
 export function create() {
 	return {
 		type: "PieceLift",
+		done: false,
 		y: 0,
 		time: 0,
 		floating: false

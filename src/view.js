@@ -6,7 +6,7 @@ import * as Cell from "../lib/cell"
 import pathfind from "../lib/pathfind"
 import renderMap from "./view/map"
 import renderUnitPreview from "./view/unit-preview"
-import anims from "./anims"
+import Anims from "./anims"
 import lerp from "lerp"
 const tilesize = 16
 
@@ -57,7 +57,7 @@ export function init(view, game) {
 	let state = view.state
 	let cache = view.cache
 	let sprites = view.sprites
-	let { camera, pointer } = state
+	let { camera, pointer, anims } = state
 
 	let map = game.map
 	view.game = game
@@ -87,6 +87,9 @@ export function init(view, game) {
 				device = switchDevice(event)
 			}
 			if (pointer.pressed) return false
+			if (anims.find(anim => anim.blocking)) {
+				return
+			}
 			pointer.pos = getPosition(event)
 			if (!pointer.pos) return false
 			pointer.clicking = true
@@ -117,6 +120,9 @@ export function init(view, game) {
 					pointer.clicking = false
 				}
 			}
+			if (anims.find(anim => anim.blocking)) {
+				return
+			}
 			if (!pointer.select) {
 				actions.pan(camera, pointer)
 				return
@@ -128,6 +134,9 @@ export function init(view, game) {
 		},
 		release(event) {
 			if (!pointer.pressed) return false
+			if (anims.find(anim => anim.blocking)) {
+				return
+			}
 			let cursor = null
 			if (pointer.clicking) {
 				cursor = snapToGrid(pointer.pressed)
@@ -146,10 +155,10 @@ export function init(view, game) {
 					}
 					if (square && square.type === "move") {
 						actions.move(unit, cursor)
-					} else if (pointer.clicking && !state.anims.find(anim => anim.blocking)) {
+					} else if (pointer.clicking && !anims.find(anim => anim.blocking)) {
 						actions.deselect()
 					}
-				} else if (unit && !state.anims.find(anim => anim.blocking)) {
+				} else if (unit && !anims.find(anim => anim.blocking)) {
 					actions.select(unit)
 				}
 			}
@@ -163,9 +172,9 @@ export function init(view, game) {
 		select(unit) {
 			let range = findRange(unit, map)
 			let preview = renderUnitPreview(unit, sprites)
-			let expand = anims.RangeExpand.create(range)
-			let enter = anims.PreviewEnter.create()
-			let lift = anims.PieceLift.create()
+			let expand = Anims.RangeExpand.create(range)
+			let enter = Anims.PreviewEnter.create()
+			let lift = Anims.PieceLift.create()
 			state.anims.push(expand, enter, lift)
 			state.select = {
 				unit: unit,
@@ -208,16 +217,16 @@ export function init(view, game) {
 			let select = state.select
 			select.anim.done = true
 			if (cache.range) {
-				let shrink = anims.RangeShrink.create(cache.range)
+				let shrink = Anims.RangeShrink.create(cache.range)
 				state.anims.push(shrink)
 			}
 			if (cache.preview) {
-				let exit = anims.PreviewExit.create(cache.preview.anim.x)
+				let exit = Anims.PreviewExit.create(cache.preview.anim.x)
 				cache.preview.anim.done = true
 				cache.preview.anim = exit
 				state.anims.push(exit)
 			}
-			let drop = anims.PieceDrop.create(select.anim.y)
+			let drop = Anims.PieceDrop.create(select.anim.y)
 			state.anims.push(drop)
 			select.anim = drop
 		},
@@ -225,11 +234,11 @@ export function init(view, game) {
 			if (!state.select) return false
 			let select = state.select
 			if (cache.range) {
-				let shrink = anims.RangeShrink.create(cache.range)
+				let shrink = Anims.RangeShrink.create(cache.range)
 				state.anims.push(shrink)
 			}
 			if (select.path) {
-				let move = anims.PieceMove.create(select.path)
+				let move = Anims.PieceMove.create(select.path)
 				select.anim.done = true
 				select.anim = move
 				state.anims.push(move)
@@ -263,6 +272,13 @@ export function init(view, game) {
 			render(view)
 		}
 
+		if (state.select && state.select.anim.type === "PieceMove") {
+			let anim = state.select.anim
+			camera.target.x = cache.map.width / 2 - (anim.cell.x + 0.5) * tilesize
+			camera.target.y = cache.map.height / 2 - (anim.cell.y + 0.5) * tilesize
+			console.log(anim)
+		}
+
 		camera.pos.x += (camera.target.x - camera.pos.x) / 4
 		camera.pos.y += (camera.target.y - camera.pos.y) / 4
 
@@ -275,7 +291,6 @@ export function init(view, game) {
 
 		for (let i = 0; i < state.anims.length; i++) {
 			let anim = state.anims[i]
-			anims[anim.type].update(anim)
 			if (anim.done) {
 				state.anims.splice(i--, 1)
 				// TODO: move these into actual hooks?
@@ -287,7 +302,7 @@ export function init(view, game) {
 					state.select = null
 				} else if (anim.type === "PieceMove") {
 					if (cache.preview) {
-						let exit = anims.PreviewExit.create(cache.preview.anim.x)
+						let exit = Anims.PreviewExit.create(cache.preview.anim.x)
 						cache.preview.anim.done = true
 						cache.preview.anim = exit
 						state.anims.push(exit)
@@ -298,6 +313,7 @@ export function init(view, game) {
 					state.select = null
 				}
 			}
+			Anims[anim.type].update(anim)
 			state.dirty = true
 		}
 		requestAnimationFrame(update)
@@ -381,10 +397,7 @@ export function render(view) {
 
 	// find top left corner of grid for drawing grid-bound elements
 	let { camera, pointer, select } = state
-	let origin = {
-		x: Math.round(view.width / 2 - cache.map.width / 2 + camera.pos.x),
-		y: Math.round(view.height / 2 - cache.map.width / 2 + camera.pos.y)
-	}
+	let origin = findOrigin(view)
 
 	// clear layers
 	for (let name in layers) {
@@ -510,4 +523,11 @@ export function render(view) {
 
 function zsort(a, b) {
 	return (a.y + a.image.height / 2) - (b.y + b.image.height / 2)
+}
+
+function findOrigin(view) {
+	return {
+		x: view.width / 2 - view.cache.map.width / 2 + view.state.camera.pos.x,
+		y: view.height / 2 - view.cache.map.width / 2 + view.state.camera.pos.y
+	}
 }
