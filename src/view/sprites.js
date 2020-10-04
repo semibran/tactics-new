@@ -36,7 +36,7 @@ function disasm(sheet, srcmap) {
 }
 
 function disasmSquares() {
-	const opacity = 0.125
+	const opacity = 0.25
 	const tilesize = 16
 
 	let move = Canvas.create(tilesize, tilesize)

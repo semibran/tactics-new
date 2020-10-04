@@ -45,8 +45,8 @@ export default function renderUnitPreview(unit, sprites) {
 
 		let label = renderText("HP", {
 			font: fonts.smallcaps,
-			stroke: palette.white,
-			color: palette.jet
+			color: palette.white,
+			stroke: palette.jet
 		})
 		let value = renderText(unit.stats.hp, {
 			font: fonts.standard,
@@ -98,13 +98,13 @@ export default function renderUnitPreview(unit, sprites) {
 	})()
 
 	let width = hpbar.width + 1
-	let height = badge.height + 2 + hpbar.height + 3 + stats.height + 1
+	let height = badge.height + 2 + hpbar.height + 3 + stats.height
 	let content = Canvas.create(width, height)
 	content.drawImage(badge, 0, 0)
 	content.drawImage(name, badge.width + 2, 0)
 	content.drawImage(hpbar, 1, badge.height + 2)
-	content.drawImage(stats, 4, badge.height + 2 + hpbar.height + 3)
-	content.drawImage(element, width - element.width, badge.height + 3 + hpbar.height + 1)
+	content.drawImage(stats, width - stats.width, badge.height + 2 + hpbar.height + 2)
+	content.drawImage(element, 0, badge.height + 3 + hpbar.height)
 
 	let shadow = Canvas.recolor(content.canvas, palette.cyan)
 	let box = Canvas.create(content.canvas.width + 6, content.canvas.height + 5)

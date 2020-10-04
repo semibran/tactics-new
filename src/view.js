@@ -53,7 +53,7 @@ export function init(view, game) {
 
 	let map = game.map
 	view.game = game
-	view.cache.map = renderMap(map, tilesize)
+	view.cache.map = renderMap(map, tilesize, sprites.palette)
 
 	function onresize() {
 		let scaleX = Math.max(1, Math.floor(window.innerWidth / view.native.width))
