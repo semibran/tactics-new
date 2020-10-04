@@ -38,7 +38,8 @@ export function create(width, height, sprites) {
 		},
 		cache: {
 			map: null,
-			camera: { x: 0, y: 0 }
+			camera: { x: 0, y: 0 },
+			cursor: { x: 0, y: 0 }
 		},
 		layers: {
 			map: [],
@@ -208,7 +209,14 @@ export function init(view, game) {
 						.filter(other => !Unit.allied(unit, other))
 						.map(unit => unit.cell)
 				})
-				select.cursor = cell
+				if (!select.cursor) {
+					select.cursor = {
+						pos: { x: cell.x * tilesize, y: cell.y * tilesize },
+						target: cell
+					}
+				} else {
+					select.cursor.target = cell
+				}
 				select.arrow = sprites.Arrow(path, unit.faction)
 				select.path = path
 				select.valid = true
@@ -286,14 +294,26 @@ export function init(view, game) {
 			actions.centerCamera(state.select.anim.cell)
 		}
 
-		camera.pos.x += (camera.target.x - camera.pos.x) / 4
-		camera.pos.y += (camera.target.y - camera.pos.y) / 4
-
 		if (Math.round(cache.camera.x) !== Math.round(camera.pos.x)
 		|| Math.round(cache.camera.y) !== Math.round(camera.pos.y)) {
 			cache.camera.x = camera.pos.x
 			cache.camera.y = camera.pos.y
 			state.dirty = true
+		}
+
+		camera.pos.x += (camera.target.x - camera.pos.x) / 4
+		camera.pos.y += (camera.target.y - camera.pos.y) / 4
+
+		if (state.select && state.select.cursor) {
+			let cursor = state.select.cursor
+			if (Math.round(cache.cursor.x) !== Math.round(cursor.pos.x)
+			|| Math.round(cache.cursor.y) !== Math.round(cursor.pos.y)) {
+				cache.cursor.x = cursor.pos.x
+				cache.cursor.y = cursor.pos.y
+				state.dirty = true
+			}
+			cursor.pos.x += (cursor.target.x * tilesize - cursor.pos.x) / 4
+			cursor.pos.y += (cursor.target.y * tilesize - cursor.pos.y) / 4
 		}
 
 		for (let i = 0; i < state.anims.length; i++) {
@@ -428,8 +448,8 @@ export function render(view) {
 	if (select && select.cursor
 	&& select.anim.type !== "PieceMove") {
 		let sprite = sprites.select.cursor[game.phase.faction]
-		let x = origin.x + select.cursor.x * tilesize - 1
-		let y = origin.y + select.cursor.y * tilesize - 1
+		let x = origin.x + select.cursor.pos.x - 1
+		let y = origin.y + select.cursor.pos.y - 1
 		layers.selection.push({ image: sprite, x, y })
 	}
 
