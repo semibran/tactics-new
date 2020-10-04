@@ -23,7 +23,10 @@ export function create(width, height, sprites) {
 			concurs: [],
 			time: 0,
 			dirty: false,
-			camera: { x: 0, y: 0 },
+			camera: {
+				pos: { x: 0, y: 0 },
+				target: { x: 0, y: 0 }
+			},
 			selection: null,
 			pointer: {
 				pos: null,
@@ -34,7 +37,8 @@ export function create(width, height, sprites) {
 		},
 		cache: {
 			map: null,
-			selection: null
+			selection: null,
+			camera: { x: 0, y: 0 }
 		},
 		range: null,
 		game: null
@@ -81,8 +85,8 @@ export function init(view, game) {
 			pointer.clicking = true
 			pointer.pressed = pointer.pos
 			pointer.offset = {
-				x: camera.x * view.scale,
-				y: camera.y * view.scale
+				x: camera.pos.x * view.scale,
+				y: camera.pos.y * view.scale
 			}
 		},
 		move(event) {
@@ -95,23 +99,24 @@ export function init(view, game) {
 					pointer.clicking = false
 				}
 			}
-			camera.x = (pointer.pos.x - pointer.pressed.x + pointer.offset.x) / view.scale
-			camera.y = (pointer.pos.y - pointer.pressed.y + pointer.offset.y) / view.scale
+
+			camera.target.x = (pointer.pos.x - pointer.pressed.x + pointer.offset.x) / view.scale
+			camera.target.y = (pointer.pos.y - pointer.pressed.y + pointer.offset.y) / view.scale
+
 			let left = view.width / 2
 			let right = -view.width / 2
 			let top = view.height / 2
 			let bottom = -view.height / 2
-			if (camera.x > left) {
-				camera.x = left
-			} else if (camera.x < right) {
-				camera.x = right
+			if (camera.target.x > left) {
+				camera.target.x = left
+			} else if (camera.target.x < right) {
+				camera.target.x = right
 			}
-			if (camera.y > top) {
-				camera.y = top
-			} else if (camera.y < bottom) {
-				camera.y = bottom
+			if (camera.target.y > top) {
+				camera.target.y = top
+			} else if (camera.target.y < bottom) {
+				camera.target.y = bottom
 			}
-			view.state.dirty = true
 		},
 		release(event) {
 			if (!pointer.pressed) return false
@@ -210,6 +215,17 @@ export function init(view, game) {
 			state.dirty = false
 			render(view)
 		}
+
+		camera.pos.x += (camera.target.x - camera.pos.x) / 4
+		camera.pos.y += (camera.target.y - camera.pos.y) / 4
+
+		if (cache.camera.x !== Math.round(camera.pos.x)
+		&& cache.camera.y !== Math.round(camera.pos.y)) {
+			cache.camera.x = Math.round(camera.pos.x)
+			cache.camera.y = Math.round(camera.pos.y)
+			state.dirty = true
+		}
+
 		for (let i = 0; i < state.concurs.length; i++) {
 			let anim = state.concurs[i]
 			anims[anim.type].update(anim)
@@ -289,8 +305,8 @@ export function init(view, game) {
 		}
 		// relative to top left corner of map
 		let gridpos = {
-			x: realpos.x + map.width * tilesize / 2 - camera.x,
-			y: realpos.y + map.height * tilesize / 2 - camera.y,
+			x: realpos.x + map.width * tilesize / 2 - camera.pos.x,
+			y: realpos.y + map.height * tilesize / 2 - camera.pos.y,
 		}
 		// fix to tiles
 		return {
@@ -312,8 +328,8 @@ export function render(view) {
 
 	let { camera, selection } = view.state
 	let origin = {
-		x: Math.round(view.width / 2 - cache.map.width / 2 + camera.x),
-		y: Math.round(view.height / 2 - cache.map.width / 2 + camera.y)
+		x: Math.round(view.width / 2 - cache.map.width / 2 + camera.pos.x),
+		y: Math.round(view.height / 2 - cache.map.width / 2 + camera.pos.y)
 	}
 
 	let layers = {
