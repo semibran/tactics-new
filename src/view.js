@@ -38,7 +38,8 @@ export function create(width, height, sprites) {
 		cache: {
 			map: null,
 			selection: null,
-			camera: { x: 0, y: 0 }
+			camera: { x: 0, y: 0 },
+			cursor: null
 		},
 		range: null,
 		game: null
@@ -81,12 +82,22 @@ export function init(view, game) {
 			if (pointer.pressed) return false
 			pointer.pos = getPosition(event)
 			if (!pointer.pos) return false
-			let cursor = snapToGrid(pointer.pos)
 			pointer.clicking = true
 			pointer.pressed = pointer.pos
 			pointer.offset = {
 				x: camera.pos.x * view.scale,
 				y: camera.pos.y * view.scale
+			}
+			if (state.selection) {
+				let unit = state.selection.unit
+				let cursor = snapToGrid(pointer.pos)
+				let square = null
+				if (game.phase.pending.includes(unit)) {
+					square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
+				}
+				if (square) {
+					cache.cursor = cursor
+				}
 			}
 		},
 		move(event) {
@@ -238,12 +249,14 @@ export function init(view, game) {
 					cache.preview = null
 				} else if (anim.type === "PieceDrop") {
 					cache.selection = null
+					cache.cursor = null
 				} else if (anim.type === "PieceMove") {
 					let unit = state.selection.unit
 					Unit.move(unit, anim.cell, map)
 					Game.endTurn(unit, game)
 					state.selection = null
 					cache.selection = null
+					cache.cursor = null
 				}
 			}
 			state.dirty = true
@@ -355,6 +368,16 @@ export function render(view) {
 	}
 
 	let game = view.game
+	if (cache.cursor) {
+		let sprite = sprites.select.cursor[game.phase.faction]
+		let cell = cache.cursor
+		let x = origin.x + cell.x * tilesize
+		let y = origin.y + cell.y * tilesize
+		if (!cache.selection.path || state.time % 2) {
+			layers.selection.push({ image: sprite, x, y })
+		}
+	}
+
 	for (let unit of game.map.units) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let cell = unit.cell

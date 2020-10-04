@@ -1,5 +1,7 @@
 import lerp from "lerp"
 
+const speed = 3
+
 export function create(path) {
 	return {
 		type: "PieceMove",
@@ -15,8 +17,8 @@ export function create(path) {
 
 export function update(anim) {
 	if (anim.done) return false
-	let index = Math.floor(anim.time / 4)
-	let t = anim.time % 4 / 4
+	let index = Math.floor(anim.time / speed)
+	let t = anim.time % speed / speed
 	let cell = anim.path[index]
 	let next = anim.path[index + 1]
 	if (next) {
