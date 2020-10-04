@@ -103,21 +103,7 @@ export function init(view, game) {
 			// if unit hasn't moved yet
 			if (game.phase.pending.includes(unit)) {
 				// check if the user is selecting a square
-				square = cache.range.squares.find(square => {
-					return square.type === "move" && Cell.equals(square.cell, cursor)
-				})
-			}
-			if (square) {
-				let path = pathfind(unit.cell, cursor, {
-					width: map.width,
-					height: map.height,
-					blacklist: map.units // make enemy units unwalkable
-						.filter(other => !Unit.allied(unit, other))
-						.map(unit => unit.cell)
-				})
-				select.cursor = cursor
-				select.arrow = sprites.Arrow(path, unit.faction)
-				select.path = path
+				actions.hover(cursor)
 				pointer.select = true
 			}
 		},
@@ -136,25 +122,8 @@ export function init(view, game) {
 				return
 			}
 			let cursor = snapToGrid(pointer.pos)
-			if (Cell.equals(pointer.select, cursor)) {
-				return
-			}
-			let select = state.select
-			let unit = select.unit
-			let square = cache.range.squares.find(square => {
-				return square.type === "move" && Cell.equals(square.cell, cursor)
-			})
-			if (square) {
-				let path = pathfind(unit.cell, cursor, {
-					width: map.width,
-					height: map.height,
-					blacklist: map.units // make enemy units unwalkable
-						.filter(other => !Unit.allied(unit, other))
-						.map(unit => unit.cell)
-				})
-				select.cursor = cursor
-				select.arrow = sprites.Arrow(path, unit.faction)
-				select.path = path
+			if (!Cell.equals(pointer.select, cursor)) {
+				actions.hover(cursor)
 			}
 		},
 		release(event) {
@@ -203,12 +172,35 @@ export function init(view, game) {
 				anim: lift,
 				path: null,
 				arrow: null,
-				cursor: null
+				cursor: null,
+				valid: false
 			}
 			cache.range = expand.range
 			cache.preview = {
 				image: preview,
 				anim: enter
+			}
+		},
+		hover(cell) {
+			let select = state.select
+			let unit = select.unit
+			let square = cache.range.squares.find(square => {
+				return square.type === "move" && Cell.equals(square.cell, cell)
+			})
+			if (square) {
+				let path = pathfind(unit.cell, cell, {
+					width: map.width,
+					height: map.height,
+					blacklist: map.units // make enemy units unwalkable
+						.filter(other => !Unit.allied(unit, other))
+						.map(unit => unit.cell)
+				})
+				select.cursor = cell
+				select.arrow = sprites.Arrow(path, unit.faction)
+				select.path = path
+				select.valid = true
+			} else {
+				select.valid = false
 			}
 		},
 		deselect() {
@@ -480,11 +472,11 @@ export function render(view) {
 	}
 
 	// queue unit mirage
-	if (pointer.select) {
+	if (pointer.select && select.valid) {
 		let unit = select.unit
 		let image = sprites.pieces[unit.faction][unit.type]
 		let x = pointer.pos.x / view.scale - image.width / 2
-		let y = pointer.pos.y / view.scale - image.height - 4
+		let y = pointer.pos.y / view.scale - image.height - 8
 		layers.mirage.push({ image, x, y, opacity: 0.75 })
 	}
 
