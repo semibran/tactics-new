@@ -378,8 +378,8 @@ export function render(view) {
 	if (cache.cursor) {
 		let sprite = sprites.select.cursor[game.phase.faction]
 		let cell = cache.cursor
-		let x = origin.x + cell.x * tilesize
-		let y = origin.y + cell.y * tilesize
+		let x = origin.x + cell.x * tilesize - 1
+		let y = origin.y + cell.y * tilesize - 1
 		if (!cache.selection.path) {
 			layers.selection.push({ image: sprite, x, y })
 		}
