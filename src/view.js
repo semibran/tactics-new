@@ -105,9 +105,10 @@ export function init(view, game) {
 			let square = null
 			// if unit hasn't moved yet
 			if (game.phase.pending.includes(unit)) {
-				// check if the user is selecting a square
-				actions.hover(cursor)
-				pointer.select = true
+				let selecting = actions.hover(cursor)
+				if (selecting) {
+					pointer.select = true
+				}
 			}
 		},
 		move(event) {
@@ -124,7 +125,7 @@ export function init(view, game) {
 				return
 			}
 			if (!pointer.select) {
-				actions.pan(camera, pointer)
+				actions.panCamera(camera, pointer)
 				return
 			}
 			let cursor = snapToGrid(pointer.pos)
@@ -190,7 +191,7 @@ export function init(view, game) {
 				anim: enter
 			}
 			if (game.phase.pending.includes(unit)) {
-				actions.center(unit.cell)
+				actions.centerCamera(unit.cell)
 			}
 		},
 		hover(cell) {
@@ -211,8 +212,10 @@ export function init(view, game) {
 				select.arrow = sprites.Arrow(path, unit.faction)
 				select.path = path
 				select.valid = true
+				return true
 			} else {
 				select.valid = false
+				return false
 			}
 		},
 		deselect() {
@@ -247,7 +250,7 @@ export function init(view, game) {
 				state.anims.push(move)
 			}
 		},
-		pan(camera, pointer) {
+		panCamera(camera, pointer) {
 			camera.target.x = (pointer.pos.x - pointer.pressed.x + pointer.offset.x) / view.scale
 			camera.target.y = (pointer.pos.y - pointer.pressed.y + pointer.offset.y) / view.scale
 
@@ -266,7 +269,7 @@ export function init(view, game) {
 				camera.target.y = bottom
 			}
 		},
-		center(cell) {
+		centerCamera(cell) {
 			camera.target.x = cache.map.width / 2 - (cell.x + 0.5) * tilesize
 			camera.target.y = cache.map.height / 2 - (cell.y + 0.5) * tilesize
 		}
@@ -280,7 +283,7 @@ export function init(view, game) {
 		}
 
 		if (state.select && state.select.anim.type === "PieceMove") {
-			actions.center(state.select.anim.cell)
+			actions.centerCamera(state.select.anim.cell)
 		}
 
 		camera.pos.x += (camera.target.x - camera.pos.x) / 4
