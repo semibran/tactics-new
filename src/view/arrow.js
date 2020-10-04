@@ -62,13 +62,13 @@ export default function renderArrow(sprites, path) {
 				direction = "downleft"
 			} else if (d && r) {
 				direction = "downright"
-			} else if (i === 1 && stubdir === "left") {
+			} else if (i === 1 && stubdir === "left" && path.length > 2) {
 				direction = "leftStub"
-			} else if (i === 1 && stubdir === "right") {
+			} else if (i === 1 && stubdir === "right" && path.length > 2) {
 				direction = "rightStub"
-			} else if (i === 1 && stubdir === "up") {
+			} else if (i === 1 && stubdir === "up" && path.length > 2) {
 				direction = "upStub"
-			} else if (i === 1 && stubdir === "down") {
+			} else if (i === 1 && stubdir === "down" && path.length > 2) {
 				direction = "downStub"
 			} else if (l && r) {
 				direction = "leftright"
