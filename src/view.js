@@ -492,12 +492,13 @@ export function render(view) {
 	}
 
 	// queue unit mirage
-	if (pointer.select && select.valid) {
+	if (pointer.select) {
 		let unit = select.unit
 		let image = sprites.pieces[unit.faction][unit.type]
 		let x = pointer.pos.x / view.scale - image.width / 2
 		let y = pointer.pos.y / view.scale - image.height - 8
-		layers.mirage.push({ image, x, y, opacity: 0.75 })
+		let opacity = select.valid ? 0.75 : 0.25
+		layers.mirage.push({ image, x, y, opacity })
 	}
 
 	// queue unit preview
