@@ -347,8 +347,8 @@ export function render(view) {
 
 	let layers = {
 		map: [],
-		shadows: [],
 		range: [],
+		shadows: [],
 		markers: [],
 		pieces: [],
 		selection: [],
@@ -389,8 +389,7 @@ export function render(view) {
 			if (game.phase.pending.includes(unit)) {
 				if (!cache.selection || cache.selection.unit !== unit) {
 					let glow = sprites.select.glow[unit.faction]
-					layers.pieces.push({ image: glow, x, y: y - 3, z: -1 })
-					layer = "selection"
+					layers.pieces.push({ image: glow, x, y: y - 2, z })
 				}
 			} else {
 				sprite = sprites.pieces.done[unit.faction][unit.type]

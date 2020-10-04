@@ -149,7 +149,10 @@ function disasmSelect(images, palette) {
 }
 
 function disasmPieces(base, icons, palette) {
-	let pieces = { done: {}, shadow: base }
+	let pieces = {
+		done: {},
+		shadow: Canvas.recolor(base, [ 0, 0, 0, 191 ])
+	}
 	for (let faction in palette.factions) {
 		pieces[faction] = {}
 		pieces.done[faction] = {}
