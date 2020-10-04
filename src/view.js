@@ -189,6 +189,9 @@ export function init(view, game) {
 				image: preview,
 				anim: enter
 			}
+			if (game.phase.pending.includes(unit)) {
+				actions.center(unit.cell)
+			}
 		},
 		hover(cell) {
 			let select = state.select
@@ -262,6 +265,10 @@ export function init(view, game) {
 			} else if (camera.target.y < bottom) {
 				camera.target.y = bottom
 			}
+		},
+		center(cell) {
+			camera.target.x = cache.map.width / 2 - (cell.x + 0.5) * tilesize
+			camera.target.y = cache.map.height / 2 - (cell.y + 0.5) * tilesize
 		}
 	}
 
@@ -273,10 +280,7 @@ export function init(view, game) {
 		}
 
 		if (state.select && state.select.anim.type === "PieceMove") {
-			let anim = state.select.anim
-			camera.target.x = cache.map.width / 2 - (anim.cell.x + 0.5) * tilesize
-			camera.target.y = cache.map.height / 2 - (anim.cell.y + 0.5) * tilesize
-			console.log(anim)
+			actions.center(state.select.anim.cell)
 		}
 
 		camera.pos.x += (camera.target.x - camera.pos.x) / 4
