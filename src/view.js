@@ -334,6 +334,7 @@ export function render(view) {
 
 	let layers = {
 		map: [],
+		shadows: [],
 		range: [],
 		markers: [],
 		pieces: [],
@@ -384,7 +385,17 @@ export function render(view) {
 				layers.pieces.push({ image: ring, x: x - 2, y: y - 3, z: -1 })
 			}
 		}
-		layers[layer].push({ image: sprite, x, y: y - 1, z })
+		layers[layer].push({
+			image: sprite,
+			x: x + 1,
+			y: y - 1,
+			z: z
+		})
+		layers.shadows.push({
+			image: sprites.pieces.shadow,
+			x: x + 1,
+			y: y + 3
+		})
 	}
 
 	if (cache.preview) {
