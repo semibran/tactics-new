@@ -122,7 +122,7 @@ export function init(view, game) {
 				if (state.selection) {
 					let unit = state.selection.unit
 					let square = null
-					if (cache.range) {
+					if (cache.range && game.phase.pending.includes(unit)) {
 						square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
 					}
 					if (square && square.type === "move") {
@@ -131,7 +131,7 @@ export function init(view, game) {
 					&& !animating(state.concurs, "PieceMove")) {
 						deselect()
 					}
-				} else if (unit && game.phase.pending.includes(unit)
+				} else if (unit
 				&& !animating(state.concurs, "PreviewExit")
 				&& !animating(state.concurs, "PieceMove")
 				) {
