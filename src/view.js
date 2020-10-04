@@ -187,8 +187,9 @@ export function init(view, game) {
 			}
 			if (cache.preview) {
 				let exit = anims.PreviewExit.create(cache.preview.anim.x)
-				state.anims.push(exit)
+				cache.preview.anim.done = true
 				cache.preview.anim = exit
+				state.anims.push(exit)
 			}
 			let drop = anims.PieceDrop.create(select.anim.y)
 			state.anims.push(drop)
@@ -200,12 +201,6 @@ export function init(view, game) {
 			if (cache.range) {
 				let shrink = anims.RangeShrink.create(cache.range)
 				state.anims.push(shrink)
-			}
-			if (cache.preview) {
-				let exit = anims.PreviewExit.create(cache.preview.anim.x)
-				cache.preview.anim.done = true
-				cache.preview.anim = exit
-				state.anims.push(exit)
 			}
 			if (select.path) {
 				let move = anims.PieceMove.create(select.path)
@@ -265,10 +260,16 @@ export function init(view, game) {
 				} else if (anim.type === "PieceDrop") {
 					state.select = null
 				} else if (anim.type === "PieceMove") {
+					if (cache.preview) {
+						let exit = anims.PreviewExit.create(cache.preview.anim.x)
+						cache.preview.anim.done = true
+						cache.preview.anim = exit
+						state.anims.push(exit)
+					}
 					let unit = state.select.unit
-					state.select = null
 					Unit.move(unit, anim.cell, map)
 					Game.endTurn(unit, game)
+					state.select = null
 				}
 			}
 			state.dirty = true
