@@ -31,6 +31,7 @@ export function create(width, height, sprites) {
 			pointer: {
 				pos: null,
 				clicking: false,
+				select: false,
 				pressed: null,
 				offset: null
 			}
@@ -116,25 +117,55 @@ export function init(view, game) {
 				select.cursor = cursor
 				select.arrow = sprites.Arrow(path, unit.faction)
 				select.path = path
+				pointer.select = true
 			}
 		},
 		move(event) {
 			pointer.pos = getPosition(event)
 			if (!pointer.pos || !pointer.pressed) return
-			let cursor = pointer.pos
 			if (pointer.clicking) {
+				let cursor = pointer.pos
 				let origin = pointer.pressed
-				if (Cell.distance(origin, cursor) > 3) {
+				if (Cell.distance(origin, cursor) > 4) {
 					pointer.clicking = false
 				}
 			}
-			actions.pan(camera, pointer)
+			if (!pointer.select) {
+				actions.pan(camera, pointer)
+				return
+			}
+			let cursor = snapToGrid(pointer.pos)
+			if (Cell.equals(pointer.select, cursor)) {
+				return
+			}
+			let select = state.select
+			let unit = select.unit
+			let square = cache.range.squares.find(square => {
+				return square.type === "move" && Cell.equals(square.cell, cursor)
+			})
+			if (square) {
+				let path = pathfind(unit.cell, cursor, {
+					width: map.width,
+					height: map.height,
+					blacklist: map.units // make enemy units unwalkable
+						.filter(other => !Unit.allied(unit, other))
+						.map(unit => unit.cell)
+				})
+				select.cursor = cursor
+				select.arrow = sprites.Arrow(path, unit.faction)
+				select.path = path
+			}
 		},
 		release(event) {
 			if (!pointer.pressed) return false
+			let cursor = null
 			if (pointer.clicking) {
-				pointer.clicking = false
-				let cursor = snapToGrid(pointer.pressed)
+				cursor = snapToGrid(pointer.pressed)
+			}
+			if (pointer.select) {
+				cursor = snapToGrid(pointer.pos)
+			}
+			if (cursor) {
 				let unit = Map.unitAt(map, cursor)
 				if (state.select) {
 					let select = state.select
@@ -145,13 +176,15 @@ export function init(view, game) {
 					}
 					if (square && square.type === "move") {
 						actions.move(unit, cursor)
-					} else if (!state.anims.find(anim => anim.blocking)) {
+					} else if (pointer.clicking && !state.anims.find(anim => anim.blocking)) {
 						actions.deselect()
 					}
 				} else if (unit && !state.anims.find(anim => anim.blocking)) {
 					actions.select(unit)
 				}
 			}
+			pointer.clicking = false
+			pointer.select = false
 			pointer.pressed = null
 		}
 	}
