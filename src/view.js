@@ -219,10 +219,10 @@ export function init(view, game) {
 		camera.pos.x += (camera.target.x - camera.pos.x) / 4
 		camera.pos.y += (camera.target.y - camera.pos.y) / 4
 
-		if (cache.camera.x !== Math.round(camera.pos.x)
-		&& cache.camera.y !== Math.round(camera.pos.y)) {
-			cache.camera.x = Math.round(camera.pos.x)
-			cache.camera.y = Math.round(camera.pos.y)
+		if (Math.round(cache.camera.x) !== Math.round(camera.pos.x)
+		|| Math.round(cache.camera.y) !== Math.round(camera.pos.y)) {
+			cache.camera.x = camera.pos.x
+			cache.camera.y = camera.pos.y
 			state.dirty = true
 		}
 
