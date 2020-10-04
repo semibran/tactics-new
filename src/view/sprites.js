@@ -14,6 +14,7 @@ export default function normalize(spritesheet) {
 	let icons = disasmIcons(images)
 	return {
 		icons, palette,
+		squares: disasmSquares(),
 		badges: disasmBadges(palette, icons),
 		select: disasmSelect(images.select, palette),
 		pieces: disasmPieces(images.piece, icons, palette),
@@ -32,6 +33,23 @@ function disasm(sheet, srcmap) {
 		}
 	}
 	return sprites
+}
+
+function disasmSquares() {
+	const opacity = 0.125
+	const tilesize = 16
+
+	let move = Canvas.create(tilesize, tilesize)
+	move.globalAlpha = opacity
+	move.fillStyle = "blue"
+	move.fillRect(0, 0, tilesize - 1, tilesize - 1)
+
+	let attack = Canvas.create(tilesize, tilesize)
+	attack.globalAlpha = opacity
+	attack.fillStyle = "red"
+	attack.fillRect(0, 0, tilesize - 1, tilesize - 1)
+
+	return { move: move.canvas, attack: attack.canvas }
 }
 
 function disasmFonts(images, fonts, palette) {

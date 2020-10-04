@@ -300,22 +300,24 @@ export function render(view) {
 		y: Math.round(view.height / 2 - cache.map.width / 2 + camera.y)
 	}
 
-	context.drawImage(cache.map, origin.x, origin.y)
+	let layers = {
+		map: [],
+		range: [],
+		pieces: [],
+		selection: [],
+		ui: []
+	}
+
+	layers.map.push({ image: cache.map, x: origin.x, y: origin.y })
 
 	if (cache.range) {
 		let range = cache.range
-		context.globalAlpha = 0.125
 		for (let square of range.squares) {
+			let sprite = sprites.squares[square.type]
 			let x = origin.x + square.cell.x * tilesize
 			let y = origin.y + square.cell.y * tilesize
-			if (square.type === "move") {
-				context.fillStyle = "blue"
-			} else if (square.type === "attack") {
-				context.fillStyle = "red"
-			}
-			context.fillRect(x, y, tilesize - 1, tilesize - 1)
+			layers.range.push({ image: sprite, x, y })
 		}
-		context.globalAlpha = 1
 	}
 
 	let app = view.app
@@ -325,6 +327,7 @@ export function render(view) {
 		let x = origin.x + cell.x * tilesize
 		let y = origin.y + cell.y * tilesize
 		let z = 0
+		let layer = "pieces"
 		if (cache.selection && cache.selection.unit === unit) {
 			if (cache.selection.path) {
 				let anim = cache.selection.anim
@@ -333,11 +336,15 @@ export function render(view) {
 			} else {
 				z = Math.round(cache.selection.anim.y)
 				if (selection && selection.unit) {
-					context.drawImage(sprites.select[selection.unit.faction], x - 2, y - 2)
+					let ring = sprites.select[selection.unit.faction]
+					layers.selection.push({ image: ring, x: x - 2, y: y, z: 3 })
 				}
 			}
+			layer = "selection"
+		} else {
+			layer = "pieces"
 		}
-		context.drawImage(sprite, x, y - 1 - z)
+		layers[layer].push({ image: sprite, x, y: y - 1, z })
 	}
 
 	if (cache.preview) {
@@ -345,6 +352,20 @@ export function render(view) {
 		const margin = 4
 		let x = Math.round(lerp(-preview.image.width, margin, preview.anim.x))
 		let y = view.height - preview.image.height + 1 - margin
-		context.drawImage(preview.image, x, y)
+		layers.ui.push({ image: preview.image, x, y })
 	}
+
+	for (let layername in layers) {
+		let layer = layers[layername]
+		layer.sort(zsort)
+		for (let node of layer) {
+			let x = Math.round(node.x)
+			let y = Math.round(node.y - (node.z || 0))
+			context.drawImage(node.image, x, y)
+		}
+	}
+}
+
+function zsort(a, b) {
+	return (b.y + b.image.height / 2) - (a.y + a.image.height / 2)
 }
