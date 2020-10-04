@@ -353,8 +353,8 @@ export function render(view) {
 		map: [],
 		range: [],
 		shadows: [],
-		markers: [],
 		pieces: [],
+		markers: [],
 		selection: [],
 		ui: []
 	}
@@ -414,7 +414,7 @@ export function render(view) {
 			layer = "selection"
 			if (!cache.selection.path || state.time % 2) {
 				let ring = sprites.select.ring[unit.faction]
-				layers.pieces.push({ image: ring, x: x - 2, y: y - 3, z: -1 })
+				layers.markers.push({ image: ring, x: x - 2, y: y - 3, z: -1 })
 			}
 			if (cache.selection.path) {
 				let anim = cache.selection.anim

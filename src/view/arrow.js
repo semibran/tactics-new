@@ -1,5 +1,6 @@
 export default function renderArrow(sprites, path) {
 	var arrow = []
+	var stubdir = null
 	for (var i = 0; i < path.length; i++) {
 		var cell = path[i]
 		var x = cell.x
@@ -45,10 +46,14 @@ export default function renderArrow(sprites, path) {
 
 		if (l || r || u || d) {
 			var direction = null
-			if (l && r) {
-				direction = "leftright"
-			} else if (u && d) {
-				direction = "updown"
+			if (!i && l) {
+				stubdir = "left"
+			} else if (!i && r) {
+				stubdir = "right"
+			} else if (!i && u) {
+				stubdir = "up"
+			} else if (!i && d) {
+				stubdir = "down"
 			} else if (u && l) {
 				direction = "upleft"
 			} else if (u && r) {
@@ -57,14 +62,18 @@ export default function renderArrow(sprites, path) {
 				direction = "downleft"
 			} else if (d && r) {
 				direction = "downright"
-			} else if (l && !i) {
+			} else if (i === 1 && stubdir === "left") {
 				direction = "leftStub"
-			} else if (r && !i) {
+			} else if (i === 1 && stubdir === "right") {
 				direction = "rightStub"
-			} else if (u && !i) {
+			} else if (i === 1 && stubdir === "up") {
 				direction = "upStub"
-			} else if (d && !i) {
+			} else if (i === 1 && stubdir === "down") {
 				direction = "downStub"
+			} else if (l && r) {
+				direction = "leftright"
+			} else if (u && d) {
+				direction = "updown"
 			} else if (l) {
 				direction = "left"
 			} else if (r) {
