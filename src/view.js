@@ -2,6 +2,7 @@ import findRange from "./game/range"
 import * as Map from "./game/map"
 import * as Unit from "./game/unit"
 import * as Cell from "../lib/cell"
+import pathfind from "../lib/pathfind"
 import renderMap from "./view/map"
 import renderUnitPreview from "./view/unit-preview"
 import anims from "./anims"
@@ -118,14 +119,14 @@ export function init(view, app) {
 				let cursor = snapToGrid(pointer.pressed)
 				let unit = Map.unitAt(map, cursor)
 				if (state.selection) {
+					let unit = state.selection.unit
+					let square = null
 					if (cache.range) {
-						let square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
-						if (square && square.type === "move") {
-							Unit.move(state.selection.unit, cursor, map)
-							deselect()
-						}
+						square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
 					}
-					if (!animating(state.concurs, "PreviewEnter")) {
+					if (square && square.type === "move") {
+						move(unit, cursor)
+					} else if (!animating(state.concurs, "PreviewEnter")) {
 						deselect()
 					}
 				} else if (unit && !animating(state.concurs, "PreviewExit")) {
@@ -156,23 +157,33 @@ export function init(view, app) {
 	}
 
 	function deselect() {
-		let shrink = anims.RangeShrink.create(cache.range)
-		let exit = anims.PreviewExit.create(cache.preview.anim.x)
-		let drop = anims.PieceDrop.create(cache.selection.anim.y)
-		state.concurs.push(shrink, exit, drop)
-		cache.preview.anim = exit
-		cache.selection.anim = drop
+		if (cache.range) {
+			let shrink = anims.RangeShrink.create(cache.range)
+			state.concurs.push(shrink)
+		}
+		if (cache.preview) {
+			let exit = anims.PreviewExit.create(cache.preview.anim.x)
+			cache.preview.anim = exit
+			state.concurs.push(exit)
+		}
+		if (cache.selection) {
+			let drop = anims.PieceDrop.create(cache.selection.anim.y)
+			state.concurs.push(drop)
+			cache.selection.anim = drop
+		}
 		state.selection = null
 	}
 
-	function animating(anims, type) {
-		if (!type) return !!anims.length
-		for (let anim of anims) {
-			if (anim.type === type) {
-				return true
-			}
-		}
-		return false
+	function move(unit, cursor) {
+		let path = pathfind(unit.cell, cursor, map)
+		let exit = anims.PreviewExit.create(cache.preview.anim.x)
+		let move = anims.PieceMove.create(path)
+		Unit.move(unit, cursor, map)
+		cache.selection.anim.done = true
+		cache.selection.anim = move
+		cache.selection.path = path
+		cache.range = null
+		state.concurs.push(move, exit)
 	}
 
 	function update() {
@@ -191,11 +202,25 @@ export function init(view, app) {
 					cache.range = null
 				} else if (anim.type === "PreviewExit") {
 					cache.preview = null
+				} else if (anim.type === "PieceMove") {
+					state.selection = null
+					cache.selection = null
 				}
 			}
 			state.dirty = true
 		}
+		let anim = state.consecs[0]
 		requestAnimationFrame(update)
+	}
+
+	function animating(anims, type) {
+		if (!type) return !!anims.length
+		for (let anim of anims) {
+			if (anim.type === type) {
+				return true
+			}
+		}
+		return false
 	}
 
 	events.resize()
@@ -289,14 +314,21 @@ export function render(view) {
 	let app = view.app
 	for (let unit of app.map.units) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
-		let x = origin.x + unit.cell.x * tilesize
-		let y = origin.y + unit.cell.y * tilesize
+		let cell = unit.cell
+		let x = origin.x + cell.x * tilesize
+		let y = origin.y + cell.y * tilesize
 		let z = 0
 		if (cache.selection && cache.selection.unit === unit) {
-			z = Math.round(cache.selection.anim.y)
-		}
-		if (selection && unit === selection.unit) {
-			context.drawImage(sprites.select[selection.unit.faction], x - 2, y - 2)
+			if (cache.selection.path) {
+				let anim = cache.selection.anim
+				x = origin.x + anim.cell.x * tilesize
+				y = origin.y + anim.cell.y * tilesize
+			} else {
+				z = Math.round(cache.selection.anim.y)
+				if (selection && selection.unit) {
+					context.drawImage(sprites.select[selection.unit.faction], x - 2, y - 2)
+				}
+			}
 		}
 		context.drawImage(sprite, x, y - 1 - z)
 	}

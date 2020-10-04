@@ -107,7 +107,7 @@ export default function renderUnitPreview(unit, sprites) {
 	content.drawImage(element, width - element.width, badge.height + 3 + hpbar.height + 1)
 
 	let shadow = Canvas.recolor(content.canvas, palette.cyan)
-	let box = Canvas.create(content.canvas.width + 9, content.canvas.height + 6)
+	let box = Canvas.create(content.canvas.width + 6, content.canvas.height + 5)
 	box.fillStyle = rgb(...palette.cyan)
 	box.fillRect(0, 1, box.canvas.width, box.canvas.height - 2)
 	box.fillRect(1, 0, box.canvas.width - 2, box.canvas.height)
