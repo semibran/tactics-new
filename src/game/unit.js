@@ -1,7 +1,6 @@
 import * as Map from "./map"
 
 export function create(name, type, faction, cell, stats) {
-	console.log(name, type, faction, cell, stats)
 	return {
 		name: name,
 		type: type,

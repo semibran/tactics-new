@@ -143,15 +143,22 @@ function disasmSelect(image, palette) {
 }
 
 function disasmPieces(base, icons, palette) {
-	let pieces = {}
+	let pieces = { done: {} }
 	for (let faction in palette.factions) {
 		pieces[faction] = {}
+		pieces.done[faction] = {}
 		let subpal = palette.factions[faction]
 		for (let iconname in icons.types) {
 			let unittype = icons.types[iconname]
 			let icon = icons.small[iconname]
 			let piece = Piece(base, icon, subpal)
+			let done = Piece(base, icon, {
+				light: subpal.normal,
+				normal: subpal.dark,
+				dark: palette.black
+			})
 			pieces[faction][unittype] = piece
+			pieces.done[faction][unittype] = done
 		}
 	}
 

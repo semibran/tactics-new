@@ -1,6 +1,7 @@
 import findRange from "./game/range"
 import * as Map from "./game/map"
 import * as Unit from "./game/unit"
+import * as Game from "./game"
 import * as Cell from "../lib/cell"
 import pathfind from "../lib/pathfind"
 import renderMap from "./view/map"
@@ -36,18 +37,18 @@ export function create(width, height, sprites) {
 			selection: null
 		},
 		range: null,
-		app: null
+		game: null
 	}
 }
 
-export function init(view, app) {
+export function init(view, game) {
 	let state = view.state
 	let cache = view.cache
 	let sprites = view.sprites
 	let { camera, pointer } = state
 
-	let map = app.map
-	view.app = app
+	let map = game.map
+	view.game = game
 	view.cache.map = renderMap(map, tilesize)
 
 	function onresize() {
@@ -126,10 +127,14 @@ export function init(view, app) {
 					}
 					if (square && square.type === "move") {
 						move(unit, cursor)
-					} else if (!animating(state.concurs, "PreviewEnter") && !animating(state.concurs, "PieceMove")) {
+					} else if (!animating(state.concurs, "PreviewEnter")
+					&& !animating(state.concurs, "PieceMove")) {
 						deselect()
 					}
-				} else if (unit && !animating(state.concurs, "PreviewExit") && !animating(state.concurs, "PieceMove")) {
+				} else if (unit && game.phase.pending.includes(unit)
+				&& !animating(state.concurs, "PreviewExit")
+				&& !animating(state.concurs, "PieceMove")
+				) {
 					select(unit)
 				}
 			}
@@ -192,7 +197,6 @@ export function init(view, app) {
 				.map(unit => unit.cell)
 		})
 		let move = anims.PieceMove.create(path)
-		Unit.move(unit, cursor, map)
 		cache.selection.anim.done = true
 		cache.selection.anim = move
 		cache.selection.path = path
@@ -216,6 +220,9 @@ export function init(view, app) {
 				} else if (anim.type === "PreviewExit") {
 					cache.preview = null
 				} else if (anim.type === "PieceMove") {
+					let unit = state.selection.unit
+					Unit.move(unit, anim.cell, map)
+					Game.endTurn(unit, game)
 					state.selection = null
 					cache.selection = null
 				}
@@ -271,7 +278,7 @@ export function init(view, app) {
 	}
 
 	function snapToGrid(pos) {
-		let map = app.map
+		let map = game.map
 		// undo scaling
 		let realpos = {
 			x: (pos.x - window.innerWidth / 2) / view.scale,
@@ -309,6 +316,7 @@ export function render(view) {
 	let layers = {
 		map: [],
 		range: [],
+		markers: [],
 		pieces: [],
 		selection: [],
 		ui: []
@@ -326,14 +334,25 @@ export function render(view) {
 		}
 	}
 
-	let app = view.app
-	for (let unit of app.map.units) {
+	let game = view.game
+	for (let unit of game.map.units) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let cell = unit.cell
 		let x = origin.x + cell.x * tilesize
 		let y = origin.y + cell.y * tilesize
 		let z = 0
 		let layer = "pieces"
+		if (game.phase.faction === unit.faction) {
+			if (game.phase.pending.includes(unit)) {
+				if (!cache.selection || !cache.selection.path) {
+					let ring = sprites.select[unit.faction]
+					layers.pieces.push({ image: ring, x: x - 2, y: y - 3, z: -1 })
+					layer = "selection"
+				}
+			} else {
+				sprite = sprites.pieces.done[unit.faction][unit.type]
+			}
+		}
 		if (cache.selection && cache.selection.unit === unit) {
 			if (cache.selection.path) {
 				let anim = cache.selection.anim
@@ -341,14 +360,8 @@ export function render(view) {
 				y = origin.y + anim.cell.y * tilesize
 			} else {
 				z = Math.round(cache.selection.anim.y)
-				if (selection && selection.unit) {
-					let ring = sprites.select[selection.unit.faction]
-					layers.selection.push({ image: ring, x: x - 2, y: y, z: 3 })
-				}
 			}
 			layer = "selection"
-		} else {
-			layer = "pieces"
 		}
 		layers[layer].push({ image: sprite, x, y: y - 1, z })
 	}
@@ -373,5 +386,5 @@ export function render(view) {
 }
 
 function zsort(a, b) {
-	return (b.y + b.image.height / 2) - (a.y + a.image.height / 2)
+	return (a.y + a.image.height / 2) - (b.y + b.image.height / 2)
 }
