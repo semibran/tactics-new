@@ -47,6 +47,7 @@ export function create(width, height, sprites) {
 			pieces: [],
 			markers: [],
 			selection: [],
+			mirage: [],
 			ui: []
 		}
 	}
@@ -387,7 +388,7 @@ export function render(view) {
 	context.fillRect(0, 0, canvas.width, canvas.height)
 
 	// find top left corner of grid for drawing grid-bound elements
-	let { camera, select } = state
+	let { camera, pointer, select } = state
 	let origin = {
 		x: Math.round(view.width / 2 - cache.map.width / 2 + camera.pos.x),
 		y: Math.round(view.height / 2 - cache.map.width / 2 + camera.pos.y)
@@ -478,6 +479,15 @@ export function render(view) {
 		})
 	}
 
+	// queue unit mirage
+	if (pointer.select) {
+		let unit = select.unit
+		let image = sprites.pieces[unit.faction][unit.type]
+		let x = pointer.pos.x / view.scale - image.width / 2
+		let y = pointer.pos.y / view.scale - image.height - 4
+		layers.mirage.push({ image, x, y, opacity: 0.75 })
+	}
+
 	// queue unit preview
 	if (cache.preview) {
 		let preview = cache.preview
@@ -492,9 +502,16 @@ export function render(view) {
 		let layer = layers[layername]
 		layer.sort(zsort)
 		for (let node of layer) {
+			let image = node.image
 			let x = Math.round(node.x)
 			let y = Math.round(node.y - (node.z || 0))
-			context.drawImage(node.image, x, y)
+			if (node.opacity !== undefined) {
+				context.globalAlpha = node.opacity
+				context.drawImage(image, x, y)
+				context.globalAlpha = 1
+			} else {
+				context.drawImage(image, x, y)
+			}
 		}
 	}
 }
