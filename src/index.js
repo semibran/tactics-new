@@ -1,11 +1,11 @@
 import loadImage from "img-load"
 import disasm from "./view/sprites"
 import * as View from "./view"
-import map from "./maps/test"
 import * as Map from "./game/map"
+import * as Game from "./game"
+import map from "./maps/test"
 
-let state = { map: Map.create(map) }
-
+let state = Game.create(map)
 loadImage("sprites.png").then(main)
 
 function main(sprites) {

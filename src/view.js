@@ -191,7 +191,6 @@ export function init(view, app) {
 				.filter(other => !Unit.allied(unit, other))
 				.map(unit => unit.cell)
 		})
-		console.log(path)
 		let move = anims.PieceMove.create(path)
 		Unit.move(unit, cursor, map)
 		cache.selection.anim.done = true

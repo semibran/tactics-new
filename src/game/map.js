@@ -1,18 +1,8 @@
 import * as Cell from "../../lib/cell"
 import * as Unit from "./unit"
 
-export function create(data) {
-	let map = {
-		width: data.width,
-		height: data.height,
-		units: []
-	}
-	for (let { name, type, faction, pos, stats } of data.units) {
-		let cell = Cell.create(...pos)
-		let unit = Unit.create(name, type, faction, cell, stats)
-		map.units.push(unit)
-	}
-	return map
+export function create(width, height, units) {
+	return { width, height, units }
 }
 
 export function contains(map, cell) {
