@@ -25,6 +25,7 @@ export function create(width, height, sprites) {
 			dirty: false,
 			camera: {
 				pos: { x: 0, y: 0 },
+				vel: { x: 0, y: 0 },
 				target: { x: 0, y: 0 }
 			},
 			selection: null,
@@ -301,8 +302,10 @@ export function init(view, game) {
 			state.dirty = true
 		}
 
-		camera.pos.x += (camera.target.x - camera.pos.x) / 4
-		camera.pos.y += (camera.target.y - camera.pos.y) / 4
+		camera.pos.x += camera.vel.x
+		camera.pos.y += camera.vel.y
+		camera.vel.x += ((camera.target.x - camera.pos.x) / 8 - camera.vel.x) / 2
+		camera.vel.y += ((camera.target.y - camera.pos.y) / 8 - camera.vel.y) / 2
 
 		if (state.select && state.select.cursor) {
 			let cursor = state.select.cursor
