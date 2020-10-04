@@ -75,12 +75,12 @@ export default function renderUnitPreview(unit, sprites) {
 		let def = renderText(unit.stats.def, style)
 		let sword = drawOutline(sprites.icons.small.sword, palette.jet)
 		let shield = drawOutline(sprites.icons.small.shield, palette.jet)
-		let width = sword.width + atk.width + 3 + shield.width + def.width
+		let width = sword.width + atk.width + 1 + shield.width + def.width
 		let stats = Canvas.create(width, 8)
 		stats.drawImage(sword, 0, 0)
-		stats.drawImage(atk, sword.width, 0)
-		stats.drawImage(shield, sword.width + atk.width + 2, 0)
-		stats.drawImage(def, sword.width + atk.width + 2 + shield.width, 0)
+		stats.drawImage(atk, sword.width - 1, 0)
+		stats.drawImage(shield, sword.width - 1 + atk.width + 2, 0)
+		stats.drawImage(def, sword.width - 1 + atk.width + 2 + shield.width - 1, 0)
 		return stats.canvas
 	})()
 
