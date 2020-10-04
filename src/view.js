@@ -101,7 +101,9 @@ export function init(view, game) {
 			// if unit hasn't moved yet
 			if (game.phase.pending.includes(unit)) {
 				// check if the user is selecting a square
-				square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
+				square = cache.range.squares.find(square => {
+					return square.type === "move" && Cell.equals(square.cell, cursor)
+				})
 			}
 			if (square) {
 				let path = pathfind(unit.cell, cursor, {
