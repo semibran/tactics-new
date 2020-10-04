@@ -184,7 +184,14 @@ export function init(view, app) {
 			cache.preview.anim = exit
 			state.concurs.push(exit)
 		}
-		let path = pathfind(unit.cell, cursor, map)
+		let path = pathfind(unit.cell, cursor, {
+			width: map.width,
+			height: map.height,
+			blacklist: map.units
+				.filter(other => !Unit.allied(unit, other))
+				.map(unit => unit.cell)
+		})
+		console.log(path)
 		let move = anims.PieceMove.create(path)
 		Unit.move(unit, cursor, map)
 		cache.selection.anim.done = true
