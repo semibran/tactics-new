@@ -10,7 +10,7 @@ export default function makeCharmap(image, font, color, stroke) {
 	let cols = image.width / font.cellsize.width
 	let rows = image.height / font.cellsize.height
 	if (color) {
-		image = Canvas.replace(image, [ 255, 255, 255 ], color)
+		image = Canvas.replace(image, [ 255, 255, 255, 255 ], color)
 	}
 	for (let row = 0; row < rows; row++) {
 		for (let col = 0; col < cols; col++) {

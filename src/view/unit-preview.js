@@ -45,8 +45,8 @@ export default function renderUnitPreview(unit, sprites) {
 
 		let label = renderText("HP", {
 			font: fonts.smallcaps,
-			color: palette.white,
-			stroke: palette.jet
+			stroke: palette.white,
+			color: palette.jet
 		})
 		let value = renderText(unit.stats.hp, {
 			font: fonts.standard,
