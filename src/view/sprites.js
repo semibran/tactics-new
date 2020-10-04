@@ -7,16 +7,19 @@ import disasmPalette from "./palette"
 import stroke from "./stroke"
 import fonts from "../fonts"
 import Font from "./font"
+import renderArrow from "./arrow"
 
 export default function normalize(spritesheet) {
 	let images = disasm(spritesheet, srcmap)
 	let palette = disasmPalette(images.palette)
 	let icons = disasmIcons(images)
+	let select = disasmSelect(images, palette)
 	return {
-		icons, palette,
+		icons, palette, select,
+		Arrow: (path, faction) =>
+			renderArrow(select.arrows[faction], path),
 		squares: disasmSquares(),
 		badges: disasmBadges(palette, icons),
-		select: disasmSelect(images, palette),
 		pieces: disasmPieces(images.piece, icons, palette),
 		fonts: disasmFonts(images, fonts, palette)
 	}
@@ -125,7 +128,7 @@ function disasmBadges(palette, icons) {
 }
 
 function disasmSelect(images, palette) {
-	let select = { glow: {}, ring: {}, cursor: {} }
+	let select = { glow: {}, ring: {}, cursor: {}, arrows: {} }
 	for (let faction in palette.factions) {
 		let subpal = palette.factions[faction]
 
@@ -144,8 +147,32 @@ function disasmSelect(images, palette) {
 		cursor.drawImage(cursorshadow, 1, 1)
 		cursor.drawImage(cursorbase, 0, 0)
 		select.cursor[faction] = cursor.canvas
+
+		select.arrows[faction] = disasmArrows(images, palette, faction)
 	}
 	return select
+}
+
+function disasmArrows(images, palette, faction) {
+	let subpal = palette.factions[faction]
+	let base = images["select-arrows"]
+	let sheet = Canvas.replace(base, palette.black, subpal.light)
+	return {
+		left:      extract(sheet,  0,  0, 16, 16),
+		right:     extract(sheet, 16,  0, 16, 16),
+		up:        extract(sheet, 32,  0, 16, 16),
+		down:      extract(sheet, 48,  0, 16, 16),
+		leftStub:  extract(sheet,  0, 16, 16, 16),
+		rightStub: extract(sheet, 16, 16, 16, 16),
+		upStub:    extract(sheet, 32, 16, 16, 16),
+		downStub:  extract(sheet, 48, 16, 16, 16),
+		upleft:    extract(sheet,  0, 32, 16, 16),
+		upright:   extract(sheet, 16, 32, 16, 16),
+		downleft:  extract(sheet, 32, 32, 16, 16),
+		downright: extract(sheet, 48, 32, 16, 16),
+		leftright: extract(sheet,  0, 48, 16, 16),
+		updown:    extract(sheet, 16, 48, 16, 16)
+	}
 }
 
 function disasmPieces(base, icons, palette) {

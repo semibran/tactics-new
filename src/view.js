@@ -96,7 +96,16 @@ export function init(view, game) {
 					square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
 				}
 				if (square) {
+					let path = pathfind(unit.cell, cursor, {
+						width: map.width,
+						height: map.height,
+						blacklist: map.units
+							.filter(other => !Unit.allied(unit, other))
+							.map(unit => unit.cell)
+					})
 					cache.cursor = cursor
+					cache.arrow = sprites.Arrow(path, unit.faction)
+					cache.path = path
 				}
 			}
 		},
@@ -206,17 +215,10 @@ export function init(view, game) {
 			cache.preview.anim = exit
 			state.concurs.push(exit)
 		}
-		let path = pathfind(unit.cell, cursor, {
-			width: map.width,
-			height: map.height,
-			blacklist: map.units
-				.filter(other => !Unit.allied(unit, other))
-				.map(unit => unit.cell)
-		})
-		let move = anims.PieceMove.create(path)
+		let move = anims.PieceMove.create(cache.path)
 		cache.selection.anim.done = true
 		cache.selection.anim = move
-		cache.selection.path = path
+		cache.selection.path = cache.path
 		state.concurs.push(move)
 	}
 
@@ -250,6 +252,7 @@ export function init(view, game) {
 				} else if (anim.type === "PieceDrop") {
 					cache.selection = null
 					cache.cursor = null
+					cache.path = null
 				} else if (anim.type === "PieceMove") {
 					let unit = state.selection.unit
 					Unit.move(unit, anim.cell, map)
@@ -257,6 +260,7 @@ export function init(view, game) {
 					state.selection = null
 					cache.selection = null
 					cache.cursor = null
+					cache.path = null
 				}
 			}
 			state.dirty = true
@@ -373,8 +377,19 @@ export function render(view) {
 		let cell = cache.cursor
 		let x = origin.x + cell.x * tilesize
 		let y = origin.y + cell.y * tilesize
-		if (!cache.selection.path || state.time % 2) {
+		if (!cache.selection.path) {
 			layers.selection.push({ image: sprite, x, y })
+		}
+	}
+
+	if (cache.path) {
+		for (let node of cache.arrow) {
+			let image = node.image
+			let x = origin.x + node.x
+			let y = origin.y + node.y
+			if (!cache.selection.path || state.time % 2) {
+				layers.markers.push({ image, x, y })
+			}
 		}
 	}
 
@@ -397,14 +412,16 @@ export function render(view) {
 		}
 		if (cache.selection && cache.selection.unit === unit) {
 			layer = "selection"
+			if (!cache.selection.path || state.time % 2) {
+				let ring = sprites.select.ring[unit.faction]
+				layers.pieces.push({ image: ring, x: x - 2, y: y - 3, z: -1 })
+			}
 			if (cache.selection.path) {
 				let anim = cache.selection.anim
 				x = origin.x + anim.cell.x * tilesize
 				y = origin.y + anim.cell.y * tilesize
 			} else {
 				z = Math.round(cache.selection.anim.y)
-				let ring = sprites.select.ring[unit.faction]
-				layers.pieces.push({ image: ring, x: x - 2, y: y - 3, z: -1 })
 			}
 		}
 		layers[layer].push({
