@@ -18,6 +18,7 @@ export function create(width, height, sprites) {
 		scale: 1,
 		sprites: sprites,
 		element: document.createElement("canvas"),
+		game: null,
 		state: {
 			consecs: [],
 			concurs: [],
@@ -41,8 +42,15 @@ export function create(width, height, sprites) {
 			camera: { x: 0, y: 0 },
 			cursor: null
 		},
-		range: null,
-		game: null
+		layers: {
+			map: [],
+			range: [],
+			shadows: [],
+			pieces: [],
+			markers: [],
+			selection: [],
+			ui: []
+		}
 	}
 }
 
@@ -339,6 +347,7 @@ export function render(view) {
 	let state = view.state
 	let cache = view.cache
 	let canvas = view.element
+	let layers = view.layers
 	let context = canvas.getContext("2d")
 	context.fillStyle = "black"
 	context.fillRect(0, 0, canvas.width, canvas.height)
@@ -349,14 +358,8 @@ export function render(view) {
 		y: Math.round(view.height / 2 - cache.map.width / 2 + camera.pos.y)
 	}
 
-	let layers = {
-		map: [],
-		range: [],
-		shadows: [],
-		pieces: [],
-		markers: [],
-		selection: [],
-		ui: []
+	for (let name in layers) {
+		layers[name].length = 0
 	}
 
 	layers.map.push({ image: cache.map, x: origin.x, y: origin.y })
