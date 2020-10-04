@@ -16,7 +16,7 @@ export default function normalize(spritesheet) {
 		icons, palette,
 		squares: disasmSquares(),
 		badges: disasmBadges(palette, icons),
-		select: disasmSelect(images.select, palette),
+		select: disasmSelect(images, palette),
 		pieces: disasmPieces(images.piece, icons, palette),
 		fonts: disasmFonts(images, fonts, palette)
 	}
@@ -124,20 +124,18 @@ function disasmBadges(palette, icons) {
 	return badges
 }
 
-function disasmSelect(image, palette) {
-	let select = {}
+function disasmSelect(images, palette) {
+	let select = { glow: {}, ring: {} }
 	for (let faction in palette.factions) {
 		let subpal = palette.factions[faction]
-		let sprite = image
-			.getContext("2d")
-			.getImageData(0, 0, image.width, image.height)
-		pixels.replace(sprite, palette.white, subpal.light)
 
-		let ring = Canvas.create(image.width, image.height + 1)
-		ring.putImageData(sprite, 0, 1)
-		ring.drawImage(image, 0, 0)
-
-		select[faction] = ring.canvas
+		let ringbase = images["select-ring"]
+		let ringshadow = Canvas.replace(ringbase, palette.white, subpal.light)
+		let ring = Canvas.create(ringbase.width, ringbase.height + 1)
+		ring.drawImage(ringshadow, 0, 1)
+		ring.drawImage(ringbase, 0, 0)
+		select.ring[faction] = ring.canvas
+		select.glow[faction] = images["select-glow"]
 	}
 	return select
 }

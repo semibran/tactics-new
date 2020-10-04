@@ -162,6 +162,7 @@ export function init(view, game) {
 	}
 
 	function deselect() {
+		cache.selection.anim.done = true
 		if (cache.range) {
 			let shrink = anims.RangeShrink.create(cache.range)
 			state.concurs.push(shrink)
@@ -219,6 +220,8 @@ export function init(view, game) {
 					cache.range = null
 				} else if (anim.type === "PreviewExit") {
 					cache.preview = null
+				} else if (anim.type === "PieceDrop") {
+					cache.selection = null
 				} else if (anim.type === "PieceMove") {
 					let unit = state.selection.unit
 					Unit.move(unit, anim.cell, map)
@@ -344,9 +347,9 @@ export function render(view) {
 		let layer = "pieces"
 		if (game.phase.faction === unit.faction) {
 			if (game.phase.pending.includes(unit)) {
-				if (!cache.selection || !cache.selection.path) {
-					let ring = sprites.select[unit.faction]
-					layers.pieces.push({ image: ring, x: x - 2, y: y - 3, z: -1 })
+				if (!cache.selection || cache.selection.unit !== unit) {
+					let glow = sprites.select.glow[unit.faction]
+					layers.pieces.push({ image: glow, x, y: y - 3, z: -1 })
 					layer = "selection"
 				}
 			} else {
@@ -354,14 +357,16 @@ export function render(view) {
 			}
 		}
 		if (cache.selection && cache.selection.unit === unit) {
+			layer = "selection"
 			if (cache.selection.path) {
 				let anim = cache.selection.anim
 				x = origin.x + anim.cell.x * tilesize
 				y = origin.y + anim.cell.y * tilesize
 			} else {
 				z = Math.round(cache.selection.anim.y)
+				let ring = sprites.select.ring[unit.faction]
+				layers.pieces.push({ image: ring, x: x - 2, y: y - 3, z: -1 })
 			}
-			layer = "selection"
 		}
 		layers[layer].push({ image: sprite, x, y: y - 1, z })
 	}
