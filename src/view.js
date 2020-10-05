@@ -562,8 +562,9 @@ export function render(view) {
 	}
 
 	// queue unit mirage
-	if (pointer.select && select.cursor
-	&& !Cell.equals(select.cursor.target, select.unit.cell)
+	if (pointer.select
+	// && select.cursor
+	// && !Cell.equals(select.cursor.target, select.unit.cell)
 	) {
 		let unit = select.unit
 		let image = sprites.pieces[unit.faction][unit.type]
