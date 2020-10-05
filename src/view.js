@@ -280,7 +280,8 @@ export function init(view, game) {
 				select.anim = move
 				state.anims.push(move)
 			}
-			if (cursor.clicking) {
+			console.log(pointer.clicking)
+			if (pointer.clicking) {
 				camera.follow = true
 			} else {
 				actions.centerCamera(cursor)
