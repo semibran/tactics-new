@@ -279,6 +279,11 @@ export function init(view, game) {
 				select.anim = move
 				state.anims.push(move)
 			}
+			if (cursor.clicking) {
+				camera.follow = true
+			} else {
+				actions.centerCamera(cursor)
+			}
 		},
 		panCamera(camera, pointer) {
 			camera.target.x = (pointer.pos.x - pointer.pressed.x + pointer.offset.x) / view.scale
@@ -300,6 +305,7 @@ export function init(view, game) {
 			}
 		},
 		centerCamera(cell) {
+			camera.focus = cell
 			camera.target.x = cache.map.width / 2 - (cell.x + 0.5) * tilesize
 			camera.target.y = cache.map.height / 2 - (cell.y + 0.5) * tilesize
 		}
@@ -313,12 +319,14 @@ export function init(view, game) {
 		}
 
 		if (!pointer.select && pointer.unit && state.time - pointer.time === 20) {
-			pointer.select = true
+			if (game.phase.pending.includes(pointer.unit)) {
+				pointer.select = true
+			}
 			actions.select(pointer.unit)
 		}
 
 		// center camera on moving pieces
-		if (state.select && state.select.anim.type === "PieceMove") {
+		if (camera.follow && state.select && state.select.anim.type === "PieceMove") {
 			let anim = state.select.anim
 			actions.centerCamera(anim.cell)
 		}
@@ -351,6 +359,7 @@ export function init(view, game) {
 		}
 
 		// special animations
+		// console.log(state.anims.map(anim => anim.type))
 		for (let i = 0; i < state.anims.length; i++) {
 			let anim = state.anims[i]
 			if (anim.done) {
@@ -373,6 +382,9 @@ export function init(view, game) {
 					Unit.move(unit, anim.cell, map)
 					Game.endTurn(unit, game)
 					state.select = null
+					if (camera.follow) {
+						camera.follow = false
+					}
 				}
 			}
 			Anims[anim.type].update(anim)
