@@ -251,7 +251,8 @@ export function init(view, game) {
 				return true
 			} else {
 				if (select.cursor) {
-					select.cursor.target = cell
+					select.cursor = null
+					// select.cursor.target = cell
 				}
 				select.arrow = null
 				select.path = null
@@ -494,6 +495,7 @@ export function render(view) {
 	// queue cursor
 	if (select && select.cursor
 	&& select.anim.type !== "PieceMove"
+	&& select.valid
 	&& !Cell.equals(select.cursor.target, select.unit.cell)
 	&& Map.contains(game.map, select.cursor.target)
 	) {
