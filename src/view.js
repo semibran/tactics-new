@@ -31,7 +31,9 @@ export function create(width, height, sprites) {
 			selection: null,
 			pointer: {
 				pos: null,
+				time: 0,
 				clicking: false,
+				unit: false,
 				select: false,
 				pressed: null,
 				offset: null
@@ -90,20 +92,22 @@ export function init(view, game) {
 			}
 			if (pointer.pressed) return false
 			if (anims.find(anim => anim.blocking)) {
-				return
+				return false
 			}
+			pointer.time = state.time
 			pointer.pos = getPosition(event)
 			if (!pointer.pos) return false
+			let cursor = snapToGrid(pointer.pos)
 			pointer.clicking = true
+			pointer.unit = Map.unitAt(map, cursor)
 			pointer.pressed = pointer.pos
 			pointer.offset = {
 				x: camera.pos.x * view.scale,
 				y: camera.pos.y * view.scale
 			}
+			if (!state.select) return
 			let select = state.select
-			if (!select) return
 			let unit = select.unit
-			let cursor = snapToGrid(pointer.pos)
 			let square = null
 			// if unit hasn't moved yet
 			if (game.phase.pending.includes(unit)) {
@@ -121,6 +125,7 @@ export function init(view, game) {
 				let origin = pointer.pressed
 				if (Cell.distance(origin, cursor) > 4) {
 					pointer.clicking = false
+					pointer.unit = false
 				}
 			}
 			if (anims.find(anim => anim.blocking)) {
@@ -168,6 +173,7 @@ export function init(view, game) {
 				}
 			}
 			pointer.clicking = false
+			pointer.unit = null
 			pointer.select = false
 			pointer.pressed = null
 		}
@@ -194,7 +200,7 @@ export function init(view, game) {
 				image: preview,
 				anim: enter
 			}
-			if (game.phase.pending.includes(unit)) {
+			if (!pointer.select && game.phase.pending.includes(unit)) {
 				actions.centerCamera(unit.cell)
 			}
 		},
@@ -222,18 +228,7 @@ export function init(view, game) {
 			let square = cache.range.squares.find(square => {
 				return square.type === "move" && Cell.equals(square.cell, cell)
 			})
-			if (Map.contains(map, cell)) {
-				if (!select.cursor) {
-					select.cursor = {
-						pos: { x: cell.x * tilesize, y: cell.y * tilesize },
-						target: cell
-					}
-				} else {
-					select.cursor.target = cell
-				}
-			} else {
-				select.cursor = null
-			}
+
 			if (square) {
 				let path = pathfind(unit.cell, cell, {
 					width: map.width,
@@ -242,11 +237,22 @@ export function init(view, game) {
 						.filter(other => !Unit.allied(unit, other))
 						.map(unit => unit.cell)
 				})
+				if (!select.cursor) {
+					select.cursor = {
+						pos: { x: cell.x * tilesize, y: cell.y * tilesize },
+						target: cell
+					}
+				} else {
+					select.cursor.target = cell
+				}
 				select.arrow = sprites.Arrow(path, unit.faction)
 				select.path = path
 				select.valid = true
 				return true
 			} else {
+				if (select.cursor) {
+					select.cursor.target = cell
+				}
 				select.arrow = null
 				select.path = null
 				select.valid = false
@@ -306,10 +312,18 @@ export function init(view, game) {
 			render(view)
 		}
 
-		if (state.select && state.select.anim.type === "PieceMove") {
-			actions.centerCamera(state.select.anim.cell)
+		if (!pointer.select && pointer.unit && state.time - pointer.time === 20) {
+			pointer.select = true
+			actions.select(pointer.unit)
 		}
 
+		// center camera on moving pieces
+		if (state.select && state.select.anim.type === "PieceMove") {
+			let anim = state.select.anim
+			actions.centerCamera(anim.cell)
+		}
+
+		// rerender if camera is at least a pixel off from its drawn position
 		if (Math.round(cache.camera.x) !== Math.round(camera.pos.x)
 		|| Math.round(cache.camera.y) !== Math.round(camera.pos.y)) {
 			cache.camera.x = camera.pos.x
@@ -317,11 +331,13 @@ export function init(view, game) {
 			state.dirty = true
 		}
 
+		// update camera position
 		camera.pos.x += camera.vel.x
 		camera.pos.y += camera.vel.y
 		camera.vel.x += ((camera.target.x - camera.pos.x) / 8 - camera.vel.x) / 2
 		camera.vel.y += ((camera.target.y - camera.pos.y) / 8 - camera.vel.y) / 2
 
+		// update cursor
 		if (state.select && state.select.cursor) {
 			let cursor = state.select.cursor
 			if (Math.round(cache.cursor.x) !== Math.round(cursor.pos.x)
@@ -334,6 +350,7 @@ export function init(view, game) {
 			cursor.pos.y += (cursor.target.y * tilesize - cursor.pos.y) / 4
 		}
 
+		// special animations
 		for (let i = 0; i < state.anims.length; i++) {
 			let anim = state.anims[i]
 			if (anim.done) {
@@ -465,7 +482,9 @@ export function render(view) {
 	// queue cursor
 	if (select && select.cursor
 	&& select.anim.type !== "PieceMove"
-	&& !Cell.equals(select.cursor.target, select.unit.cell)) {
+	&& !Cell.equals(select.cursor.target, select.unit.cell)
+	&& Map.contains(game.map, select.cursor.target)
+	) {
 		let sprite = sprites.select.cursor[game.phase.faction]
 		let x = origin.x + select.cursor.pos.x - 1
 		let y = origin.y + select.cursor.pos.y - 1
@@ -531,13 +550,20 @@ export function render(view) {
 	}
 
 	// queue unit mirage
-	if (pointer.select) {
+	if (pointer.select && select.cursor
+	&& !Cell.equals(select.cursor.target, select.unit.cell)
+	) {
 		let unit = select.unit
 		let image = sprites.pieces[unit.faction][unit.type]
 		let x = pointer.pos.x / view.scale - image.width / 2
 		let y = pointer.pos.y / view.scale - image.height - 8
-		let opacity = select.valid ? 0.75 : 0.25
-		layers.mirage.push({ image, x, y, opacity })
+		let opacity = 0.75
+		if (!select.valid) {
+			opacity = 0.25
+		}
+		if (opacity) {
+			layers.mirage.push({ image, x, y, opacity })
+		}
 	}
 
 	// queue unit preview
