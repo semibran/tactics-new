@@ -158,10 +158,12 @@ export function init(view, game) {
 					}
 					if (square && square.type === "move") {
 						actions.move(unit, cursor)
-					} else if (pointer.clicking && !anims.find(anim => anim.blocking)) {
+					} else if (pointer.clicking) {
 						actions.deselect()
+					} else {
+						actions.unhover()
 					}
-				} else if (unit && !anims.find(anim => anim.blocking)) {
+				} else if (unit) {
 					actions.select(unit)
 				}
 			}
@@ -196,37 +198,6 @@ export function init(view, game) {
 				actions.centerCamera(unit.cell)
 			}
 		},
-		hover(cell) {
-			let select = state.select
-			let unit = select.unit
-			let square = cache.range.squares.find(square => {
-				return square.type === "move" && Cell.equals(square.cell, cell)
-			})
-			if (square) {
-				let path = pathfind(unit.cell, cell, {
-					width: map.width,
-					height: map.height,
-					blacklist: map.units // make enemy units unwalkable
-						.filter(other => !Unit.allied(unit, other))
-						.map(unit => unit.cell)
-				})
-				if (!select.cursor) {
-					select.cursor = {
-						pos: { x: cell.x * tilesize, y: cell.y * tilesize },
-						target: cell
-					}
-				} else {
-					select.cursor.target = cell
-				}
-				select.arrow = sprites.Arrow(path, unit.faction)
-				select.path = path
-				select.valid = true
-				return true
-			} else {
-				select.valid = false
-				return false
-			}
-		},
 		deselect() {
 			if (!state.select) return false
 			let select = state.select
@@ -244,6 +215,50 @@ export function init(view, game) {
 			let drop = Anims.PieceDrop.create(select.anim.y)
 			state.anims.push(drop)
 			select.anim = drop
+		},
+		hover(cell) {
+			let select = state.select
+			let unit = select.unit
+			let square = cache.range.squares.find(square => {
+				return square.type === "move" && Cell.equals(square.cell, cell)
+			})
+			if (Map.contains(map, cell)) {
+				if (!select.cursor) {
+					select.cursor = {
+						pos: { x: cell.x * tilesize, y: cell.y * tilesize },
+						target: cell
+					}
+				} else {
+					select.cursor.target = cell
+				}
+			} else {
+				select.cursor = null
+			}
+			if (square) {
+				let path = pathfind(unit.cell, cell, {
+					width: map.width,
+					height: map.height,
+					blacklist: map.units // make enemy units unwalkable
+						.filter(other => !Unit.allied(unit, other))
+						.map(unit => unit.cell)
+				})
+				select.arrow = sprites.Arrow(path, unit.faction)
+				select.path = path
+				select.valid = true
+				return true
+			} else {
+				select.arrow = null
+				select.path = null
+				select.valid = false
+				return false
+			}
+		},
+		unhover() {
+			let select = state.select
+			select.cursor = null
+			select.arrow = null
+			select.path = null
+			select.valid = false
 		},
 		move(unit, cursor) {
 			if (!state.select) return false
@@ -449,7 +464,8 @@ export function render(view) {
 
 	// queue cursor
 	if (select && select.cursor
-	&& select.anim.type !== "PieceMove") {
+	&& select.anim.type !== "PieceMove"
+	&& !Cell.equals(select.cursor.target, select.unit.cell)) {
 		let sprite = sprites.select.cursor[game.phase.faction]
 		let x = origin.x + select.cursor.pos.x - 1
 		let y = origin.y + select.cursor.pos.y - 1
