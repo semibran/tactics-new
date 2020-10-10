@@ -11,7 +11,7 @@ export default {
 		  { hp:  7, atk: 11, def:  3, element: "ice" } ],
 		[ "Gilda",  "fighter", "player", { x: 5, y: 5 },
 		  { hp: 13, atk: 14, def:  7, element: "fire" } ],
-		[ "Kid",    "thief",   "player", { x: 6, y: 2 },
+		[ "Kidd",   "thief",   "player", { x: 6, y: 2 },
 		  { hp:  8, atk:  7, def:  5, element: "dark" } ],
 		[ "Napi",   "archer",  "player", { x: 4, y: 1 },
 		  { hp:  9, atk: 12, def:  9, element: "volt" } ],

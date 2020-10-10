@@ -10,7 +10,7 @@ export default function renderUnitPreview(unit, sprites) {
 
 	// unit name
 	let name = renderText(unit.name, {
-		font: sprites.fonts.serif,
+		font: sprites.fonts.standard,
 		color: palette.white,
 		stroke: palette.jet
 	})
@@ -103,7 +103,7 @@ export default function renderUnitPreview(unit, sprites) {
 	let height = badge.height + 1 + hpbar.height // + 3 + stats.height
 	let content = Canvas.create(width, height)
 	content.drawImage(badge, 0, 0)
-	content.drawImage(name, badge.width + 2, 0)
+	content.drawImage(name, badge.width + 1, 0)
 	content.drawImage(hpbar, 1, badge.height + 1)
 	// content.drawImage(stats, width - stats.width, badge.height + 2 + hpbar.height + 2)
 	// content.drawImage(element, 0, badge.height + 3 + hpbar.height)

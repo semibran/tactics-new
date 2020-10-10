@@ -1,4 +1,5 @@
 exports.standard = require("./standard")
+exports.standardBold = require("./standard-bold")
 exports.serif = require("./serif")
 exports.smallcaps = require("./smallcaps")
 exports.smallcapsBold = require("./smallcaps-bold")
