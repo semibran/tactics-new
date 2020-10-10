@@ -1,6 +1,7 @@
 import Canvas from "../../lib/canvas"
 import findTextWidth from "./textwidth"
 import makeCharmap from "./charmap"
+import drawShadow from "./shadow"
 
 export default function renderText(content, style, width) {
 	let font = style.font
@@ -41,5 +42,9 @@ export default function renderText(content, style, width) {
 		text.drawImage(image, x, 0)
 		x += image.width + kerning
 	}
-	return text.canvas
+	if (style.shadow) {
+		return drawShadow(text.canvas, style.shadow)
+	} else {
+		return text.canvas
+	}
 }

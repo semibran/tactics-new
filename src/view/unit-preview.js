@@ -14,48 +14,48 @@ export default function renderUnitPreview(unit, sprites) {
 
 	// health bar
 	let hpbar = (_ => {
-		let bar = Canvas.create(68, 15)
-		let subpal = palette.factions[unit.faction]
-		bar.fillStyle = rgb(...palette.jet)
-		bar.fillRect(0, 0, 68, 5)
-
-		let gradient = bar.createLinearGradient(0, 3, 68, 3)
-		gradient.addColorStop(0, rgb(...palette.green))
-		gradient.addColorStop(1, rgb(...palette.lime))
-		bar.fillStyle = gradient
-		bar.fillRect(1, 1, 66, 3)
-		bar.fillStyle = "white"
-		bar.fillRect(2, 1, 64, 1)
+		let bar = Canvas.create(60, 12)
 
 		let label = renderText("HP", {
 			font: fonts.smallcaps,
 			color: palette.silver,
-			stroke: palette.jet
+			shadow: palette.jet
 		})
 		let value = renderText(unit.stats.hp, {
 			font: fonts.smallcapsBold,
 			color: palette.white,
-			stroke: palette.jet
+			shadow: palette.jet
 		})
 		let max = renderText("/" + unit.stats.hp, {
 			font: fonts.smallcapsBold,
 			color: palette.silver,
-			stroke: palette.jet
+			shadow: palette.jet
 		})
-		bar.drawImage(label, 0, 6)
-		bar.drawImage(value, 0 + label.width + 2, 6)
-		bar.drawImage(max, 0 + label.width + 2 + value.width - 1, 6)
+		bar.drawImage(label, 1, 0)
+		bar.drawImage(value, 1 + label.width + 2, 0)
+		bar.drawImage(max, 1 + label.width + 2 + value.width, 0)
+
+		bar.fillStyle = rgb(...palette.jet)
+		bar.fillRect(0, label.height + 1, bar.canvas.width, 5)
+
+		let gradient = bar.createLinearGradient(0, 3, bar.canvas.width - 2, 3)
+		gradient.addColorStop(0, rgb(...palette.green))
+		gradient.addColorStop(1, rgb(...palette.lime))
+		bar.fillStyle = gradient
+		bar.fillRect(1, label.height + 2, bar.canvas.width - 2, 3)
+		bar.fillStyle = "white"
+		bar.fillRect(2, label.height + 2, bar.canvas.width - 4, 1)
+
 		return bar.canvas
 	})()
 
-	let width = hpbar.width + 1
-	let height = tag.height + 1 + hpbar.height
-	let content = Canvas.create(width, height)
-	content.drawImage(tag, 0, 0)
-	content.drawImage(hpbar, 0, tag.height + 1)
-
-	let shadow = Canvas.recolor(content.canvas, palette.cyan)
-	let box = Canvas.create(content.canvas.width + 6, content.canvas.height + 5)
-	box.drawImage(content.canvas, 2, 2)
-	return box.canvas
+	let box = renderBox(hpbar.width + 13, hpbar.height + 15, sprites)
+		.getContext("2d")
+	let preview = Canvas.create(box.canvas.width, box.canvas.height + 7)
+	box.drawImage(hpbar, 6, 9)
+	preview.drawImage(box.canvas, 0, 7)
+	preview.drawImage(tag, 7, 0)
+	preview.fillStyle = rgb(...palette.jet)
+	preview.fillRect(6, 7, 1, 2)
+	return preview.canvas
 }
