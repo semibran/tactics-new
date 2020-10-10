@@ -1,8 +1,10 @@
 import * as pixels from "../../lib/pixels"
 
 const matrix = [
-	[ "white", "gray", "cyan", "blue", "navy"   ],
-	[ "black", "jet",  "pink", "red",  "purple" ]
+	[ "white",  "cyan",   "pink",  "lime", "yellow" ],
+	[ "black",  "blue",    "red", "green", "orange" ],
+	[    null,  "navy", "purple" ],
+	[ "silver", "gray",   "coal",   "jet" ]
 ]
 
 const mappings = {
@@ -26,6 +28,7 @@ export default function match(image) {
 	for (let y = 0; y < matrix.length; y++) {
 		for (let x = 0; x < matrix[y].length; x++) {
 			let colorname = matrix[y][x]
+			if (!colorname) continue
 			palette[colorname] = pixels.get(data, x, y)
 		}
 	}
