@@ -225,31 +225,53 @@ export function init(view, game) {
 		hover(cell) {
 			let select = state.select
 			let unit = select.unit
+			let prev = select.path && select.path[select.path.length - 1]
+			if (prev && Cell.equals(prev, cell)) {
+				return false
+			}
 			let square = cache.range.squares.find(square => {
 				return square.type === "move" && Cell.equals(square.cell, cell)
 			})
 
+			let path = null
 			if (square) {
-				let path = pathfind(unit.cell, cell, {
+				let opts = {
 					width: map.width,
 					height: map.height,
 					blacklist: map.units // make enemy units unwalkable
 						.filter(other => !Unit.allied(unit, other))
 						.map(unit => unit.cell)
-				})
-				if (!select.cursor) {
-					select.cursor = {
-						pos: { x: cell.x * tilesize, y: cell.y * tilesize },
-						target: cell
-					}
-				} else {
-					select.cursor.target = cell
 				}
-				select.arrow = sprites.Arrow(path, unit.faction)
-				select.path = path
-				select.valid = true
-				return true
-			} else {
+				if (select.path) {
+					let cached = select.path
+					let addendum = pathfind(prev, cell, opts)
+					let length = cached.length + addendum.length - 1
+					let backtrack = cached.find(other => Cell.equals(other, cell))
+					if (backtrack) {
+						path = cached.slice(0, cached.indexOf(backtrack) + 1)
+					} else if (length <= Unit.mov(unit)) {
+						path = cached.concat(addendum.slice(1))
+					}
+				}
+				if (!path) {
+					path = pathfind(unit.cell, cell, opts)
+				}
+				if (path) {
+					if (!select.cursor) {
+						select.cursor = {
+							pos: { x: cell.x * tilesize, y: cell.y * tilesize },
+							target: cell
+						}
+					} else {
+						select.cursor.target = cell
+					}
+					select.arrow = sprites.Arrow(path, unit.faction)
+					select.path = path
+					select.valid = true
+					return true
+				}
+			}
+			if (!path) {
 				if (select.cursor) {
 					select.cursor = null
 					// select.cursor.target = cell
