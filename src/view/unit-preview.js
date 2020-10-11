@@ -1,7 +1,7 @@
 import * as pixels from "../../lib/pixels"
 import * as Canvas from "../../lib/canvas"
 import rgb from "../../lib/rgb"
-import renderUnitTag from "./unit-tag"
+import renderTag from "./name-tag"
 import renderText from "./text"
 import renderBox from "./box"
 import drawOutline from "./outline"
@@ -10,11 +10,11 @@ export default function renderUnitPreview(unit, sprites) {
 	let { fonts, palette } = sprites
 
 	// unit name
-	let tag = renderUnitTag(unit, sprites)
+	let tag = renderTag(unit.name, sprites)
 
 	// health bar
 	let hpbar = (_ => {
-		let bar = Canvas.create(55, 13)
+		let bar = Canvas.create(55, 14)
 
 		let label = renderText("HP", {
 			font: fonts.smallcaps,
@@ -50,13 +50,11 @@ export default function renderUnitPreview(unit, sprites) {
 		return bar.canvas
 	})()
 
-	let box = renderBox(hpbar.width + 12, hpbar.height + 16, sprites)
+	let box = renderBox(hpbar.width + 12, hpbar.height + 14, sprites)
 		.getContext("2d")
 	let preview = Canvas.create(box.canvas.width, box.canvas.height + 6)
-	box.drawImage(hpbar, 6, 10)
+	box.drawImage(hpbar, 6, 8)
 	preview.drawImage(box.canvas, 0, 6)
-	preview.drawImage(tag, 7, 0)
-	preview.fillStyle = rgb(...palette.jet)
-	preview.fillRect(6, 6, 1, 2)
+	preview.drawImage(tag, Math.floor(preview.canvas.width / 2 - tag.width / 2), 0)
 	return preview.canvas
 }

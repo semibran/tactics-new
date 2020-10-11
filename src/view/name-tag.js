@@ -3,13 +3,16 @@ import renderText from "./text"
 import renderTag from "./tag"
 
 export default function renderNameTag(name, { fonts, palette }) {
-	let text = renderText(name, { font: fonts.standard })
-	let shadow = Canvas.recolor(text, palette.jet)
-	let tag = renderTag(text.width + 9, text.height + 7 - 2)
-		.getContext("2d") // xpad * 2 + 1, ypad * 2 + 1 - baseline
-	tag.drawImage(shadow, 5, 3)
-	tag.drawImage(shadow, 4, 4)
-	tag.drawImage(shadow, 5, 4)
-	tag.drawImage(text, 4, 3)
+	const padx = 12
+	const pady = 2
+	let text = renderText(name, {
+		font: fonts.standard,
+		shadow: palette.jet
+	})
+	let width = padx + text.width - 1 + padx
+	let height = pady + text.height - 3 + pady
+	let tag = renderTag(width, height, { palette })
+		.getContext("2d")
+	tag.drawImage(text, padx, pady)
 	return tag.canvas
 }
