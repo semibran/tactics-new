@@ -3,9 +3,8 @@ import findTextWidth from "./textwidth"
 import makeCharmap from "./charmap"
 import drawShadow from "./shadow"
 
-export default function renderText(content, style, width) {
-	let font = style.font
-	let id = style.color
+export default function renderText(content, font, style, width) {
+	let id = (style && style.color)
 		? style.stroke
 			? style.color + "+" + style.stroke
 			: style.color
@@ -19,16 +18,16 @@ export default function renderText(content, style, width) {
 	let cached = font.cache[id]
 	content = content.toString()
 	if (!width) {
-		width = findTextWidth(content, font, style.stroke)
+		width = findTextWidth(content, font, style && style.stroke)
 	}
 	let height = font.data.cellsize.height
-	if (style.stroke) {
+	if (style && style.stroke) {
 		height += 2
 	}
 	let text = Canvas(width, height)
 	let x = 0
 	let kerning = font.data.spacing.char
-	if (style.stroke) {
+	if (style && style.stroke) {
 		kerning -= 2
 	}
 	for (let char of content) {
@@ -42,7 +41,7 @@ export default function renderText(content, style, width) {
 		text.drawImage(image, x, 0)
 		x += image.width + kerning
 	}
-	if (style.shadow) {
+	if (style && style.shadow) {
 		return drawShadow(text.canvas, style.shadow)
 	} else {
 		return text.canvas

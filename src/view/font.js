@@ -7,8 +7,7 @@ export default function Font(image, data, palette) {
 		data: data,
 		cache: {
 			default: charmap,
-			[palette.white]: charmap,
-			[palette.white + "+" + palette.jet]: makeCharmap(image, data, palette.white, palette.jet)
+			[palette.white]: charmap
 		}
 	}
 }

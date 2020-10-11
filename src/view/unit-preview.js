@@ -13,48 +13,26 @@ export default function renderUnitPreview(unit, sprites) {
 	let tag = renderTag(unit.name, sprites)
 
 	// health bar
-	let hpbar = (_ => {
-		let bar = Canvas.create(55, 14)
-
-		let label = renderText("HP", {
-			font: fonts.smallcaps,
-			color: palette.silver,
-			shadow: palette.jet
-		})
-		let value = renderText(unit.stats.hp, {
-			font: fonts.numbers,
-			color: palette.white,
-			shadow: palette.jet
-		})
-		let max = renderText("/" + unit.stats.hp, {
-			font: fonts.numbers,
-			color: palette.silver,
-			shadow: palette.jet
-		})
-		bar.drawImage(label, 1, 1)
-		bar.drawImage(value, 1 + label.width + 3, 0)
-		bar.drawImage(max, 1 + label.width + 3 + value.width, 0)
-
-		bar.fillStyle = rgb(...palette.jet)
-		bar.fillRect(0, value.height + 1, bar.canvas.width - 1, 5)
-		bar.fillRect(1, value.height + 2, bar.canvas.width - 1, 5)
-
-		let gradient = bar.createLinearGradient(0, 3, bar.canvas.width - 3, 3)
-		gradient.addColorStop(0, rgb(...palette.green))
-		gradient.addColorStop(1, rgb(...palette.lime))
-		bar.fillStyle = gradient
-		bar.fillRect(1, value.height + 2, bar.canvas.width - 3, 3)
-		bar.fillStyle = "white"
-		bar.fillRect(2, value.height + 2, bar.canvas.width - 5, 1)
-
-		return bar.canvas
+	let hp = (_ => {
+		let hp = Canvas.create(55, 9)
+		let label = sprites.labels.hp
+		let value = renderText(unit.stats.hp + "/" + unit.stats.hp, fonts.smallcapsRadiant)
+		hp.drawImage(label, 0, 0)
+		hp.drawImage(value, label.width + 2, 1)
+		return hp.canvas
 	})()
 
-	let box = renderBox(hpbar.width + 12, hpbar.height + 14, sprites)
+	let box = renderBox(74, hp.height + 14, sprites)
 		.getContext("2d")
-	let preview = Canvas.create(box.canvas.width, box.canvas.height + 6)
-	box.drawImage(hpbar, 6, 8)
-	preview.drawImage(box.canvas, 0, 6)
-	preview.drawImage(tag, Math.floor(preview.canvas.width / 2 - tag.width / 2), 0)
+	let shadow = Canvas.recolor(hp, palette.taupe)
+	let preview = Canvas.create(box.canvas.width, box.canvas.height + 9)
+	box.drawImage(shadow, 8, 9)
+	box.drawImage(hp, 7, 8)
+	preview.drawImage(box.canvas, 0, 9)
+
+	let x = Math.ceil(74 / 2 - (tag.width - 1) / 2)
+	shadow = Canvas.recolor(tag, palette.taupe)
+	preview.drawImage(shadow, x, 1)
+	preview.drawImage(tag, x, 0)
 	return preview.canvas
 }

@@ -5,7 +5,7 @@ import renderTag from "./tag"
 
 export default function renderUnitTag(unit, { fonts, badges, palette }) {
 	let badge = renderBadge(unit, { badges })
-	let text = renderText(unit.name, { font: fonts.standard })
+	let text = renderText(unit.name, fonts.standard )
 	let shadow = Canvas.recolor(text, palette.jet)
 	let width = 3 + badge.width + 2 + text.width + 3 + 1
 	let height = 3 + text.height - 2 + 3 + 1
