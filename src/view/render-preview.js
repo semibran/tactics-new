@@ -22,12 +22,12 @@ export default function renderUnitPreview(unit, sprites) {
 		return hp.canvas
 	})()
 
-	let box = renderBox(74, hp.height + 14, sprites)
+	let box = renderBox(74, hp.height + 13, sprites)
 		.getContext("2d")
 	let shadow = Canvas.recolor(hp, palette.taupe)
 	let preview = Canvas.create(box.canvas.width, box.canvas.height + 9)
-	box.drawImage(shadow, 8, 9)
-	box.drawImage(hp, 7, 8)
+	box.drawImage(shadow, 9, 8)
+	box.drawImage(hp, 8, 7)
 	preview.drawImage(box.canvas, 0, 9)
 
 	let x = Math.ceil(74 / 2 - (tag.width - 1) / 2)
