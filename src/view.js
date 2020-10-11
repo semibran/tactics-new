@@ -245,7 +245,7 @@ export function init(view, game) {
 				if (select.path) {
 					let cached = select.path
 					let addendum = pathfind(prev, cell, opts)
-					let length = cached.length + addendum.length - 1
+					let length = cached.length + addendum.length - 2
 					let backtrack = cached.find(other => Cell.equals(other, cell))
 					if (backtrack) {
 						path = cached.slice(0, cached.indexOf(backtrack) + 1)
@@ -302,7 +302,6 @@ export function init(view, game) {
 				select.anim = move
 				state.anims.push(move)
 			}
-			console.log(pointer.clicking)
 			if (pointer.clicking) {
 				camera.follow = true
 			} else {
@@ -382,8 +381,6 @@ export function init(view, game) {
 			cursor.pos.y += (cursor.target.y * tilesize - cursor.pos.y) / 4
 		}
 
-		// special animations
-		// console.log(state.anims.map(anim => anim.type))
 		for (let i = 0; i < state.anims.length; i++) {
 			let anim = state.anims[i]
 			if (anim.done) {
