@@ -14,7 +14,7 @@ export default function renderUnitPreview(unit, sprites) {
 
 	// health bar
 	let hpbar = (_ => {
-		let bar = Canvas.create(60, 12)
+		let bar = Canvas.create(55, 13)
 
 		let label = renderText("HP", {
 			font: fonts.smallcaps,
@@ -32,30 +32,31 @@ export default function renderUnitPreview(unit, sprites) {
 			shadow: palette.jet
 		})
 		bar.drawImage(label, 1, 0)
-		bar.drawImage(value, 1 + label.width + 2, 0)
-		bar.drawImage(max, 1 + label.width + 2 + value.width, 0)
+		bar.drawImage(value, 1 + label.width + 3, 0)
+		bar.drawImage(max, 1 + label.width + 3 + value.width, 0)
 
 		bar.fillStyle = rgb(...palette.jet)
-		bar.fillRect(0, label.height + 1, bar.canvas.width, 5)
+		bar.fillRect(0, label.height + 1, bar.canvas.width - 1, 5)
+		bar.fillRect(1, label.height + 2, bar.canvas.width - 1, 5)
 
-		let gradient = bar.createLinearGradient(0, 3, bar.canvas.width - 2, 3)
+		let gradient = bar.createLinearGradient(0, 3, bar.canvas.width - 3, 3)
 		gradient.addColorStop(0, rgb(...palette.green))
 		gradient.addColorStop(1, rgb(...palette.lime))
 		bar.fillStyle = gradient
-		bar.fillRect(1, label.height + 2, bar.canvas.width - 2, 3)
+		bar.fillRect(1, label.height + 2, bar.canvas.width - 3, 3)
 		bar.fillStyle = "white"
-		bar.fillRect(2, label.height + 2, bar.canvas.width - 4, 1)
+		bar.fillRect(2, label.height + 2, bar.canvas.width - 5, 1)
 
 		return bar.canvas
 	})()
 
-	let box = renderBox(hpbar.width + 13, hpbar.height + 15, sprites)
+	let box = renderBox(hpbar.width + 12, hpbar.height + 16, sprites)
 		.getContext("2d")
-	let preview = Canvas.create(box.canvas.width, box.canvas.height + 7)
-	box.drawImage(hpbar, 6, 9)
-	preview.drawImage(box.canvas, 0, 7)
+	let preview = Canvas.create(box.canvas.width, box.canvas.height + 6)
+	box.drawImage(hpbar, 6, 10)
+	preview.drawImage(box.canvas, 0, 6)
 	preview.drawImage(tag, 7, 0)
 	preview.fillStyle = rgb(...palette.jet)
-	preview.fillRect(6, 7, 1, 2)
+	preview.fillRect(6, 6, 1, 2)
 	return preview.canvas
 }
