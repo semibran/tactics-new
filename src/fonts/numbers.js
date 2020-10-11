@@ -3,7 +3,8 @@ module.exports = {
 	cellsize: { width: 6, height: 6 },
 	charsize: { width: 6, height: 6 },
 	exceptions: {
-		1: { width: 4 }
+		1: { width: 4 },
+		"/": { width: 3 }
 	},
 	spacing: {
 		char: 1,
@@ -11,6 +12,7 @@ module.exports = {
 		line: 2
 	},
 	layout: [
-		"0123456789"
+		"0123456789",
+		"/"
 	]
 }

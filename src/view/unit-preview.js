@@ -22,30 +22,30 @@ export default function renderUnitPreview(unit, sprites) {
 			shadow: palette.jet
 		})
 		let value = renderText(unit.stats.hp, {
-			font: fonts.smallcapsBold,
+			font: fonts.numbers,
 			color: palette.white,
 			shadow: palette.jet
 		})
 		let max = renderText("/" + unit.stats.hp, {
-			font: fonts.smallcapsBold,
+			font: fonts.numbers,
 			color: palette.silver,
 			shadow: palette.jet
 		})
-		bar.drawImage(label, 1, 0)
+		bar.drawImage(label, 1, 1)
 		bar.drawImage(value, 1 + label.width + 3, 0)
 		bar.drawImage(max, 1 + label.width + 3 + value.width, 0)
 
 		bar.fillStyle = rgb(...palette.jet)
-		bar.fillRect(0, label.height + 1, bar.canvas.width - 1, 5)
-		bar.fillRect(1, label.height + 2, bar.canvas.width - 1, 5)
+		bar.fillRect(0, value.height + 1, bar.canvas.width - 1, 5)
+		bar.fillRect(1, value.height + 2, bar.canvas.width - 1, 5)
 
 		let gradient = bar.createLinearGradient(0, 3, bar.canvas.width - 3, 3)
 		gradient.addColorStop(0, rgb(...palette.green))
 		gradient.addColorStop(1, rgb(...palette.lime))
 		bar.fillStyle = gradient
-		bar.fillRect(1, label.height + 2, bar.canvas.width - 3, 3)
+		bar.fillRect(1, value.height + 2, bar.canvas.width - 3, 3)
 		bar.fillStyle = "white"
-		bar.fillRect(2, label.height + 2, bar.canvas.width - 5, 1)
+		bar.fillRect(2, value.height + 2, bar.canvas.width - 5, 1)
 
 		return bar.canvas
 	})()
