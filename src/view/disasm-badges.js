@@ -1,6 +1,6 @@
 import * as Canvas from "../../lib/canvas"
 import rgb from "../../lib/rgb"
-import stroke from "./stroke"
+import stroke from "./style-stroke"
 
 export default function disasmBadges(palette, icons) {
 	let badges = {}

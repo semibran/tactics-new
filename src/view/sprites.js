@@ -1,6 +1,5 @@
 import srcmap from "../../dist/tmp/sprites.json"
 import fonts from "../fonts"
-import renderArrow from "./arrow"
 import disasm from "./disasm"
 import disasmPalette from "./palette"
 import disasmIcons from "./disasm-icons"
@@ -11,6 +10,7 @@ import disasmLabels from "./disasm-labels"
 import disasmBadges from "./disasm-badges"
 import disasmPieces from "./disasm-pieces"
 import disasmFonts from "./disasm-fonts"
+import renderArrow from "./render-arrow"
 
 export default function normalize(spritesheet) {
 	let images = disasm(spritesheet, srcmap)

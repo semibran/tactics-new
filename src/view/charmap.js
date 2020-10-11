@@ -1,6 +1,6 @@
 import * as Canvas from "../../lib/canvas"
-import outline from "./outline"
 import extract from "../../lib/img-extract"
+import outline from "./style-outline"
 
 export default function makeCharmap(image, font, color, stroke) {
 	if (!image) {

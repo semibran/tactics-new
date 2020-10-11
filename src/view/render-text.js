@@ -1,7 +1,7 @@
 import Canvas from "../../lib/canvas"
 import findTextWidth from "./textwidth"
 import makeCharmap from "./charmap"
-import drawShadow from "./shadow"
+import drawShadow from "./style-shadow"
 
 export default function renderText(content, font, style, width) {
 	let id = (style && style.color)

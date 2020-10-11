@@ -1,6 +1,6 @@
 import * as Canvas from "../../lib/canvas"
-import renderText from "./text"
-import renderTag from "./tag"
+import renderText from "./render-text"
+import renderTag from "./render-tag"
 
 export default function renderNameTag(name, sprites) {
 	const { fonts, palette } = sprites

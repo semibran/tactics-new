@@ -1,10 +1,10 @@
 import * as pixels from "../../lib/pixels"
 import * as Canvas from "../../lib/canvas"
 import rgb from "../../lib/rgb"
-import renderTag from "./name-tag"
-import renderText from "./text"
-import renderBox from "./box"
-import drawOutline from "./outline"
+import renderTag from "./render-name-tag"
+import renderText from "./render-text"
+import renderBox from "./render-box"
+import drawOutline from "./style-outline"
 
 export default function renderUnitPreview(unit, sprites) {
 	let { fonts, palette } = sprites
