@@ -10,8 +10,9 @@ import renderText from "./view/render-text"
 import renderMap from "./view/render-map"
 import renderTag from "./view/render-name-tag"
 import renderPreview from "./view/render-preview"
-import renderCombatStats from "./view/render-combatstats"
 import getGradient from "./view/hp-gradient"
+import * as RenderHP from "./view/render-hp"
+import * as RenderForecast from "./view/render-forecast"
 import Anims from "./anims"
 import lerp from "lerp"
 const tilesize = 16
@@ -53,7 +54,9 @@ export function create(width, height, sprites) {
 			cursor: { x: 0, y: 0 },
 			playerview: null,
 			enemyview: null,
-			vs: null
+			vs: null,
+			hp: null,
+			forecast: null
 		},
 		layers: {
 			map: [],
@@ -477,6 +480,7 @@ export function init(view, game) {
 			cursor.pos.y += (cursor.target.y * tilesize - cursor.pos.y) / 4
 		}
 
+		// handle animations
 		for (let i = 0; i < state.anims.length; i++) {
 			let anim = state.anims[i]
 			if (anim.done) {
@@ -493,11 +497,21 @@ export function init(view, game) {
 				} else if (anim.type === "PieceMove") {
 					if (state.target) {
 						state.screen = "attack"
+
 						let enter = Anims.EaseOut.create(15)
-						cache.vs = {
-							anim: enter
-						}
+						cache.vs = { anim: enter }
 						state.anims.push(enter)
+
+						let attacker = state.select.unit
+						let defender = state.target
+						let hpleft = RenderHP.attacker(attacker, sprites)
+						let hpright = RenderHP.defender(defender, sprites)
+						cache.hp = { left: hpleft, right: hpright }
+						cache.forecast = {
+							wpn: RenderForecast.renderWeapon(attacker, defender, sprites),
+							dmg: RenderForecast.renderDamage(attacker, defender, sprites),
+							hit: RenderForecast.renderHit(attacker, defender, sprites)
+						}
 					}
 					if (cache.playerview) {
 						let exit = Anims.PreviewExit.create(cache.playerview.anim.x, "playerview")
@@ -743,48 +757,43 @@ export function render(view) {
 		let y = view.height * 3 / 4 - vs.height / 2
 		layers.ui.push({ image: vs, x, y, width })
 
-		let attacker = state.select.unit
-		let hpleft = Canvas.copy(sprites.bars.left)
-		let [ start, end ] = getGradient(attacker, palette, true)
-		let gradient = hpleft.createLinearGradient(2, 0, 53, 0)
-		gradient.addColorStop(0, rgb(...start))
-		gradient.addColorStop(1, rgb(...end))
-		hpleft.fillStyle = gradient
-		hpleft.fillRect(6, 2, 55, 1)
-		hpleft.fillRect(7, 3, 55, 2)
-		hpleft.fillRect(8, 5, 55, 2)
-		x = lerp(-hpleft.canvas.width, 4, cache.vs.anim.x) + 1
+		let hpleft = cache.hp.left
+		x = lerp(-hpleft.width, 4, cache.vs.anim.x) + 1
 		y = y + 22
-		layers.ui.unshift({ image: hpleft.canvas, x, y })
+		layers.ui.unshift({ image: hpleft, x, y })
 
-		let defender = state.target
-		let hpright = Canvas.copy(sprites.bars.right)
-		;[ start, end ] = getGradient(defender, palette)
-		gradient = hpright.createLinearGradient(0, 0, 53, 0)
-		gradient.addColorStop(0, rgb(...start))
-		gradient.addColorStop(1, rgb(...end))
-		hpright.fillStyle = gradient
-		hpright.fillRect(7, 2, 55, 1)
-		hpright.fillRect(6, 3, 55, 2)
-		hpright.fillRect(5, 5, 55, 2)
-		width = hpright.canvas.width
-		x = view.width + lerp(width, -4 - width, cache.vs.anim.x) + 1
-		layers.ui.unshift({ image: hpright.canvas, x, y })
+		let hpright = cache.hp.right
+		x = view.width + lerp(hpright.width, -4 - hpright.width, cache.vs.anim.x) + 1
+		layers.ui.unshift({ image: hpright, x, y })
 
+		let attacker = state.select.unit
 		let atktag = renderTag(attacker.name, attacker.faction, sprites)
 		x = lerp(-atktag.width, 4, cache.vs.anim.x) + 1
 		y = y - atktag.height - 1
 		layers.ui.unshift({ image: atktag, x, y })
 
+		let defender = state.target
 		let deftag = renderTag(defender.name, defender.faction, sprites)
 		x = view.width + lerp(deftag.width, -4 - deftag.width, cache.vs.anim.x) + 1
 		layers.ui.unshift({ image: deftag, x, y })
 
-		let stats = renderCombatStats(attacker, defender, sprites)
-		let height = stats.height * cache.vs.anim.x
-		x = view.width / 2 - stats.width / 2
+		let weapon = cache.forecast.wpn
+		let height = weapon.height * cache.vs.anim.x
+		x = view.width / 2 - weapon.width / 2
 		y = view.height * 3 / 4 + 28 - height / 2
-		layers.ui.push({ image: stats, x, y, height })
+		layers.ui.push({ image: weapon, x, y, height })
+
+		let damage = cache.forecast.dmg
+		height = damage.height * cache.vs.anim.x
+		x = view.width / 2 - damage.width / 2
+		y = y + 14
+		layers.ui.push({ image: damage, x, y, height })
+
+		let hit = cache.forecast.hit
+		height = hit.height * cache.vs.anim.x
+		x = view.width / 2 - hit.width / 2
+		y = y + 14
+		layers.ui.push({ image: hit, x, y, height })
 
 		// let text = renderText(
 		// 	`Select a techw to use, then tap "GO" to initiate combat.`,

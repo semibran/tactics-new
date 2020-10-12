@@ -23,7 +23,7 @@ export default function normalize(spritesheet) {
 		icons, palette, select,
 		Arrow: (path, faction) =>
 			renderArrow(select.arrows[faction], path),
-		squares: disasmSquares(),
+		squares: disasmSquares(palette),
 		vs: disasmVs(images.vs, palette),
 		tag: disasmTag(images.tag, palette),
 		bars: disasmBars(images.bars, palette),

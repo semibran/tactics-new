@@ -14,7 +14,7 @@ export default function disasmBars(image, palette) {
 	]
 	let newColors = [
 		palette.white,
-		palette.cyan,
+		palette.opal,
 		palette.gray,
 		palette.coal,
 		palette.jet

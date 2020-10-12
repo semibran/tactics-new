@@ -18,7 +18,7 @@ export default function disasmTag(image, palette) {
 		palette.brass
 	]
 	let playerColors = [
-		palette.silver,
+		palette.opal,
 		palette.coal,
 		palette.jet
 	]

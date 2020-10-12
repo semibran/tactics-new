@@ -1,18 +1,18 @@
 import * as pixels from "../../lib/pixels"
 
 const matrix = [
-	[ "white",  "cyan",  "pink",   "lime"   ],
-	[ "black",  "blue",  "red",    "green"  ],
-	[ null,     "navy",  "purple", "maroon" ],
-	[ "silver", "gray",  "coal",   "jet"    ],
-	[ "cream",  "beige", "taupe",  "brown"  ],
-	[ "yellow", "gold",  "brass",  "sage"   ]
+	[ "white",  "cyan",   "pink",   "lime"  ],
+	[ "black",  "opal",   "red",    "green" ],
+	[ "silver", "blue",   "maroon", "beige" ],
+	[ "gray",   "navy",   "purple", "taupe" ],
+	[ "coal",   "yellow", "gold",   "brass" ],
+	[ "jet",    "cream",  "sage",   "brown" ]
 ]
 
 const mappings = {
 	factions: {
 		player: {
-			light: "cyan",
+			light: "opal",
 			normal: "blue",
 			dark: "navy"
 		},

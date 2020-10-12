@@ -1,6 +1,7 @@
 import * as Canvas from "../../lib/canvas"
+import rgb from "../../lib/rgb"
 
-export default function disasmSquares() {
+export default function disasmSquares(palette) {
 	const opacity = 0.25
 	const tilesize = 16
 
