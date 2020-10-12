@@ -26,13 +26,13 @@ export default function renderUnitPreview(unit, sprites) {
 			? palette.green
 			: palette.red
 		let end = palette.pink
-		if (unit.stats.hp >= 12) {
+		if (unit.stats.hp >= 8) {
 			end = palette.blue
-		} else if (unit.stats.hp >= 10) {
+		} else if (unit.stats.hp >= 7) {
 			end = palette.cyan
-		} else if (unit.stats.hp >= 8) {
-			end = palette.lime
 		} else if (unit.stats.hp >= 6) {
+			end = palette.lime
+		} else if (unit.stats.hp >= 5) {
 			end = palette.yellow
 		}
 
@@ -75,7 +75,8 @@ export default function renderUnitPreview(unit, sprites) {
 			let content = Canvas.create(width - padx * 2, height - pady * 2)
 
 			let x = 0
-			let value = renderText(unit.stats.atk, fonts.numbers, { color: palette.jet })
+			let stat = unit.stats.atk
+			let value = renderText(stat, fonts.numbers, { color: palette.jet })
 			let badge = sprites.badges.sword
 			if (unit.type === "mage") {
 				badge = sprites.badges.fire
@@ -86,14 +87,20 @@ export default function renderUnitPreview(unit, sprites) {
 			content.drawImage(value, x + badge.width + 2, 1)
 
 			x += 21
-			value = renderText(unit.stats.hit, fonts.numbers, { color: palette.jet })
+			stat = unit.stats.hit
 			badge = sprites.badges.target
+			value = renderText(stat, fonts.numbers, { color: palette.jet })
 			content.drawImage(badge, x, 0)
 			content.drawImage(value, x + badge.width + 2, 1)
 
 			x += 21
-			value = renderText(unit.stats.def, fonts.numbers, { color: palette.jet })
-			badge = sprites.badges.shield
+			stat = unit.stats.spd
+			badge = sprites.badges.boot
+			if (unit.stats.def > unit.stats.spd) {
+				stat = unit.stats.def
+				badge = sprites.badges.shield
+			}
+			value = renderText(stat, fonts.numbers, { color: palette.jet })
 			content.drawImage(badge, x, 0)
 			content.drawImage(value, x + badge.width + 2, 1)
 
