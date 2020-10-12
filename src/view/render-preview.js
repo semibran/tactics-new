@@ -15,8 +15,8 @@ export default function renderUnitPreview(unit, sprites) {
 
 	// health bar
 	let content = (_ => {
-		let content = Canvas.create(66, 26)
-		let padx = 3
+		let content = Canvas.create(70, 26)
+		let padx = 5
 		let label = sprites.labels.hp
 		let value = renderText(unit.stats.hp + "/" + unit.stats.hp, fonts.smallcapsRadiant)
 
@@ -77,7 +77,7 @@ export default function renderUnitPreview(unit, sprites) {
 
 			let x = 0
 			let stat = unit.stats.atk
-			let value = renderText(stat, fonts.six, { color: palette.jet })
+			let value = renderText(stat, fonts.numbers, { color: palette.jet })
 			let badge = sprites.badges.sword
 			if (unit.type === "mage") {
 				badge = sprites.badges[unit.stats.element]
@@ -91,25 +91,25 @@ export default function renderUnitPreview(unit, sprites) {
 				badge = sprites.badges.bow
 			}
 			content.drawImage(badge, x, 0)
-			content.drawImage(value, x + 22 - value.width - 3, 1)
+			content.drawImage(value, x + 22 - value.width - 1, 1)
 
-			x += 22
+			x += 23
 			stat = unit.stats.hit
 			badge = sprites.badges.target
-			value = renderText(stat, fonts.six, { color: palette.jet })
+			value = renderText(stat, fonts.numbers, { color: palette.jet })
 			content.drawImage(badge, x, 0)
-			content.drawImage(value, x + 22 - value.width - 3, 1)
+			content.drawImage(value, x + 22 - value.width - 1, 1)
 
-			x += 22
+			x += 23
 			stat = unit.stats.spd
 			badge = sprites.badges.wing
 			if (unit.stats.def > unit.stats.spd) {
 				stat = unit.stats.def
 				badge = sprites.badges.shield
 			}
-			value = renderText(stat, fonts.six, { color: palette.jet })
+			value = renderText(stat, fonts.numbers, { color: palette.jet })
 			content.drawImage(badge, x, 0)
-			content.drawImage(value, x + 22 - value.width - 3, 1)
+			content.drawImage(value, x + 22 - value.width - 1, 1)
 
 			let shadowed = drawShadow(content.canvas, palette.taupe)
 			stats.drawImage(shadowed, padx, pady)
@@ -120,10 +120,10 @@ export default function renderUnitPreview(unit, sprites) {
 		return content.canvas
 	})()
 
-	let box = renderBox(74, content.height + 10, sprites)
+	let box = renderBox(76, content.height + 10, sprites)
 		.getContext("2d")
 	let preview = Canvas.create(box.canvas.width, box.canvas.height + 9)
-	box.drawImage(content, 4, 6)
+	box.drawImage(content, 3, 6)
 	preview.drawImage(box.canvas, 0, 9)
 
 	let x = Math.ceil(74 / 2 - (tag.width - 1) / 2)

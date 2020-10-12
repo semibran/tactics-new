@@ -2,12 +2,13 @@ import { easeOut } from "../../lib/exponential"
 
 const d = 5
 
-export function create(x) {
+export function create(x, id) {
 	return {
 		type: "PreviewExit",
 		blocking: true,
 		done: false,
-		x: x || 1
+		x: x || 1,
+		id: id
 	}
 }
 

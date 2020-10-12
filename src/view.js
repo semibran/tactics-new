@@ -42,7 +42,9 @@ export function create(width, height, sprites) {
 		cache: {
 			map: null,
 			camera: { x: 0, y: 0 },
-			cursor: { x: 0, y: 0 }
+			cursor: { x: 0, y: 0 },
+			playerview: null,
+			enemyview: null
 		},
 		layers: {
 			map: [],
@@ -196,7 +198,7 @@ export function init(view, game) {
 				valid: false
 			}
 			cache.range = expand.range
-			cache.preview = {
+			cache.playerview = {
 				image: preview,
 				anim: enter
 			}
@@ -212,10 +214,10 @@ export function init(view, game) {
 				let shrink = Anims.RangeShrink.create(cache.range)
 				state.anims.push(shrink)
 			}
-			if (cache.preview) {
-				let exit = Anims.PreviewExit.create(cache.preview.anim.x)
-				cache.preview.anim.done = true
-				cache.preview.anim = exit
+			if (cache.playerview) {
+				let exit = Anims.PreviewExit.create(cache.playerview.anim.x, "playerview")
+				cache.playerview.anim.done = true
+				cache.playerview.anim = exit
 				state.anims.push(exit)
 			}
 			let drop = Anims.PieceDrop.create(select.anim.y)
@@ -232,7 +234,6 @@ export function init(view, game) {
 				return Cell.equals(square.cell, cell)
 				    && (square.type === "move" || square.type === "attack" && square.target)
 			})
-
 			let path = null
 			if (square) {
 				let target = cell
@@ -242,6 +243,25 @@ export function init(view, game) {
 					blacklist: map.units // make enemy units unwalkable
 						.filter(other => !Unit.allied(unit, other))
 						.map(unit => unit.cell)
+				}
+				if (square.target) {
+					let unit = square.target
+					if (!cache.enemyview) {
+						let preview = renderUnitPreview(unit, sprites)
+						let enter = Anims.PreviewEnter.create()
+						cache.enemyview = {
+							image: preview,
+							unit: unit,
+							anim: enter
+						}
+						console.log(unit)
+						state.anims.push(enter)
+					} else if (unit !== cache.enemyview.unit) {
+						let exit = Anims.PreviewExit.create(cache.enemyview.anim.x, "enemyview")
+						cache.enemyview.anim.done = true
+						cache.enemyview.anim = exit
+						state.anims.push(exit)
+					}
 				}
 				if (square.type === "attack" && Cell.adjacent(unit.cell, target)) {
 					path = [ unit.cell ]
@@ -415,14 +435,20 @@ export function init(view, game) {
 				if (anim.type === "RangeShrink") {
 					cache.range = null
 				} else if (anim.type === "PreviewExit") {
-					cache.preview = null
+					cache[anim.id] = null
 				} else if (anim.type === "PieceDrop") {
 					state.select = null
 				} else if (anim.type === "PieceMove") {
-					if (cache.preview) {
-						let exit = Anims.PreviewExit.create(cache.preview.anim.x)
-						cache.preview.anim.done = true
-						cache.preview.anim = exit
+					if (cache.playerview) {
+						let exit = Anims.PreviewExit.create(cache.playerview.anim.x, "playerview")
+						cache.playerview.anim.done = true
+						cache.playerview.anim = exit
+						state.anims.push(exit)
+					}
+					if (cache.enemyview) {
+						let exit = Anims.PreviewExit.create(cache.enemyview.anim.x, "enemyview")
+						cache.enemyview.anim.done = true
+						cache.enemyview.anim = exit
 						state.anims.push(exit)
 					}
 					let unit = state.select.unit
@@ -628,11 +654,20 @@ export function render(view) {
 	}
 
 	// queue unit preview
-	if (cache.preview) {
-		let preview = cache.preview
-		const margin = 4
+	if (cache.playerview) {
+		const margin = 2
+		let preview = cache.playerview
 		let x = Math.round(lerp(-preview.image.width, margin, preview.anim.x))
-		let y = view.height - preview.image.height + 1 - margin
+		let y = view.height - preview.image.height - margin
+		layers.ui.push({ image: preview.image, x, y })
+	}
+
+	if (cache.enemyview) {
+		const margin = 2
+		let preview = cache.enemyview
+		let width = preview.image.width - 1
+		let x = view.width + Math.round(lerp(width, -margin - width, preview.anim.x))
+		let y = view.height - preview.image.height - margin
 		layers.ui.push({ image: preview.image, x, y })
 	}
 
