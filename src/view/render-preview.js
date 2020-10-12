@@ -13,8 +13,8 @@ export default function renderUnitPreview(unit, sprites) {
 	let tag = renderTag(unit.name, unit.faction, sprites)
 
 	// health bar
-	let hp = (_ => {
-		let hp = Canvas.create(58, 10)
+	let content = (_ => {
+		let content = Canvas.create(60, 10)
 		let label = sprites.labels.hp
 		let value = renderText(unit.stats.hp + "/" + unit.stats.hp, fonts.smallcapsRadiant)
 
@@ -22,39 +22,31 @@ export default function renderUnitPreview(unit, sprites) {
 			? palette.green
 			: palette.red
 		let end = palette.lime
-		let bar = Canvas.create(42, 3)
-		let gradient = bar.createLinearGradient(0, 1, bar.canvas.width - 2, 1)
+		let health = Canvas.create(42, 3)
+		let gradient = health.createLinearGradient(0, 1, health.canvas.width - 2, 1)
 		gradient.addColorStop(0, rgb(...start))
 		gradient.addColorStop(1, rgb(...end))
 
-		bar.fillStyle = gradient
-		bar.fillRect(2, 0, bar.canvas.width - 2, 1)
-		bar.fillRect(1, 1, bar.canvas.width - 2, 1)
-		bar.fillRect(0, 2, bar.canvas.width - 2, 1)
-		hp.drawImage(label, 0, 0)
-		hp.drawImage(value, label.width + 6, 2)
+		health.fillStyle = gradient
+		health.fillRect(2, 0, health.canvas.width - 2, 1)
+		health.fillRect(1, 1, health.canvas.width - 2, 1)
+		health.fillRect(0, 2, health.canvas.width - 2, 1)
+		content.drawImage(label, 0, 0)
+		content.drawImage(value, label.width + 6, 2)
 
-		let shadow = Canvas.recolor(hp.canvas, palette.taupe)
-		hp.fillStyle = rgb(...palette.cream)
-		hp.fillRect(label.width + 3, bar.canvas.height + 1, bar.canvas.width - 2, 1)
-		hp.fillRect(label.width + 3 + bar.canvas.width - 2, bar.canvas.height, 1, 1)
-		hp.fillRect(label.width + 3 + bar.canvas.width - 1, bar.canvas.height - 1, 1, 1)
-		hp.drawImage(shadow, 1, 1)
-		hp.drawImage(bar.canvas, label.width + 3, 1)
-		hp.drawImage(label, 0, 0)
-		hp.drawImage(value, label.width + 6, 2)
-
-		hp.fillStyle = rgb(...palette.taupe)
-		hp.fillRect(label.width + 5, 0, bar.canvas.width - 2, 1)
-		hp.fillRect(label.width + 4, 1, 1, 1)
-		hp.fillRect(label.width + 3, 2, 1, 1)
-		return hp.canvas
+		let shadow = Canvas.recolor(content.canvas, palette.taupe)
+		content.drawImage(sprites.bar, label.width + 2, 0)
+		content.drawImage(shadow, 1, 1)
+		content.drawImage(health.canvas, label.width + 3, 1)
+		content.drawImage(label, 0, 0)
+		content.drawImage(value, label.width + 6, 2)
+		return content.canvas
 	})()
 
-	let box = renderBox(74, hp.height + 12, sprites)
+	let box = renderBox(74, content.height + 12, sprites)
 		.getContext("2d")
 	let preview = Canvas.create(box.canvas.width, box.canvas.height + 9)
-	box.drawImage(hp, 8, 7)
+	box.drawImage(content, 7, 7)
 	preview.drawImage(box.canvas, 0, 9)
 
 	let x = Math.ceil(74 / 2 - (tag.width - 1) / 2)
