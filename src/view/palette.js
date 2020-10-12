@@ -6,7 +6,7 @@ const matrix = [
 	[ null,     "navy",  "purple", "maroon" ],
 	[ "silver", "gray",  "coal",   "jet"    ],
 	[ "cream",  "beige", "taupe",  "brown"  ],
-	[ "yellow", "gold",  "brass",  null     ]
+	[ "yellow", "gold",  "brass",  "sage"   ]
 ]
 
 const mappings = {
