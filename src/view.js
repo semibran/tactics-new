@@ -161,7 +161,7 @@ export function init(view, game) {
 					if (cache.range && game.phase.pending.includes(unit)) {
 						square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
 					}
-					if (square && square.type === "move") {
+					if (square && select.path) {
 						actions.move(unit, cursor)
 					} else if (pointer.clicking) {
 						actions.deselect()
@@ -243,7 +243,9 @@ export function init(view, game) {
 						.filter(other => !Unit.allied(unit, other))
 						.map(unit => unit.cell)
 				}
-				if (select.path) {
+				if (Cell.adjacent(unit.cell, target)) {
+					path = [ unit.cell ]
+				} else if (select.path) {
 					let cached = select.path
 					let prev = cached[cached.length - 1]
 					if (square.type === "attack" && !Cell.adjacent(prev, cell)) {
