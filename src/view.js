@@ -395,7 +395,7 @@ export function init(view, game) {
 			render(view)
 		}
 
-		if (!pointer.select && pointer.unit && state.time - pointer.time === 20) {
+		if (!state.select && !pointer.select && pointer.unit && state.time - pointer.time === 20) {
 			if (game.phase.pending.includes(pointer.unit)) {
 				pointer.select = true
 			}
