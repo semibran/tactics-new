@@ -277,15 +277,22 @@ export function init(view, game) {
 					let prev = select.path
 						? select.path[select.path.length - 1]
 						: unit.cell
-					if (square.type === "attack" && Cell.distance(prev, cell) > Unit.rng(unit)) {
-						let neighbors = Cell.neighbors(cell).concat([ cell ])
-							.sort((a, b) =>	Cell.distance(a, unit.cell) - Cell.distance(b, unit.cell))
-						target = neighbors[0]
+					let range = Unit.rng(unit)
+					if (square.type === "attack") {
+						if (Cell.distance(prev, cell) > range) {
+							let neighbors = Cell.neighborhood(cell, range)
+								.sort((a, b) =>
+									Cell.distance(a, unit.cell) - Cell.distance(b, unit.cell)
+								)
+							target = neighbors[0]
+						} else if (!select.path) {
+							path = [ unit.cell ]
+						}
 					}
-					if (select.path) {
+					if (!path && select.path) {
 						let cached = select.path
 						let prev = cached[cached.length - 1]
-						if (square.type !== "attack" || Cell.distance(prev, cell) > Unit.rng(unit)) {
+						if (square.type !== "attack" || Cell.distance(prev, cell) > range) {
 							let addendum = pathfind(prev, target, opts)
 							for (let i = addendum.length; --i >= 1;) {
 								for (let j = 0; j < cached.length; j++) {
