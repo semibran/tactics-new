@@ -1,5 +1,6 @@
 import extract from "../../lib/img-extract"
 import replaceColors from "../../lib/canvas-replace"
+import * as Canvas from "../../lib/canvas"
 
 export default function disasmTag(image, palette) {
 	let tags = {}
@@ -35,6 +36,7 @@ export default function disasmTag(image, palette) {
 	}
 	oldColors = newColors
 	newColors = yellows.concat(enemyColors)
+	image = Canvas.copy(image).canvas
 	replaceColors(image, oldColors, newColors)
 	tags.enemy = {
 		start: extract(image, 0, 0, 2, 12),
