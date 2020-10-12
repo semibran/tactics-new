@@ -685,7 +685,7 @@ export function render(view) {
 		}
 		if (select && select.unit === unit) {
 			let anim = select.anim
-			if (anim && !anim.done) {
+			if (anim) {
 				if (anim.type !== "PieceMove" || state.time % 2) {
 					let ring = sprites.select.ring[unit.faction]
 					layers.markers.push({ image: ring, x: x - 2, y: y - 2, z: 0 })

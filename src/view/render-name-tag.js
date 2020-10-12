@@ -5,7 +5,10 @@ import renderTag from "./render-tag"
 export default function renderNameTag(name, faction, sprites) {
 	const { fonts, palette } = sprites
 	const pady = 2
-	let text = renderText(name, fonts.standard, { shadow: palette.jet })
+	let text = renderText(name, {
+		font: fonts.standard,
+		shadow: palette.jet
+	})
 	let width = 52
 	let height = pady + text.height - 3 + pady
 	let tag = renderTag(width, height, faction, sprites)

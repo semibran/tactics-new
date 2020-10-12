@@ -20,7 +20,9 @@ export default function renderUnitPreview(unit, sprites) {
 		let content = Canvas.create(68, 29)
 		let padx = 2
 		let label = sprites.labels.hp
-		let value = renderText(unit.stats.hp + "/" + unit.stats.hp, fonts.smallcapsRadiant)
+		let value = renderText(unit.stats.hp + "/" + unit.stats.hp, {
+			font: fonts.smallcapsRadiant
+		})
 
 		// draw hp bar
 		let health = Canvas.create(48, 3)
@@ -61,17 +63,21 @@ export default function renderUnitPreview(unit, sprites) {
 			const spacing = 21
 			let x = 0
 			let stat = unit.stats.atk
-			let value = renderText(stat, fonts.numbers, { color: palette.jet })
 			let badge = getBadge(unit, sprites.badges)
-
+			let value = renderText(stat, {
+				font: fonts.numbers,
+				color: palette.jet
+			})
 			content.drawImage(badge, x, 0)
-			// x += spacing - value.width - 3
 			content.drawImage(value, x + badge.width + 2, 1)
 
 			x += spacing
 			stat = unit.stats.hit
 			badge = sprites.badges.target
-			value = renderText(stat, fonts.numbers, { color: palette.jet })
+			value = renderText(stat, {
+				font: fonts.numbers,
+				color: palette.jet
+			})
 			content.drawImage(badge, x, 0)
 			content.drawImage(value, x + badge.width + 2, 1)
 
@@ -82,7 +88,10 @@ export default function renderUnitPreview(unit, sprites) {
 				stat = unit.stats.def
 				badge = sprites.badges.shield
 			}
-			value = renderText(stat, fonts.numbers, { color: palette.jet })
+			value = renderText(stat, {
+				font: fonts.numbers,
+				color: palette.jet
+			})
 			content.drawImage(badge, x, 0)
 			content.drawImage(value, x + badge.width + 2, 1)
 
