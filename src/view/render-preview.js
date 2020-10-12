@@ -70,14 +70,14 @@ export default function renderUnitPreview(unit, sprites) {
 			stats.fillRect(1, 0, width - 2, height)
 			stats.fillRect(0, 1, width, height - 2)
 
-			let padx = 2
+			let padx = 3
 			let pady = 1
 			let content = Canvas.create(width - padx * 2, height - pady * 2)
 
-			const spacing = 22
+			const spacing = 21
 			let x = 0
 			let stat = unit.stats.atk
-			let value = renderText(stat, fonts.six, { color: palette.jet })
+			let value = renderText(stat, fonts.numbers, { color: palette.jet })
 			let badge = sprites.badges.sword
 			if (unit.type === "mage") {
 				badge = sprites.badges[unit.stats.element]
@@ -92,14 +92,15 @@ export default function renderUnitPreview(unit, sprites) {
 			}
 
 			content.drawImage(badge, x, 0)
-			content.drawImage(value, x + spacing - value.width - 3, 1)
+			// x += spacing - value.width - 3
+			content.drawImage(value, x + badge.width + 2, 1)
 
 			x += spacing
 			stat = unit.stats.hit
 			badge = sprites.badges.target
-			value = renderText(stat, fonts.six, { color: palette.jet })
+			value = renderText(stat, fonts.numbers, { color: palette.jet })
 			content.drawImage(badge, x, 0)
-			content.drawImage(value, x + spacing - value.width - 3, 1)
+			content.drawImage(value, x + badge.width + 2, 1)
 
 			x += spacing
 			stat = unit.stats.spd
@@ -108,16 +109,16 @@ export default function renderUnitPreview(unit, sprites) {
 				stat = unit.stats.def
 				badge = sprites.badges.shield
 			}
-			value = renderText(stat, fonts.six, { color: palette.jet })
+			value = renderText(stat, fonts.numbers, { color: palette.jet })
 			content.drawImage(badge, x, 0)
-			content.drawImage(value, x + spacing - value.width - 3, 1)
+			content.drawImage(value, x + badge.width + 2, 1)
 
 			let shadowed = drawShadow(content.canvas, palette.sage)
 			stats.drawImage(shadowed, padx, pady)
 			return stats.canvas
-		})(content.canvas.width)
+		})(content.canvas.width - 4)
 
-		content.drawImage(stats, 0, label.height + 6)
+		content.drawImage(stats, 2, label.height + 6)
 		return content.canvas
 	})()
 
