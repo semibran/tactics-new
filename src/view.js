@@ -744,7 +744,7 @@ export function render(view) {
 		let attacker = state.select.unit
 		let hpleft = Canvas.copy(sprites.bars.left)
 		let [ start, end ] = getGradient(attacker, palette, true)
-		let gradient = hpleft.createLinearGradient(0, 0, 55, 0)
+		let gradient = hpleft.createLinearGradient(2, 0, 53, 0)
 		gradient.addColorStop(0, rgb(...start))
 		gradient.addColorStop(1, rgb(...end))
 		hpleft.fillStyle = gradient
@@ -758,7 +758,7 @@ export function render(view) {
 		let defender = state.target
 		let hpright = Canvas.copy(sprites.bars.right)
 		;[ start, end ] = getGradient(defender, palette)
-		gradient = hpright.createLinearGradient(0, 0, 55, 0)
+		gradient = hpright.createLinearGradient(0, 0, 53, 0)
 		gradient.addColorStop(0, rgb(...start))
 		gradient.addColorStop(1, rgb(...end))
 		hpright.fillStyle = gradient
