@@ -5,7 +5,7 @@ const matrix = [
 	[ "black",  "blue",  "red",    "green"  ],
 	[ null,     "navy",  "purple", "maroon" ],
 	[ "silver", "gray",  "coal",   "jet"    ],
-	[ "beige",  "taupe", "brown",  null     ],
+	[ "cream",  "beige", "taupe",  "brown"  ],
 	[ "yellow", "gold",  "brass",  null     ]
 ]
 
