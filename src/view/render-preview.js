@@ -21,7 +21,17 @@ export default function renderUnitPreview(unit, sprites) {
 		let start = unit.faction === "player"
 			? palette.green
 			: palette.red
-		let end = palette.lime
+		let end = palette.pink
+		if (unit.stats.hp >= 12) {
+			end = palette.blue
+		} else if (unit.stats.hp >= 10) {
+			end = palette.cyan
+		} else if (unit.stats.hp >= 8) {
+			end = palette.lime
+		} else if (unit.stats.hp >= 6) {
+			end = palette.yellow
+		}
+
 		let health = Canvas.create(42, 3)
 		let gradient = health.createLinearGradient(0, 1, health.canvas.width - 2, 1)
 		gradient.addColorStop(0, rgb(...start))
