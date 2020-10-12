@@ -7,6 +7,7 @@ import renderBox from "./render-box"
 import drawOutline from "./style-outline"
 import drawShadow from "./style-shadow"
 import getGradient from "./hp-gradient"
+import getBadge from "./unit-badge"
 
 export default function renderUnitPreview(unit, sprites) {
 	let { fonts, palette } = sprites
@@ -61,18 +62,7 @@ export default function renderUnitPreview(unit, sprites) {
 			let x = 0
 			let stat = unit.stats.atk
 			let value = renderText(stat, fonts.numbers, { color: palette.jet })
-			let badge = sprites.badges.sword
-			if (unit.type === "mage") {
-				badge = sprites.badges[unit.stats.element]
-			} else if (unit.type === "fighter") {
-				badge = sprites.badges.axe
-			} else if (unit.type === "knight") {
-				badge = sprites.badges.lance
-			} else if (unit.type === "thief") {
-				badge = sprites.badges.dagger
-			} else if (unit.type === "archer") {
-				badge = sprites.badges.bow
-			}
+			let badge = getBadge(unit, sprites.badges)
 
 			content.drawImage(badge, x, 0)
 			// x += spacing - value.width - 3

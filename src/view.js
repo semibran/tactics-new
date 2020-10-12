@@ -6,9 +6,11 @@ import * as Cell from "../lib/cell"
 import * as Canvas from "../lib/canvas"
 import rgb from "../lib/rgb"
 import pathfind from "../lib/pathfind"
+import renderText from "./view/render-text"
 import renderMap from "./view/render-map"
 import renderTag from "./view/render-name-tag"
 import renderPreview from "./view/render-preview"
+import renderCombatStats from "./view/render-combatstats"
 import getGradient from "./view/hp-gradient"
 import Anims from "./anims"
 import lerp from "lerp"
@@ -777,6 +779,20 @@ export function render(view) {
 		let deftag = renderTag(defender.name, defender.faction, sprites)
 		x = view.width + lerp(deftag.width, -4 - deftag.width, cache.vs.anim.x) + 1
 		layers.ui.unshift({ image: deftag, x, y })
+
+		let stats = renderCombatStats(attacker, defender, sprites)
+		let height = stats.height * cache.vs.anim.x
+		x = view.width / 2 - stats.width / 2
+		y = view.height * 3 / 4 + 28 - height / 2
+		layers.ui.push({ image: stats, x, y, height })
+
+		// let text = renderText(
+		// 	`Select a techw to use, then tap "GO" to initiate combat.`,
+		// 	sprites.fonts.standard
+		// )
+		// x = 3
+		// y = view.height - text.height - 1
+		// layers.ui.push({ image: text, x, y })
 	}
 
 	// render layers
