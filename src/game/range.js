@@ -55,7 +55,7 @@ export default function findRange(unit, map) {
 				&& Cell.equals(neighbor, square.cell))
 			) {
 				// different factions and not a duplicate. we can attack
-				range.squares.push({ type: "attack", cell: neighbor })
+				range.squares.push({ type: "attack", cell: neighbor, target: target })
 			}
 			// maximum steps
 			if (node.steps < mov - 1) {
@@ -94,7 +94,7 @@ export default function findRange(unit, map) {
 				if (range.squares.find(square => Cell.equals(neighbor, square.cell))) {
 					continue
 				}
-				range.squares.push({ type: "attack", cell: neighbor })
+				range.squares.push({ type: "attack", cell: neighbor, target: target })
 			}
 		}
 	}

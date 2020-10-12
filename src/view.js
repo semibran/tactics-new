@@ -225,16 +225,17 @@ export function init(view, game) {
 		hover(cell) {
 			let select = state.select
 			let unit = select.unit
-			let prev = select.path && select.path[select.path.length - 1]
-			if (prev && Cell.equals(prev, cell)) {
+			if (select.cursor && Cell.equals(select.cursor.target, cell)) {
 				return false
 			}
 			let square = cache.range.squares.find(square => {
-				return square.type === "move" && Cell.equals(square.cell, cell)
+				return Cell.equals(square.cell, cell)
+				    && (square.type === "move" || square.type === "attack" && square.target)
 			})
 
 			let path = null
 			if (square) {
+				let target = cell
 				let opts = {
 					width: map.width,
 					height: map.height,
@@ -244,17 +245,40 @@ export function init(view, game) {
 				}
 				if (select.path) {
 					let cached = select.path
-					let addendum = pathfind(prev, cell, opts)
-					let length = cached.length + addendum.length - 2
-					let backtrack = cached.find(other => Cell.equals(other, cell))
-					if (backtrack) {
-						path = cached.slice(0, cached.indexOf(backtrack) + 1)
-					} else if (length <= Unit.mov(unit)) {
-						path = cached.concat(addendum.slice(1))
+					let prev = cached[cached.length - 1]
+					if (square.type === "attack" && !Cell.adjacent(prev, cell)) {
+						let neighbors = Cell.neighbors(cell)
+							.sort((a, b) => Cell.distance(a, unit.cell) - Cell.distance(b, unit.cell))
+						target = neighbors[0]
+					}
+					if (square.type !== "attack" || !Cell.adjacent(prev, cell)) {
+						let addendum = pathfind(prev, target, opts)
+						for (let i = addendum.length; --i >= 1;) {
+							for (let j = 0; j < cached.length; j++) {
+								if (Cell.equals(addendum[i], cached[j])) {
+									path = cached.slice(0, j).concat(addendum.slice(i))
+									break
+								}
+							}
+							if (path) {
+								break
+							}
+						}
+						if (!path) {
+							let backtrack = cached.find(cell => Cell.equals(cell, target))
+							let length = cached.length + addendum.length - 2
+							if (backtrack) {
+								path = cached.slice(0, cached.indexOf(backtrack) + 1)
+							} else if (length <= Unit.mov(unit)) {
+								path = cached.concat(addendum.slice(1))
+							}
+						}
+					} else {
+						path = cached
 					}
 				}
 				if (!path) {
-					path = pathfind(unit.cell, cell, opts)
+					path = pathfind(unit.cell, target, opts)
 				}
 				if (path) {
 					if (!select.cursor) {
