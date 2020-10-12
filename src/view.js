@@ -220,6 +220,12 @@ export function init(view, game) {
 				cache.playerview.anim = exit
 				state.anims.push(exit)
 			}
+			if (cache.enemyview) {
+				let exit = Anims.PreviewExit.create(cache.enemyview.anim.x, "enemyview")
+				cache.enemyview.anim.done = true
+				cache.enemyview.anim = exit
+				state.anims.push(exit)
+			}
 			let drop = Anims.PieceDrop.create(select.anim.y)
 			state.anims.push(drop)
 			select.anim = drop
@@ -245,8 +251,8 @@ export function init(view, game) {
 						.map(unit => unit.cell)
 				}
 				if (square.target) {
-					let unit = square.target
 					if (!cache.enemyview) {
+						let unit = square.target
 						let preview = renderUnitPreview(unit, sprites)
 						let enter = Anims.PreviewEnter.create()
 						cache.enemyview = {
@@ -254,14 +260,16 @@ export function init(view, game) {
 							unit: unit,
 							anim: enter
 						}
-						console.log(unit)
 						state.anims.push(enter)
-					} else if (unit !== cache.enemyview.unit) {
-						let exit = Anims.PreviewExit.create(cache.enemyview.anim.x, "enemyview")
-						cache.enemyview.anim.done = true
-						cache.enemyview.anim = exit
-						state.anims.push(exit)
 					}
+				}
+				if (cache.enemyview
+				&& (!square.target || square.target !== cache.enemyview.unit)
+				) {
+					let exit = Anims.PreviewExit.create(cache.enemyview.anim.x, "enemyview")
+					cache.enemyview.anim.done = true
+					cache.enemyview.anim = exit
+					state.anims.push(exit)
 				}
 				if (square.type === "attack" && Cell.adjacent(unit.cell, target)) {
 					path = [ unit.cell ]

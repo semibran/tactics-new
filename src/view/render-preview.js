@@ -91,14 +91,14 @@ export default function renderUnitPreview(unit, sprites) {
 				badge = sprites.badges.bow
 			}
 			content.drawImage(badge, x, 0)
-			content.drawImage(value, x + 22 - value.width - 1, 1)
+			content.drawImage(value, x + badge.width + 2, 1)
 
 			x += 23
 			stat = unit.stats.hit
 			badge = sprites.badges.target
 			value = renderText(stat, fonts.numbers, { color: palette.jet })
 			content.drawImage(badge, x, 0)
-			content.drawImage(value, x + 22 - value.width - 1, 1)
+			content.drawImage(value, x + badge.width + 2, 1)
 
 			x += 23
 			stat = unit.stats.spd
@@ -109,7 +109,7 @@ export default function renderUnitPreview(unit, sprites) {
 			}
 			value = renderText(stat, fonts.numbers, { color: palette.jet })
 			content.drawImage(badge, x, 0)
-			content.drawImage(value, x + 22 - value.width - 1, 1)
+			content.drawImage(value, x + badge.width + 2, 1)
 
 			let shadowed = drawShadow(content.canvas, palette.taupe)
 			stats.drawImage(shadowed, padx, pady)
