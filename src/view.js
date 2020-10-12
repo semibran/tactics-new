@@ -3,9 +3,13 @@ import * as Map from "./game/map"
 import * as Unit from "./game/unit"
 import * as Game from "./game"
 import * as Cell from "../lib/cell"
+import * as Canvas from "../lib/canvas"
+import rgb from "../lib/rgb"
 import pathfind from "../lib/pathfind"
 import renderMap from "./view/render-map"
-import renderUnitPreview from "./view/render-preview"
+import renderTag from "./view/render-name-tag"
+import renderPreview from "./view/render-preview"
+import getGradient from "./view/hp-gradient"
 import Anims from "./anims"
 import lerp from "lerp"
 const tilesize = 16
@@ -30,6 +34,7 @@ export function create(width, height, sprites) {
 			},
 			selection: null,
 			target: null,
+			screen: "select",
 			pointer: {
 				pos: null,
 				time: 0,
@@ -45,7 +50,8 @@ export function create(width, height, sprites) {
 			camera: { x: 0, y: 0 },
 			cursor: { x: 0, y: 0 },
 			playerview: null,
-			enemyview: null
+			enemyview: null,
+			vs: null
 		},
 		layers: {
 			map: [],
@@ -94,7 +100,7 @@ export function init(view, game) {
 				device = switchDevice(event)
 			}
 			if (pointer.pressed) return false
-			if (anims.find(anim => anim.blocking)) {
+			if (anims.find(anim => anim.blocking) || state.screen !== "select") {
 				return false
 			}
 			pointer.time = state.time
@@ -185,7 +191,7 @@ export function init(view, game) {
 	let actions = {
 		select(unit) {
 			let range = findRange(unit, map)
-			let preview = renderUnitPreview(unit, sprites)
+			let preview = renderPreview(unit, sprites)
 			let expand = Anims.RangeExpand.create(range)
 			let enter = Anims.PreviewEnter.create()
 			let lift = Anims.PieceLift.create()
@@ -226,6 +232,7 @@ export function init(view, game) {
 				cache.enemyview.anim.done = true
 				cache.enemyview.anim = exit
 				state.anims.push(exit)
+				state.target = null
 			}
 			let drop = Anims.PieceDrop.create(select.anim.y)
 			state.anims.push(drop)
@@ -256,7 +263,7 @@ export function init(view, game) {
 				if (square.target && !cache.enemyview) {
 					// select enemy
 					let unit = square.target
-					let preview = renderUnitPreview(unit, sprites)
+					let preview = renderPreview(unit, sprites)
 					let enter = Anims.PreviewEnter.create()
 					cache.enemyview = {
 						image: preview,
@@ -264,6 +271,7 @@ export function init(view, game) {
 						anim: enter
 					}
 					state.anims.push(enter)
+					state.target = unit
 				}
 				// if we were selecting an enemy,
 				// but now the current square is empty
@@ -276,6 +284,7 @@ export function init(view, game) {
 					cache.enemyview.anim.done = true
 					cache.enemyview.anim = exit
 					state.anims.push(exit)
+					state.target = null
 				}
 				// valid if tapping an adjacent enemy to attack
 				if (square.target && !select.path && Cell.adjacent(unit.cell, target)) {
@@ -471,6 +480,8 @@ export function init(view, game) {
 			if (anim.done) {
 				state.anims.splice(i--, 1)
 				// TODO: move these into actual hooks?
+				// probably pass fns into anim data arg
+				// and call from here if existent
 				if (anim.type === "RangeShrink") {
 					cache.range = null
 				} else if (anim.type === "PreviewExit") {
@@ -478,6 +489,14 @@ export function init(view, game) {
 				} else if (anim.type === "PieceDrop") {
 					state.select = null
 				} else if (anim.type === "PieceMove") {
+					if (state.target) {
+						state.screen = "attack"
+						let enter = Anims.EaseOut.create(15)
+						cache.vs = {
+							anim: enter
+						}
+						state.anims.push(enter)
+					}
 					if (cache.playerview) {
 						let exit = Anims.PreviewExit.create(cache.playerview.anim.x, "playerview")
 						cache.playerview.anim.done = true
@@ -493,9 +512,12 @@ export function init(view, game) {
 					let unit = state.select.unit
 					Unit.move(unit, anim.cell, map)
 					Game.endTurn(unit, game)
-					state.select = null
+					state.select.anim = null
 					if (camera.follow) {
 						camera.follow = false
+					}
+					if (!state.target) {
+						state.select = null
 					}
 				}
 			}
@@ -605,7 +627,7 @@ export function render(view) {
 
 	// queue cursor
 	if (select && select.cursor
-	&& select.anim.type !== "PieceMove"
+	&& (!select.anim || select.anim && select.anim.type !== "PieceMove")
 	&& select.valid
 	&& !Cell.equals(select.cursor.target, select.unit.cell)
 	&& Map.contains(game.map, select.cursor.target)
@@ -618,7 +640,7 @@ export function render(view) {
 
 	// queue arrow
 	if (select && select.path
-	&& (select.anim.type !== "PieceMove" || state.time % 2)) {
+	&& (select.anim && (select.anim.type !== "PieceMove" || state.time % 2))) {
 		for (let node of select.arrow) {
 			let image = node.image
 			let x = origin.x + node.x
@@ -647,15 +669,17 @@ export function render(view) {
 		}
 		if (select && select.unit === unit) {
 			let anim = select.anim
-			if (anim.type !== "PieceMove" || state.time % 2) {
-				let ring = sprites.select.ring[unit.faction]
-				layers.markers.push({ image: ring, x: x - 2, y: y - 2, z: 0 })
-			}
-			if (anim.type === "PieceMove") {
-				x = origin.x + anim.cell.x * tilesize
-				y = origin.y + anim.cell.y * tilesize
-			} else {
-				z = Math.round(anim.y)
+			if (anim && !anim.done) {
+				if (anim.type !== "PieceMove" || state.time % 2) {
+					let ring = sprites.select.ring[unit.faction]
+					layers.markers.push({ image: ring, x: x - 2, y: y - 2, z: 0 })
+				}
+				if (anim.type === "PieceMove") {
+					x = origin.x + anim.cell.x * tilesize
+					y = origin.y + anim.cell.y * tilesize
+				} else {
+					z = Math.round(anim.y)
+				}
 			}
 			layer = "selection"
 		} else {
@@ -696,7 +720,7 @@ export function render(view) {
 	if (cache.playerview) {
 		const margin = 2
 		let preview = cache.playerview
-		let x = Math.round(lerp(-preview.image.width, margin, preview.anim.x))
+		let x = lerp(-preview.image.width, margin, preview.anim.x)
 		let y = view.height - preview.image.height - margin + 1
 		layers.ui.push({ image: preview.image, x, y })
 	}
@@ -705,25 +729,79 @@ export function render(view) {
 		const margin = 2
 		let preview = cache.enemyview
 		let width = preview.image.width - 1
-		let x = view.width + Math.round(lerp(width, -margin - width, preview.anim.x))
+		let x = view.width + lerp(width, -margin - width, preview.anim.x)
 		let y = view.height - preview.image.height - margin + 1
 		layers.ui.push({ image: preview.image, x, y })
+	}
+
+	if (cache.vs) {
+		let vs = sprites.vs
+		let width = vs.width * cache.vs.anim.x
+		let x = view.width / 2 - width  / 2
+		let y = view.height * 3 / 4 - vs.height / 2
+		layers.ui.push({ image: vs, x, y, width })
+
+		let attacker = state.select.unit
+		let hpleft = Canvas.copy(sprites.bars.left)
+		let [ start, end ] = getGradient(attacker, palette, true)
+		let gradient = hpleft.createLinearGradient(0, 0, 55, 0)
+		gradient.addColorStop(0, rgb(...start))
+		gradient.addColorStop(1, rgb(...end))
+		hpleft.fillStyle = gradient
+		hpleft.fillRect(6, 2, 55, 1)
+		hpleft.fillRect(7, 3, 55, 2)
+		hpleft.fillRect(8, 5, 55, 2)
+		x = lerp(-hpleft.canvas.width, 4, cache.vs.anim.x) + 1
+		y = y + 22
+		layers.ui.unshift({ image: hpleft.canvas, x, y })
+
+		let defender = state.target
+		let hpright = Canvas.copy(sprites.bars.right)
+		;[ start, end ] = getGradient(defender, palette)
+		gradient = hpright.createLinearGradient(0, 0, 55, 0)
+		gradient.addColorStop(0, rgb(...start))
+		gradient.addColorStop(1, rgb(...end))
+		hpright.fillStyle = gradient
+		hpright.fillRect(7, 2, 55, 1)
+		hpright.fillRect(6, 3, 55, 2)
+		hpright.fillRect(5, 5, 55, 2)
+		width = hpright.canvas.width
+		x = view.width + lerp(width, -4 - width, cache.vs.anim.x) + 1
+		layers.ui.unshift({ image: hpright.canvas, x, y })
+
+		let atktag = renderTag(attacker.name, attacker.faction, sprites)
+		x = lerp(-atktag.width, 4, cache.vs.anim.x) + 1
+		y = y - atktag.height - 1
+		layers.ui.unshift({ image: atktag, x, y })
+
+		let deftag = renderTag(defender.name, defender.faction, sprites)
+		x = view.width + lerp(deftag.width, -4 - deftag.width, cache.vs.anim.x) + 1
+		layers.ui.unshift({ image: deftag, x, y })
 	}
 
 	// render layers
 	for (let layername in layers) {
 		let layer = layers[layername]
-		layer.sort(zsort)
+		if (layername !== "ui") {
+			layer.sort(zsort)
+		}
 		for (let node of layer) {
 			let image = node.image
 			let x = Math.round(node.x)
 			let y = Math.round(node.y - (node.z || 0))
+			let width = Math.round(node.width)
+			let height = Math.round(node.height)
+			if (width === 0 || height === 0) {
+				continue
+			}
+			if (!width) width = image.width
+			if (!height) height = image.height
 			if (node.opacity !== undefined) {
 				context.globalAlpha = node.opacity
-				context.drawImage(image, x, y)
+				context.drawImage(image, x, y, width, height)
 				context.globalAlpha = 1
 			} else {
-				context.drawImage(image, x, y)
+				context.drawImage(image, x, y, width, height)
 			}
 		}
 	}

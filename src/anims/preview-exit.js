@@ -1,5 +1,3 @@
-import { easeOut } from "../../lib/exponential"
-
 const d = 5
 
 export function create(x, id) {

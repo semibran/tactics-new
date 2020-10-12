@@ -6,6 +6,7 @@ import renderText from "./render-text"
 import renderBox from "./render-box"
 import drawOutline from "./style-outline"
 import drawShadow from "./style-shadow"
+import getGradient from "./hp-gradient"
 
 export default function renderUnitPreview(unit, sprites) {
 	let { fonts, palette } = sprites
@@ -20,25 +21,9 @@ export default function renderUnitPreview(unit, sprites) {
 		let label = sprites.labels.hp
 		let value = renderText(unit.stats.hp + "/" + unit.stats.hp, fonts.smallcapsRadiant)
 
-		// color selection
-		// start -> green/red based on faction
-		// end -> yellow/lime/cyan/blue based on value
-		let start = unit.faction === "player"
-			? palette.green
-			: palette.red
-		let end = palette.pink
-		if (unit.stats.hp >= 14) {
-			end = palette.blue
-		} else if (unit.stats.hp >= 11) {
-			end = palette.cyan
-		} else if (unit.stats.hp >= 9) {
-			end = palette.lime
-		} else if (unit.stats.hp >= 7) {
-			end = palette.yellow
-		}
-
 		// draw hp bar
 		let health = Canvas.create(48, 3)
+		let [ start, end ] = getGradient(unit, palette)
 		let gradient = health.createLinearGradient(0, 1, health.canvas.width - 2, 1)
 		gradient.addColorStop(0, rgb(...start))
 		gradient.addColorStop(1, rgb(...end))
@@ -53,16 +38,12 @@ export default function renderUnitPreview(unit, sprites) {
 		content.drawImage(value, padx + label.width + 4, 2)
 		let shadow = Canvas.recolor(content.canvas, palette.taupe)
 
-		content.drawImage(sprites.bar, padx + label.width, 0)
+		content.drawImage(sprites.bars.small, padx + label.width, 0)
 		content.drawImage(shadow, 1, 1)
 		content.drawImage(labelshadow, 1, 1)
 		content.drawImage(health.canvas, padx + label.width + 1, 1)
 		content.drawImage(label, padx, 0)
 		content.drawImage(value, padx + label.width + 4, 2)
-
-		// line
-		content.fillStyle = rgb(...palette.taupe)
-		content.fillRect(2, label.height + 3, content.canvas.width - 4, 1)
 
 		// stats
 		let stats = (width => {
@@ -120,12 +101,16 @@ export default function renderUnitPreview(unit, sprites) {
 			return stats.canvas
 		})(content.canvas.width - 4)
 
+		// line
+		content.fillStyle = rgb(...palette.taupe)
+		content.fillRect(2, label.height + 3, content.canvas.width - 4, 1)
+
 		let shadowed = drawShadow(stats, palette.sage)
 		content.drawImage(shadowed, 2, label.height + 6)
 		return content.canvas
 	})()
 
-	let box = renderBox(76, content.height + 9, sprites)
+	let box = renderBox(76, content.height + 8, sprites)
 		.getContext("2d")
 	let preview = Canvas.create(box.canvas.width, box.canvas.height + 9)
 	box.drawImage(content, 4, 6)
