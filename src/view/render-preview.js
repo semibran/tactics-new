@@ -15,7 +15,7 @@ export default function renderUnitPreview(unit, sprites) {
 
 	// health bar
 	let content = (_ => {
-		let content = Canvas.create(68, 26)
+		let content = Canvas.create(68, 29)
 		let padx = 2
 		let label = sprites.labels.hp
 		let value = renderText(unit.stats.hp + "/" + unit.stats.hp, fonts.smallcapsRadiant)
@@ -49,11 +49,13 @@ export default function renderUnitPreview(unit, sprites) {
 
 		// pre-shadow prep
 		content.drawImage(label, padx, 0)
+		let labelshadow = Canvas.recolor(content.canvas, palette.taupe)
 		content.drawImage(value, padx + label.width + 4, 2)
 		let shadow = Canvas.recolor(content.canvas, palette.taupe)
 
 		content.drawImage(sprites.bar, padx + label.width, 0)
 		content.drawImage(shadow, 1, 1)
+		content.drawImage(labelshadow, 1, 1)
 		content.drawImage(health.canvas, padx + label.width + 1, 1)
 		content.drawImage(label, padx, 0)
 		content.drawImage(value, padx + label.width + 4, 2)
@@ -118,11 +120,12 @@ export default function renderUnitPreview(unit, sprites) {
 			return stats.canvas
 		})(content.canvas.width - 4)
 
-		content.drawImage(stats, 2, label.height + 6)
+		let shadowed = drawShadow(stats, palette.sage)
+		content.drawImage(shadowed, 2, label.height + 6)
 		return content.canvas
 	})()
 
-	let box = renderBox(76, content.height + 10, sprites)
+	let box = renderBox(76, content.height + 9, sprites)
 		.getContext("2d")
 	let preview = Canvas.create(box.canvas.width, box.canvas.height + 9)
 	box.drawImage(content, 4, 6)
