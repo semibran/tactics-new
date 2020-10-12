@@ -18,11 +18,17 @@ export default function disasmBadges(image, palette) {
 	]
 	replaceColors(image, oldColors, newColors)
 	return {
-		sword:  extract(image,  0, 0, 8, 8),
-		target: extract(image,  8, 0, 8, 8),
-		fire:   extract(image, 16, 0, 8, 8),
-		shield: extract(image,  0, 8, 8, 8),
-		boot:   extract(image,  8, 8, 8, 8),
-		axe:    extract(image, 16, 8, 8, 8)
+		sword:  extract(image,  0,  0, 8, 8),
+		lance:  extract(image,  8,  0, 8, 8),
+		axe:    extract(image, 16,  0, 8, 8),
+		bow:    extract(image, 24,  0, 8, 8),
+		shield: extract(image,  0,  8, 8, 8),
+		target: extract(image,  8,  8, 8, 8),
+		wing:   extract(image, 16,  8, 8, 8),
+		dagger: extract(image, 24,  8, 8, 8),
+		fire:   extract(image,  0, 16, 8, 8),
+		ice:    extract(image,  8, 16, 8, 8),
+		volt:   extract(image, 16, 16, 8, 8),
+		dark:   extract(image, 24, 16, 8, 8)
 	}
 }

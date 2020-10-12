@@ -79,9 +79,15 @@ export default function renderUnitPreview(unit, sprites) {
 			let value = renderText(stat, fonts.numbers, { color: palette.jet })
 			let badge = sprites.badges.sword
 			if (unit.type === "mage") {
-				badge = sprites.badges.fire
+				badge = sprites.badges[unit.stats.element]
 			} else if (unit.type === "fighter") {
 				badge = sprites.badges.axe
+			} else if (unit.type === "knight") {
+				badge = sprites.badges.lance
+			} else if (unit.type === "thief") {
+				badge = sprites.badges.dagger
+			} else if (unit.type === "archer") {
+				badge = sprites.badges.bow
 			}
 			content.drawImage(badge, x, 0)
 			content.drawImage(value, x + badge.width + 2, 1)
@@ -95,7 +101,7 @@ export default function renderUnitPreview(unit, sprites) {
 
 			x += 21
 			stat = unit.stats.spd
-			badge = sprites.badges.boot
+			badge = sprites.badges.wing
 			if (unit.stats.def > unit.stats.spd) {
 				stat = unit.stats.def
 				badge = sprites.badges.shield
