@@ -12,8 +12,8 @@ export default function disasmBadges(image, palette) {
 	]
 	let newColors = [
 		palette.white,
-		palette.silver,
-		palette.gray,
+		palette.cyan,
+		palette.coal,
 		palette.jet
 	]
 	replaceColors(image, oldColors, newColors)

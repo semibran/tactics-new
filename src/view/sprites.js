@@ -5,6 +5,7 @@ import disasmPalette from "./palette"
 import disasmIcons from "./disasm-icons"
 import disasmSelect from "./disasm-select"
 import disasmSquares from "./disasm-squares"
+import disasmVs from "./disasm-vs"
 import disasmBars from "./disasm-bars"
 import disasmTag from "./disasm-tag"
 import disasmLabels from "./disasm-labels"
@@ -23,7 +24,7 @@ export default function normalize(spritesheet) {
 		Arrow: (path, faction) =>
 			renderArrow(select.arrows[faction], path),
 		squares: disasmSquares(),
-		vs: images.vs,
+		vs: disasmVs(images.vs, palette),
 		tag: disasmTag(images.tag, palette),
 		bars: disasmBars(images.bars, palette),
 		labels: disasmLabels(images.labels, palette),
