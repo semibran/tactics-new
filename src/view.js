@@ -243,17 +243,17 @@ export function init(view, game) {
 						.filter(other => !Unit.allied(unit, other))
 						.map(unit => unit.cell)
 				}
-				if (Cell.adjacent(unit.cell, target)) {
+				if (square.type === "attack" && Cell.adjacent(unit.cell, target)) {
 					path = [ unit.cell ]
 				} else if (select.path) {
 					let cached = select.path
 					let prev = cached[cached.length - 1]
-					if (square.type === "attack" && !Cell.adjacent(prev, cell)) {
+					if (square.type === "attack" && Cell.distance(prev, cell) > Unit.rng(unit)) {
 						let neighbors = Cell.neighbors(cell)
 							.sort((a, b) => Cell.distance(a, unit.cell) - Cell.distance(b, unit.cell))
 						target = neighbors[0]
 					}
-					if (square.type !== "attack" || !Cell.adjacent(prev, cell)) {
+					if (square.type !== "attack" || Cell.distance(prev, cell) > Unit.rng(unit)) {
 						let addendum = pathfind(prev, target, opts)
 						for (let i = addendum.length; --i >= 1;) {
 							for (let j = 0; j < cached.length; j++) {
