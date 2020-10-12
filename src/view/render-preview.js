@@ -50,9 +50,8 @@ export default function renderUnitPreview(unit, sprites) {
 		// pre-shadow prep
 		content.drawImage(label, padx, 0)
 		content.drawImage(value, padx + label.width + 4, 2)
-
-		// shadow label + value, then redraw
 		let shadow = Canvas.recolor(content.canvas, palette.taupe)
+
 		content.drawImage(sprites.bar, padx + label.width, 0)
 		content.drawImage(shadow, 1, 1)
 		content.drawImage(health.canvas, padx + label.width + 1, 1)

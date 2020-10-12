@@ -29,6 +29,7 @@ export function create(width, height, sprites) {
 				target: { x: 0, y: 0 }
 			},
 			selection: null,
+			target: null,
 			pointer: {
 				pos: null,
 				time: 0,
@@ -250,28 +251,34 @@ export function init(view, game) {
 						.filter(other => !Unit.allied(unit, other))
 						.map(unit => unit.cell)
 				}
-				if (square.target) {
-					if (!cache.enemyview) {
-						let unit = square.target
-						let preview = renderUnitPreview(unit, sprites)
-						let enter = Anims.PreviewEnter.create()
-						cache.enemyview = {
-							image: preview,
-							unit: unit,
-							anim: enter
-						}
-						state.anims.push(enter)
+				// if there's an enemy in this square
+				// (and no enemy is currently selected)
+				if (square.target && !cache.enemyview) {
+					// select enemy
+					let unit = square.target
+					let preview = renderUnitPreview(unit, sprites)
+					let enter = Anims.PreviewEnter.create()
+					cache.enemyview = {
+						image: preview,
+						unit: unit,
+						anim: enter
 					}
+					state.anims.push(enter)
 				}
+				// if we were selecting an enemy,
+				// but now the current square is empty
+				// or houses a different unit than before
 				if (cache.enemyview
 				&& (!square.target || square.target !== cache.enemyview.unit)
 				) {
+					// deselect enemy
 					let exit = Anims.PreviewExit.create(cache.enemyview.anim.x, "enemyview")
 					cache.enemyview.anim.done = true
 					cache.enemyview.anim = exit
 					state.anims.push(exit)
 				}
-				if (!select.path && square.type === "attack" && Cell.adjacent(unit.cell, target)) {
+				// valid if tapping an adjacent enemy to attack
+				if (square.target && !select.path && Cell.adjacent(unit.cell, target)) {
 					path = [ unit.cell ]
 				} else {
 					let prev = select.path
@@ -279,16 +286,25 @@ export function init(view, game) {
 						: unit.cell
 					let range = Unit.rng(unit)
 					if (square.type === "attack") {
+						// if out of range
 						if (Cell.distance(prev, cell) > range) {
+							// prep closest attacking square for pathfinding
 							let neighbors = Cell.neighborhood(cell, range)
 								.sort((a, b) =>
 									Cell.distance(a, unit.cell) - Cell.distance(b, unit.cell)
 								)
 							target = neighbors[0]
 						} else if (!select.path) {
+							// valid if tapping an enemy in range to attack
 							path = [ unit.cell ]
 						}
 					}
+					// if we still don't have a path,
+					// the square covers one of three cases:
+					// 1. it's an attack target, but out of range
+					// 2. it's a move target, and we have a cached path to build off of
+					// 3. it's a move target, and we don't have a cached path
+					// the below conditional covers cases (1) and (2).
 					if (!path && select.path) {
 						let cached = select.path
 						let prev = cached[cached.length - 1]
@@ -315,10 +331,13 @@ export function init(view, game) {
 								}
 							}
 						} else {
+							// is an attack square but in range;
+							// use cached path
 							path = cached
 						}
 					}
 				}
+				// case (3): no path yet. just do a full pathfind
 				if (!path) {
 					path = pathfind(unit.cell, target, opts)
 				}
@@ -678,7 +697,7 @@ export function render(view) {
 		const margin = 2
 		let preview = cache.playerview
 		let x = Math.round(lerp(-preview.image.width, margin, preview.anim.x))
-		let y = view.height - preview.image.height - margin
+		let y = view.height - preview.image.height - margin + 1
 		layers.ui.push({ image: preview.image, x, y })
 	}
 
@@ -687,7 +706,7 @@ export function render(view) {
 		let preview = cache.enemyview
 		let width = preview.image.width - 1
 		let x = view.width + Math.round(lerp(width, -margin - width, preview.anim.x))
-		let y = view.height - preview.image.height - margin
+		let y = view.height - preview.image.height - margin + 1
 		layers.ui.push({ image: preview.image, x, y })
 	}
 
