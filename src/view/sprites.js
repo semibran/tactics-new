@@ -26,7 +26,7 @@ export default function normalize(spritesheet) {
 		tag: disasmTag(images.tag, palette),
 		bar: disasmBar(images.bar, palette),
 		labels: disasmLabels(images.labels, palette),
-		badges: disasmBadges(palette, icons),
+		badges: disasmBadges(images.badges, palette),
 		pieces: disasmPieces(images.piece, icons, palette),
 		fonts: disasmFonts(images, fonts, palette)
 	}

@@ -1,37 +1,28 @@
-import * as Canvas from "../../lib/canvas"
+import replaceColors from "../../lib/canvas-replace"
+import extract from "../../lib/img-extract"
 import rgb from "../../lib/rgb"
 import stroke from "./style-stroke"
 
-export default function disasmBadges(palette, icons) {
-	let badges = {}
-	for (let faction in palette.factions) {
-		let subpal = palette.factions[faction]
-		let badge = Canvas.create(4, 4)
-		badge.fillStyle = rgb(...palette.jet)
-		badge.fillRect(1, 0, 2, 4)
-		badge.fillRect(0, 1, 4, 2)
-		badge.fillStyle = rgb(...subpal.normal)
-		badge.fillRect(1, 1, 2, 2)
-		badge.fillStyle = rgb(...subpal.light)
-		badge.fillRect(2, 1, 1, 1)
-		badges[faction] = badge.canvas
+export default function disasmBadges(image, palette) {
+	let oldColors = [
+		[ 255, 255, 255, 255 ],
+		[ 204, 204, 204, 255 ],
+		[ 102, 102, 102, 255 ],
+		[   0,   0,   0, 255 ],
+	]
+	let newColors = [
+		palette.white,
+		palette.silver,
+		palette.gray,
+		palette.jet
+	]
+	replaceColors(image, oldColors, newColors)
+	return {
+		sword:  extract(image,  0, 0, 8, 8),
+		target: extract(image,  8, 0, 8, 8),
+		fire:   extract(image, 16, 0, 8, 8),
+		shield: extract(image,  0, 8, 8, 8),
+		boot:   extract(image,  8, 8, 8, 8),
+		axe:    extract(image, 16, 8, 8, 8)
 	}
-
-	let base = Canvas.create(8, 8)
-	base.fillStyle = rgb(...palette.jet)
-	base.fillRect(1, 0, 6, 8)
-	base.fillRect(0, 1, 8, 6)
-	base.fillStyle = rgb(...palette.gray)
-	base.fillRect(1, 1, 6, 6)
-	badges.base = base.canvas
-
-	for (let iconname in icons.types) {
-		let unittype = icons.types[iconname]
-		let icon = stroke(icons.small[iconname], palette.jet)
-		let badge = Canvas.copy(base.canvas)
-		badge.drawImage(icon, 0, 0)
-		badges[unittype] = badge.canvas
-	}
-
-	return badges
 }
