@@ -10,7 +10,7 @@ export default function renderUnitPreview(unit, sprites) {
 	let { fonts, palette } = sprites
 
 	// unit name
-	let tag = renderTag(unit.name, sprites)
+	let tag = renderTag(unit.name, unit.faction, sprites)
 
 	// health bar
 	let hp = (_ => {
