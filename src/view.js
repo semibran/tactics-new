@@ -165,6 +165,7 @@ export function init(view, game) {
 			if (state.mode === "attack") {
 				Unit.move(state.select.unit, state.select.src, map)
 				cache.forecast = null
+				cache.range = null
 				state.mode = "select"
 				state.dirty = true
 				state.select = null
@@ -504,7 +505,9 @@ export function init(view, game) {
 				// probably pass fns into anim data arg
 				// and call from here if existent
 				if (anim.type === "RangeShrink") {
-					cache.range = null
+					if (!state.anims.find(anim => anim.type === "RangeExpand")) {
+						cache.range = null
+					}
 				} else if (anim.type === "PreviewExit") {
 					cache[anim.id] = null
 				} else if (anim.type === "PieceDrop") {
@@ -539,6 +542,15 @@ export function init(view, game) {
 
 						let attacker = state.select.unit
 						let defender = state.target
+						let range = {
+							center: attacker.cell,
+							range: Unit.rng(attacker),
+							squares: Cell.neighborhood(attacker.cell, Unit.rng(attacker))
+								.map(cell => ({ cell, type: "attack" }))
+						}
+						let expand = Anims.RangeExpand.create(range)
+						state.anims.push(expand)
+						cache.range = expand.range
 						cache.forecast = {
 							vs: {
 								image: sprites.vs,
@@ -714,9 +726,9 @@ export function render(view) {
 	for (let unit of game.map.units) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let cell = unit.cell
-		let z = 0
 		let x = origin.x + cell.x * tilesize
 		let y = origin.y + cell.y * tilesize
+		let z = 0
 		let layer = null
 		if (game.phase.faction === unit.faction) {
 			if (game.phase.pending.includes(unit)) {
