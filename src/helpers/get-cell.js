@@ -4,8 +4,8 @@
 export default function getCell(pos, map, camera) {
 	// undo scaling
 	let realpos = {
-		x: (pos.x - window.innerWidth / 2) / camera.zoom,
-		y: (pos.y - window.innerHeight / 2) / camera.zoom,
+		x: (pos.x - camera.width / 2) / camera.zoom,
+		y: (pos.y - camera.height / 2) / camera.zoom,
 	}
 	// relative to top left corner of map
 	let gridpos = {
@@ -14,7 +14,7 @@ export default function getCell(pos, map, camera) {
 	}
 	// fix to tiles
 	return {
-		x: Math.floor(gridpos.x / tilesize),
-		y: Math.floor(gridpos.y / tilesize)
+		x: Math.floor(gridpos.x / map.tilesize),
+		y: Math.floor(gridpos.y / map.tilesize)
 	}
 }

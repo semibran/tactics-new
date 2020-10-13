@@ -6,8 +6,8 @@ import renderText from "./render-text"
 import renderBox from "./render-box"
 import drawOutline from "./style-outline"
 import drawShadow from "./style-shadow"
-import getGradient from "./hp-gradient"
 import getBadge from "./unit-badge"
+import getGradient from "../helpers/hp-gradient"
 
 export default function renderUnitPreview(unit, sprites) {
 	let { fonts, palette } = sprites

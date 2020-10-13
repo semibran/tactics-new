@@ -18,6 +18,11 @@ export function create(width, height, sprites) {
 		native: { width, height },
 		sprites: sprites,
 		element: document.createElement("canvas"),
+		viewport: {
+			width: window.innerWidth,
+			height: window.innerHeight,
+			scale: 1
+		},
 		screen: null,
 		time: 0,
 		dirty: false,
@@ -27,14 +32,6 @@ export function create(width, height, sprites) {
 			mode: null,
 			time: 0
 		},
-		camera: {
-			width: window.innerWidth,
-			height: window.innerHeight,
-			zoom: 1,
-			pos: { x: 0, y: 0 },
-			vel: { x: 0, y: 0 },
-			target: { x: 0, y: 0 }
-		},
 		cache: {
 			nodes: [],
 			camera: { x: 0, y: 0 }
@@ -43,9 +40,10 @@ export function create(width, height, sprites) {
 }
 
 export function init(view, game) {
-	let { sprites, camera, pointer } = view
+	let { viewport, sprites, pointer } = view
 
-	let screen = screens.Game.init(game, sprites)
+	let Screen = screens.Game
+	let screen = Screen.init(game, sprites)
 	let map = screen.map
 	view.screen = screen
 
@@ -56,14 +54,19 @@ export function init(view, game) {
 	function onresize() {
 		let scaleX = Math.max(1, Math.floor(window.innerWidth / view.native.width))
 		let scaleY = Math.max(1, Math.floor(window.innerHeight / view.native.height))
-		camera.zoom = Math.min(scaleX, scaleY)
-		camera.width = Math.ceil(window.innerWidth / camera.zoom)
-		camera.height = Math.ceil(window.innerHeight / camera.zoom)
+		viewport.scale = Math.min(scaleX, scaleY)
+		viewport.width = Math.ceil(window.innerWidth / viewport.scale)
+		viewport.height = Math.ceil(window.innerHeight / viewport.scale)
 
 		let canvas = view.element
-		canvas.width = camera.width
-		canvas.height = camera.height
-		canvas.style.transform = `scale(${ camera.zoom })`
+		canvas.width = viewport.width
+		canvas.height = viewport.height
+		canvas.style.transform = `scale(${ viewport.scale })`
+
+		// resize hook
+		if (Screen.resize) {
+			Screen.resize(viewport, screen)
+		}
 	}
 
 	let device = null
@@ -85,7 +88,11 @@ export function init(view, game) {
 			pointer.time = view.time
 			pointer.mode = "click"
 			pointer.presspos = pointer.pos
-			screens[screen.id].press(pointer.pos)
+
+			// press hook
+			if (Screen.press) {
+				Screen.press(pointer.pos, screen)
+			}
 		},
 		move(event) {
 			pointer.pos = getPosition(event)
@@ -153,9 +160,10 @@ export function render(view) {
 
 	// queue nodes
 	let screen = view.screen
-	let screennodes = screens[screen.id].render(screen, view)
+	let Screen = screens[screen.id]
+	let screennodes = Screen.render(screen, view)
 	nodes.push(...screennodes)
 
 	// draw on canvas
-	drawNodes(nodes, screens[screen.id].layerseq, context)
+	drawNodes(nodes, Screen.layerseq, context)
 }

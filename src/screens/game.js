@@ -3,6 +3,7 @@ import * as Select from "./game-select"
 import * as Forecast from "./game-forecast"
 import renderMap from "../view/render-map"
 import getOrigin from "../helpers/get-origin"
+import getCell from "../helpers/get-cell"
 
 export const tilesize = 16
 export const layerseq = [ "map", "shadows", "pieces", "ui" ]
@@ -20,14 +21,29 @@ export function init(data, sprites) {
 		data: data,
 		anims: [],
 		map: map,
+		camera: {
+			width: 0,
+			height: 0,
+			zoom: 0,
+			pos: { x: 0, y: 0 },
+			vel: { x: 0, y: 0 },
+			target: { x: 0, y: 0 }
+		},
 		pointer: {
 			unit: null
 		}
 	}
 }
 
-export function press(pos) {
-	console.log(pos)
+export function resize(viewport, screen) {
+	screen.camera.width = viewport.width
+	screen.camera.height = viewport.height
+	screen.camera.zoom = viewport.scale
+}
+
+export function press(pos, screen) {
+	let cell = getCell(pos, screen.map, screen.camera)
+	console.log(cell)
 }
 
 export function move() {
@@ -51,12 +67,16 @@ export function move() {
 	}
 }
 
+export function update() {
+	// call mode hooks (for home press and hold)
+}
+
 export function render(screen, view) {
 	let game = screen.data
 	let map = screen.map
 	let sprites = view.sprites
 	let nodes = []
-	let origin = getOrigin(map, view.camera)
+	let origin = getOrigin(map, screen.camera)
 
 	// queue map
 	nodes.push({
