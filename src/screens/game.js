@@ -19,8 +19,15 @@ export function init(data, sprites) {
 		id: "Game",
 		data: data,
 		anims: [],
-		map: map
+		map: map,
+		pointer: {
+			unit: null
+		}
 	}
+}
+
+export function press(pos) {
+	console.log(pos)
 }
 
 export function move() {

@@ -23,9 +23,9 @@ export function create(width, height, sprites) {
 		dirty: false,
 		pointer: {
 			pos: null,
-			time: 0,
+			presspos: null,
 			mode: null,
-			pressed: null
+			time: 0
 		},
 		camera: {
 			width: window.innerWidth,
@@ -74,7 +74,7 @@ export function init(view, game) {
 		},
 		press(event) {
 			if (!device) device = switchDevice(event)
-			if (pointer.pressed) return false
+			if (pointer.presspos) return false
 
 			// attempt to detect pointer position
 			// if we fail, ignore the event
@@ -84,282 +84,27 @@ export function init(view, game) {
 			// click is within bounds, we can use it
 			pointer.time = view.time
 			pointer.mode = "click"
-			pointer.pressed = pointer.pos
-			console.log(pointer.pos)
+			pointer.presspos = pointer.pos
+			screens[screen.id].press(pointer.pos)
 		},
 		move(event) {
 			pointer.pos = getPosition(event)
-			if (!pointer.pos || !pointer.pressed) return false
+			if (!pointer.pos || !pointer.presspos) return false
 			if (pointer.mode === "click") {
 				let cursor = pointer.pos
-				let origin = pointer.pressed
+				let origin = pointer.presspos
 				const maxdist = 3
 				if (getQuadrance(origin, cursor) > Math.pow(maxdist, 2)) {
 					pointer.mode = "drag"
 				}
 			}
-			if (!pointer.select) {
-				actions.panCamera(camera, pointer)
-				return
-			}
-			let cursor = getCell(pointer.pos)
-			if (!Cell.equals(pointer.select, cursor)) {
-				actions.hover(cursor)
-			}
 		},
 		release(event) {
-			if (!pointer.pressed) return false
-			pointer.clicking = false
-			pointer.unit = null
-			pointer.select = false
-			pointer.pressed = null
+			if (!pointer.presspos) return false
+			pointer.mode = null
+			pointer.presspos = null
 		}
 	}
-
-	/*
-	// let actions = {
-	// 	select(unit) {
-	// 		let range = findRange(unit, map)
-	// 		let preview = renderPreview(unit, sprites)
-	// 		let expand = Anims.RangeExpand.create(range)
-	// 		let enter = Anims.PreviewEnter.create()
-	// 		let lift = Anims.PieceLift.create()
-	// 		state.anims.push(expand, enter, lift)
-	// 		state.select = {
-	// 			unit: unit,
-	// 			anim: lift,
-	// 			path: null,
-	// 			arrow: null,
-	// 			cursor: null,
-	// 			valid: false
-	// 		}
-	// 		cache.range = expand.range
-	// 		cache.playerview = {
-	// 			image: preview,
-	// 			anim: enter
-	// 		}
-	// 		if (!pointer.select && game.phase.pending.includes(unit)) {
-	// 			actions.centerCamera(unit.cell)
-	// 		}
-	// 	},
-	// 	deselect() {
-	// 		if (!state.select) return false
-	// 		let select = state.select
-	// 		select.anim.done = true
-	// 		if (cache.range) {
-	// 			let shrink = Anims.RangeShrink.create(cache.range)
-	// 			state.anims.push(shrink)
-	// 		}
-	// 		if (cache.playerview) {
-	// 			let exit = Anims.PreviewExit.create(cache.playerview.anim.x, "playerview")
-	// 			cache.playerview.anim.done = true
-	// 			cache.playerview.anim = exit
-	// 			state.anims.push(exit)
-	// 		}
-	// 		if (cache.enemyview) {
-	// 			let exit = Anims.PreviewExit.create(cache.enemyview.anim.x, "enemyview")
-	// 			cache.enemyview.anim.done = true
-	// 			cache.enemyview.anim = exit
-	// 			state.anims.push(exit)
-	// 			state.target = null
-	// 		}
-	// 		let drop = Anims.PieceDrop.create(select.anim.y)
-	// 		state.anims.push(drop)
-	// 		select.anim = drop
-	// 	},
-	// 	hover(cell) {
-	// 		let select = state.select
-	// 		let unit = select.unit
-	// 		if (select.cursor && Cell.equals(select.cursor.target, cell)) {
-	// 			return false
-	// 		}
-	// 		let square = cache.range.squares.find(square => {
-	// 			return Cell.equals(square.cell, cell)
-	// 			    && (square.type === "move" || square.type === "attack" && square.target)
-	// 		})
-	// 		let path = null
-	// 		if (square) {
-	// 			let target = cell
-	// 			let opts = {
-	// 				width: map.width,
-	// 				height: map.height,
-	// 				blacklist: map.units // make enemy units unwalkable
-	// 					.filter(other => !Unit.allied(unit, other))
-	// 					.map(unit => unit.cell)
-	// 			}
-	// 			// if there's an enemy in this square
-	// 			// (and no enemy is currently selected)
-	// 			if (square.target && !cache.enemyview) {
-	// 				// select enemy
-	// 				let unit = square.target
-	// 				let preview = renderPreview(unit, sprites)
-	// 				let enter = Anims.PreviewEnter.create()
-	// 				cache.enemyview = {
-	// 					image: preview,
-	// 					unit: unit,
-	// 					anim: enter
-	// 				}
-	// 				state.anims.push(enter)
-	// 				state.target = unit
-	// 			}
-	// 			// if we were selecting an enemy,
-	// 			// but now the current square is empty
-	// 			// or houses a different unit than before
-	// 			if (cache.enemyview
-	// 			&& (!square.target || square.target !== cache.enemyview.unit)
-	// 			) {
-	// 				// deselect enemy
-	// 				let exit = Anims.PreviewExit.create(cache.enemyview.anim.x, "enemyview")
-	// 				cache.enemyview.anim.done = true
-	// 				cache.enemyview.anim = exit
-	// 				state.anims.push(exit)
-	// 				state.target = null
-	// 			}
-	// 			// valid if tapping an adjacent enemy to attack
-	// 			if (square.target && !select.path && Cell.adjacent(unit.cell, target)) {
-	// 				path = [ unit.cell ]
-	// 			} else {
-	// 				let prev = select.path
-	// 					? select.path[select.path.length - 1]
-	// 					: unit.cell
-	// 				let range = Unit.rng(unit)
-	// 				if (square.type === "attack") {
-	// 					// if out of range
-	// 					if (Cell.distance(prev, cell) > range) {
-	// 						// prep closest attacking square for pathfinding
-	// 						let neighbors = Cell.neighborhood(cell, range)
-	// 							.filter(cell => !map.units.find(unit => Cell.equals(cell, unit.cell)))
-	// 							.sort((a, b) =>
-	// 								Cell.distance(a, unit.cell) - Cell.distance(b, unit.cell)
-	// 							)
-	// 						target = neighbors[0]
-	// 					} else if (!select.path) {
-	// 						// valid if tapping an enemy in range to attack
-	// 						path = [ unit.cell ]
-	// 					}
-	// 				}
-	// 				// if we still don't have a path,
-	// 				// the square covers one of three cases:
-	// 				// 1. it's an attack target, but out of range
-	// 				// 2. it's a move target, and we have a cached path to build off of
-	// 				// 3. it's a move target, and we don't have a cached path
-	// 				// the below conditional covers cases (1) and (2).
-	// 				if (!path && target && select.path) {
-	// 					let cached = select.path
-	// 					let prev = cached[cached.length - 1]
-	// 					if (square.type !== "attack" || Cell.distance(prev, cell) > range) {
-	// 						let addendum = pathfind(prev, target, opts)
-	// 						for (let i = addendum.length; --i >= 1;) {
-	// 							for (let j = 0; j < cached.length; j++) {
-	// 								if (Cell.equals(addendum[i], cached[j])) {
-	// 									path = cached.slice(0, j).concat(addendum.slice(i))
-	// 									break
-	// 								}
-	// 							}
-	// 							if (path) {
-	// 								break
-	// 							}
-	// 						}
-	// 						if (!path) {
-	// 							let backtrack = cached.find(cell => Cell.equals(cell, target))
-	// 							let length = cached.length + addendum.length - 2
-	// 							if (backtrack) {
-	// 								path = cached.slice(0, cached.indexOf(backtrack) + 1)
-	// 							} else if (length <= Unit.mov(unit)) {
-	// 								path = cached.concat(addendum.slice(1))
-	// 							}
-	// 						}
-	// 					} else {
-	// 						// is an attack square but in range;
-	// 						// use cached path
-	// 						path = cached
-	// 					}
-	// 				}
-	// 			}
-	// 			// case (3): no path yet. just do a full pathfind
-	// 			if (!path) {
-	// 				path = pathfind(unit.cell, target, opts)
-	// 			}
-	// 			if (path) {
-	// 				if (!select.cursor) {
-	// 					select.cursor = {
-	// 						pos: { x: cell.x * tilesize, y: cell.y * tilesize },
-	// 						target: cell
-	// 					}
-	// 				} else {
-	// 					select.cursor.target = cell
-	// 				}
-	// 				select.arrow = sprites.Arrow(path, unit.faction)
-	// 				select.path = path
-	// 				select.valid = true
-	// 				return true
-	// 			}
-	// 		}
-	// 		if (!path) {
-	// 			if (select.cursor) {
-	// 				select.cursor = null
-	// 				// select.cursor.target = cell
-	// 			}
-	// 			// select.arrow = null
-	// 			// select.path = null
-	// 			select.valid = false
-	// 			return false
-	// 		}
-	// 	},
-	// 	unhover() {
-	// 		let select = state.select
-	// 		select.cursor = null
-	// 		select.arrow = null
-	// 		select.path = null
-	// 		select.valid = false
-	// 	},
-	// 	move(unit, cursor) {
-	// 		if (!state.select) return false
-	// 		let select = state.select
-	// 		if (cache.range) {
-	// 			let shrink = Anims.RangeShrink.create(cache.range)
-	// 			state.anims.push(shrink)
-	// 		}
-	// 		if (select.path) {
-	// 			let move = Anims.PieceMove.create(select.path)
-	// 			select.anim.done = true
-	// 			select.anim = move
-	// 			state.anims.push(move)
-	// 		}
-	// 		state.select.src = state.select.unit.cell
-	// 		state.select.dest = select.path[select.path.length - 1]
-	// 		if (pointer.clicking) {
-	// 			camera.follow = true
-	// 		} else {
-	// 			actions.centerCamera(cursor)
-	// 		}
-	// 	},
-	// 	panCamera(camera, pointer) {
-	// 		camera.target.x = (pointer.pos.x - pointer.pressed.x + pointer.offset.x) / view.scale
-	// 		camera.target.y = (pointer.pos.y - pointer.pressed.y + pointer.offset.y) / view.scale
-	//
-	// 		let left = view.width / 2
-	// 		let right = -view.width / 2
-	// 		let top = view.height / 2
-	// 		let bottom = -view.height / 2
-	// 		if (camera.target.x > left) {
-	// 			camera.target.x = left
-	// 		} else if (camera.target.x < right) {
-	// 			camera.target.x = right
-	// 		}
-	// 		if (camera.target.y > top) {
-	// 			camera.target.y = top
-	// 		} else if (camera.target.y < bottom) {
-	// 			camera.target.y = bottom
-	// 		}
-	// 	},
-	// 	centerCamera(cell) {
-	// 		camera.focus = cell
-	// 		camera.target.x = cache.map.width / 2 - (cell.x + 0.5) * tilesize
-	// 		camera.target.y = cache.map.height / 2 - (cell.y + 0.5) * tilesize
-	// 	}
-	// }
-	*/
 
 	function update() {
 		view.time++
@@ -368,117 +113,6 @@ export function init(view, game) {
 			render(view)
 		}
 	}
-
-	/*
-	//
-	// 	if (!state.select && !pointer.select && pointer.unit && state.time - pointer.time === 20) {
-	// 		if (game.phase.pending.includes(pointer.unit)) {
-	// 			pointer.select = true
-	// 		}
-	// 		actions.select(pointer.unit)
-	// 	}
-	//
-	// 	// center camera on moving pieces
-	// 	if (camera.follow && state.select && state.select.anim.type === "PieceMove") {
-	// 		let anim = state.select.anim
-	// 		actions.centerCamera(anim.cell)
-	// 	}
-	//
-	// 	// rerender if camera is at least a pixel off from its drawn position
-	// 	if (Math.round(cache.camera.x) !== Math.round(camera.pos.x)
-	// 	|| Math.round(cache.camera.y) !== Math.round(camera.pos.y)) {
-	// 		cache.camera.x = camera.pos.x
-	// 		cache.camera.y = camera.pos.y
-	// 		state.dirty = true
-	// 	}
-	//
-	// 	// update camera position
-	// 	camera.pos.x += camera.vel.x
-	// 	camera.pos.y += camera.vel.y
-	// 	camera.vel.x += ((camera.target.x - camera.pos.x) / 8 - camera.vel.x) / 2
-	// 	camera.vel.y += ((camera.target.y - camera.pos.y) / 8 - camera.vel.y) / 2
-	//
-	// 	// update cursor
-	// 	if (state.select && state.select.cursor) {
-	// 		let cursor = state.select.cursor
-	// 		if (Math.round(cache.cursor.x) !== Math.round(cursor.pos.x)
-	// 		|| Math.round(cache.cursor.y) !== Math.round(cursor.pos.y)) {
-	// 			cache.cursor.x = cursor.pos.x
-	// 			cache.cursor.y = cursor.pos.y
-	// 			state.dirty = true
-	// 		}
-	// 		cursor.pos.x += (cursor.target.x * tilesize - cursor.pos.x) / 4
-	// 		cursor.pos.y += (cursor.target.y * tilesize - cursor.pos.y) / 4
-	// 	}
-	//
-	// 	// handle animations
-	// 	for (let i = 0; i < state.anims.length; i++) {
-	// 		let anim = state.anims[i]
-	// 		if (anim.done) {
-	// 			state.anims.splice(i--, 1)
-	// 			// TODO: move these into actual hooks?
-	// 			// probably pass fns into anim data arg
-	// 			// and call from here if existent
-	// 			if (anim.type === "RangeShrink") {
-	// 				if (!state.anims.find(anim => anim.type === "RangeExpand")) {
-	// 					cache.range = null
-	// 				}
-	// 			} else if (anim.type === "PreviewExit") {
-	// 				cache[anim.id] = null
-	// 			} else if (anim.type === "PieceDrop") {
-	// 				state.select = null
-	// 			} else if (anim.type === "PieceMove") {
-	// 				if (cache.playerview) {
-	// 					let exit = Anims.PreviewExit.create(cache.playerview.anim.x, "playerview")
-	// 					cache.playerview.anim.done = true
-	// 					cache.playerview.anim = exit
-	// 					state.anims.push(exit)
-	// 				}
-	// 				if (cache.enemyview) {
-	// 					let exit = Anims.PreviewExit.create(cache.enemyview.anim.x, "enemyview")
-	// 					cache.enemyview.anim.done = true
-	// 					cache.enemyview.anim = exit
-	// 					state.anims.push(exit)
-	// 				}
-	// 				let unit = state.select.unit
-	// 				state.select.anim = null
-	// 				if (camera.follow) {
-	// 					camera.follow = false
-	// 				}
-	// 				Unit.move(unit, state.select.dest, map)
-	// 				if (!state.target) {
-	// 					Game.endTurn(unit, game)
-	// 					state.select = null
-	// 				} else {
-	// 					state.mode = "attack"
-	//
-	// 					let lift = Anims.PieceLift.create()
-	// 					let enter = Anims.EaseOut.create(15)
-	// 					state.anims.push(enter, lift)
-	// 					state.select.path = null
-	// 					state.select.anim = lift
-	//
-	// 					let attacker = state.select.unit
-	// 					let defender = state.target
-	// 					let range = {
-	// 						center: attacker.cell,
-	// 						range: Unit.rng(attacker),
-	// 						squares: Cell.neighborhood(attacker.cell, Unit.rng(attacker))
-	// 							.map(cell => ({ cell, type: "attack" }))
-	// 					}
-	// 					let expand = Anims.RangeExpand.create(range)
-	// 					state.anims.push(expand)
-	// 					cache.range = expand.range
-	// 				}
-	// 			}
-	// 		}
-	// 		Anims[anim.type].update(anim)
-	// 		state.dirty = true
-	// 	}
-	// 	requestAnimationFrame(update)
-	// }
-
-	*/
 
 	events.resize()
 	window.addEventListener("resize", events.resize)
@@ -518,9 +152,10 @@ export function render(view) {
 	nodes.length = 0
 
 	// queue nodes
-	let screennodes = screens[view.screen.id].render(view.screen, view)
+	let screen = view.screen
+	let screennodes = screens[screen.id].render(screen, view)
 	nodes.push(...screennodes)
 
 	// draw on canvas
-	drawNodes(nodes, screens[view.screen.id].layerseq, context)
+	drawNodes(nodes, screens[screen.id].layerseq, context)
 }
