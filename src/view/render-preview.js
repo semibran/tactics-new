@@ -26,7 +26,7 @@ export default function renderUnitPreview(unit, sprites) {
 
 		// draw hp bar
 		let health = Canvas.create(48, 3)
-		let [ start, end ] = getGradient(unit, palette)
+		let [ start, end ] = getGradient(unit.stats.hp, unit.faction, palette)
 		let gradient = health.createLinearGradient(0, 1, health.canvas.width - 2, 1)
 		gradient.addColorStop(0, rgb(...start))
 		gradient.addColorStop(1, rgb(...end))

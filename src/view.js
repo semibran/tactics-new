@@ -551,14 +551,15 @@ export function init(view, game) {
 						let expand = Anims.RangeExpand.create(range)
 						state.anims.push(expand)
 						cache.range = expand.range
+
 						cache.forecast = {
 							vs: {
 								image: sprites.vs,
 								anim: enter
 							},
 							hp: {
-								left: RenderHP.attacker(attacker, sprites),
-								right: RenderHP.defender(defender, sprites)
+								left: RenderHP.attacker(attacker, Unit.dmg(defender, attacker), sprites),
+								right: RenderHP.defender(defender, Unit.dmg(attacker, defender), sprites)
 							},
 							tags: {
 								atk: renderTag(attacker.name, attacker.faction, sprites),
