@@ -23,6 +23,7 @@ export function init(data, sprites) {
 		data: data,
 		anims: [],
 		map: map,
+		dirty: false,
 		camera: {
 			width: 0,
 			height: 0,
@@ -34,6 +35,9 @@ export function init(data, sprites) {
 		pointer: {
 			unit: null,
 			offset: null
+		},
+		cache: {
+			camera: { x: 0, y: 0 }
 		}
 	}
 }
@@ -45,17 +49,64 @@ export function onresize(screen, viewport) {
 }
 
 export function onpress(screen, pointer) {
-	let cell = getCell(pointer.pos, screen.map, screen.camera)
+	let camera = screen.camera
+	screen.pointer.offset = {
+		x: camera.pos.x * camera.zoom,
+		y: camera.pos.y * camera.zoom
+	}
+	let cell = getCell(pointer.pos, screen.map, camera)
 	let unit = Map.unitAt(screen.map.data, cell)
-	console.log(screen.map.data, cell, unit)
+	console.log(unit)
 }
 
 export function onmove(screen, pointer) {
-	let cell = getCell(pointer.pos, screen.map, screen.camera)
+	panCamera(screen, pointer)
 }
 
 export function onupdate(screen) {
+	// rerender if camera is at least a pixel off from its drawn position
+	let camera = screen.camera
+	let cache = screen.cache
+	if (Math.round(cache.camera.x) !== Math.round(camera.pos.x)
+	|| Math.round(cache.camera.y) !== Math.round(camera.pos.y)) {
+		cache.camera.x = camera.pos.x
+		cache.camera.y = camera.pos.y
+		screen.dirty = true
+	}
+
+	// update camera position
+	camera.pos.x += camera.vel.x
+	camera.pos.y += camera.vel.y
+	camera.vel.x += ((camera.target.x - camera.pos.x) / 8 - camera.vel.x) / 2
+	camera.vel.y += ((camera.target.y - camera.pos.y) / 8 - camera.vel.y) / 2
+
 	// call mode hooks (for home press and hold)
+}
+
+export function panCamera(screen, pointer) {
+	let camera = screen.camera
+	let delta = {
+		x: pointer.pos.x - pointer.presspos.x,
+		y: pointer.pos.y - pointer.presspos.y
+	}
+
+	camera.target.x = (delta.x + screen.pointer.offset.x) / camera.zoom
+	camera.target.y = (delta.y + screen.pointer.offset.y) / camera.zoom
+
+	let left = camera.width / 2
+	let right = -camera.width / 2
+	let top = camera.height / 2
+	let bottom = -camera.height / 2
+	if (camera.target.x > left) {
+		camera.target.x = left
+	} else if (camera.target.x < right) {
+		camera.target.x = right
+	}
+	if (camera.target.y > top) {
+		camera.target.y = top
+	} else if (camera.target.y < bottom) {
+		camera.target.y = bottom
+	}
 }
 
 export function render(screen, view) {

@@ -18,23 +18,19 @@ export function create(width, height, sprites) {
 		native: { width, height },
 		sprites: sprites,
 		element: document.createElement("canvas"),
+		screen: null,
+		time: 0,
+		cache: { nodes: [] },
 		viewport: {
 			width: window.innerWidth,
 			height: window.innerHeight,
 			scale: 1
 		},
-		screen: null,
-		time: 0,
-		dirty: false,
 		pointer: {
 			pos: null,
 			presspos: null,
 			mode: null,
 			time: 0
-		},
-		cache: {
-			nodes: [],
-			camera: { x: 0, y: 0 }
 		}
 	}
 }
@@ -47,32 +43,26 @@ export function init(view, game) {
 	let map = screen.map
 	view.screen = screen
 
-	// let center = { x: map.width * map.tilesize / 2, y: map.height * map.tilesize / 2 }
-	// view.camera.pos = center
-	// view.camera.target = center
-
-	function onresize() {
-		let scaleX = Math.max(1, Math.floor(window.innerWidth / view.native.width))
-		let scaleY = Math.max(1, Math.floor(window.innerHeight / view.native.height))
-		viewport.scale = Math.min(scaleX, scaleY)
-		viewport.width = Math.ceil(window.innerWidth / viewport.scale)
-		viewport.height = Math.ceil(window.innerHeight / viewport.scale)
-
-		let canvas = view.element
-		canvas.width = viewport.width
-		canvas.height = viewport.height
-		canvas.style.transform = `scale(${ viewport.scale })`
-
-		// resize hook
-		if (Screen.onresize) {
-			Screen.onresize(screen, viewport)
-		}
-	}
-
 	let device = null
 	let events = {
 		resize() {
-			onresize()
+			// update cache to match window size
+			let scaleX = Math.max(1, Math.floor(window.innerWidth / view.native.width))
+			let scaleY = Math.max(1, Math.floor(window.innerHeight / view.native.height))
+			viewport.scale = Math.min(scaleX, scaleY)
+			viewport.width = Math.ceil(window.innerWidth / viewport.scale)
+			viewport.height = Math.ceil(window.innerHeight / viewport.scale)
+
+			// resize canvas
+			let canvas = view.element
+			canvas.width = viewport.width
+			canvas.height = viewport.height
+			canvas.style.transform = `scale(${ viewport.scale })`
+
+			// call resize hook
+			if (Screen.onresize) {
+				Screen.onresize(screen, viewport)
+			}
 			view.dirty = true
 		},
 		press(event) {
@@ -89,9 +79,10 @@ export function init(view, game) {
 			pointer.mode = "click"
 			pointer.presspos = pointer.pos
 
-			// press hook
+			// call press hook
 			if (Screen.onpress) {
 				Screen.onpress(screen, pointer)
+				if (screen.dirty) view.dirty = true
 			}
 		},
 		move(event) {
@@ -105,16 +96,18 @@ export function init(view, game) {
 					pointer.mode = "drag"
 				}
 			}
-			// move hook
+			// call move hook
 			if (Screen.onmove) {
 				Screen.onmove(screen, pointer)
+				if (screen.dirty) view.dirty = true
 			}
 		},
 		release(event) {
 			if (!pointer.presspos) return false
-			// release hook
+			// call release hook
 			if (Screen.onrelease) {
 				Screen.onrelease(screen, pointer)
+				if (screen.dirty) view.dirty = true
 			}
 			// reset after hook in case the data is used
 			pointer.mode = null
@@ -128,10 +121,12 @@ export function init(view, game) {
 			view.dirty = false
 			render(view)
 		}
+		requestAnimationFrame(update)
 
 		// update hook
 		if (Screen.onupdate) {
 			Screen.onupdate(screen)
+			if (screen.dirty) view.dirty = true
 		}
 	}
 
