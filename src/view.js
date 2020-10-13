@@ -62,6 +62,7 @@ export function create(width, height, sprites) {
 			map: [],
 			range: [],
 			shadows: [],
+			arrows: [],
 			pieces: [],
 			markers: [],
 			selection: [],
@@ -705,7 +706,7 @@ export function render(view) {
 			let image = node.image
 			let x = origin.x + node.x
 			let y = origin.y + node.y
-			layers.markers.push({ image, x, y })
+			layers.arrows.push({ image, x, y })
 		}
 	}
 
@@ -714,17 +715,6 @@ export function render(view) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let cell = unit.cell
 		let z = 0
-		if (select && select.unit === unit) {
-			if (select.anim) {
-				if (select.anim.type === "PieceMove") {
-					cell = select.anim.cell
-				} else {
-					z = Math.round(select.anim.y)
-				}
-			} else if (select.dest) {
-				cell = select.dest
-			}
-		}
 		let x = origin.x + cell.x * tilesize
 		let y = origin.y + cell.y * tilesize
 		let layer = null
@@ -745,6 +735,15 @@ export function render(view) {
 					let ring = sprites.select.ring[unit.faction]
 					layers.markers.push({ image: ring, x: x - 2, y: y - 2, z: 0 })
 				}
+				if (anim.type === "PieceMove") {
+					x = origin.x + anim.cell.x * tilesize
+					y = origin.y + anim.cell.y * tilesize
+				} else {
+					z = Math.round(select.anim.y)
+				}
+			} else if (select.dest) {
+				x = origin.x + select.dest.x * tilesize
+				y = origin.y + select.dest.y * tilesize
 			}
 			layer = "selection"
 		} else {
