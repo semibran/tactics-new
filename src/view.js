@@ -62,9 +62,9 @@ export function create(width, height, sprites) {
 			map: [],
 			range: [],
 			shadows: [],
+			markers: [],
 			arrows: [],
 			pieces: [],
-			markers: [],
 			selection: [],
 			mirage: [],
 			ui: []
