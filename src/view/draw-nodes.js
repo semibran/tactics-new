@@ -1,6 +1,9 @@
-const order = [ "map", "shadows", "pieces" ]
-
-export default function drawNodes(nodes, context, camera) {
+// drawNodes(nodes, layerseq context) -> n/a
+// > draws all nodes on the given context
+// > layerseq determines order using node.layer
+// > TODO: only draw nodes within camera bounds
+// > TODO: origin-based positioning (would streamline centering)
+export default function drawNodes(nodes, layerseq, context) {
 	nodes.sort((a, b) => zindex(a) - zindex(b))
 	for (let node of nodes) {
 		let image = node.image
@@ -23,12 +26,12 @@ export default function drawNodes(nodes, context, camera) {
 	}
 
 	function zindex(node) {
-		let z = order.indexOf(node.layer)
+		let z = layerseq.indexOf(node.layer)
 		let h = node.height || node.image.height
 		let y = node.y + h / 2
 		if (node.layer === "ui") {
 			y = 0
 		}
-		return z * camera.height + y
+		return z * context.canvas.height + y
 	}
 }

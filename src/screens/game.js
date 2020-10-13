@@ -2,8 +2,10 @@ import * as Home from "./game-home"
 import * as Select from "./game-select"
 import * as Forecast from "./game-forecast"
 import renderMap from "../view/render-map"
+import getOrigin from "../helpers/get-origin"
 
 export const tilesize = 16
+export const layerseq = [ "map", "shadows", "pieces", "ui" ]
 
 export function init(data, sprites) {
 	let mode = Home.init()
@@ -46,7 +48,6 @@ export function render(screen, view) {
 	let game = screen.data
 	let map = screen.map
 	let sprites = view.sprites
-
 	let nodes = []
 	let origin = getOrigin(map, view.camera)
 
@@ -142,14 +143,4 @@ export function render(screen, view) {
 	// 	let y = origin.y + select.cursor.pos.y - 1
 	// 	layers.selection.push({ image: sprite, x, y })
 	// }*/
-}
-
-// getOrigin(map, camera) -> pos
-// > finds the top left corner of the map
-// > relative to the given camera
-export default function getOrigin(map, camera) {
-	return {
-		x: camera.width / 2 - map.width * map.tilesize / 2 + camera.pos.x,
-		y: camera.height / 2 - map.height * map.tilesize / 2 + camera.pos.y
-	}
 }

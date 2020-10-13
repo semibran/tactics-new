@@ -49,6 +49,10 @@ export function init(view, game) {
 	let map = screen.map
 	view.screen = screen
 
+	// let center = { x: map.width * map.tilesize / 2, y: map.height * map.tilesize / 2 }
+	// view.camera.pos = center
+	// view.camera.target = center
+
 	function onresize() {
 		let scaleX = Math.max(1, Math.floor(window.innerWidth / view.native.width))
 		let scaleY = Math.max(1, Math.floor(window.innerHeight / view.native.height))
@@ -518,5 +522,5 @@ export function render(view) {
 	nodes.push(...screennodes)
 
 	// draw on canvas
-	drawNodes(nodes, context, view.camera)
+	drawNodes(nodes, screens[view.screen.id].layerseq, context)
 }
