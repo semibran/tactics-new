@@ -6,7 +6,7 @@ SHELL := /bin/bash
 # .SILENT:
 
 all: clean
-	make assets js
+	make sprites js
 	babel dist/index.js --presets=env | uglifyjs -o dist/index.js -c
 	postcss src/style.scss -u autoprefixer -o dist/style.css -m
 	cleancss dist/style.css -o dist/style.css --source-map --source-map-inline-sources
@@ -25,8 +25,8 @@ css:
 js:
 	rollup src/index.js -o dist/index.js -f iife -c -m
 
-assets:
-	bin/sprites.js $(shell find src/assets -type f -name '*.png')
+sprites:
+	bin/sprites.js $(shell find src/sprites -type f -name '*.png')
 
 serve: all
 	serve dist

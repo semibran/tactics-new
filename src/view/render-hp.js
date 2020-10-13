@@ -1,6 +1,6 @@
 import * as Canvas from "../../lib/canvas"
 import rgb from "../../lib/rgb"
-import getGradient from "./hp-gradient"
+import getGradient from "../helpers/hp-gradient"
 
 const maxwidth = 55
 
