@@ -315,6 +315,7 @@ export function init(view, game) {
 						if (Cell.distance(prev, cell) > range) {
 							// prep closest attacking square for pathfinding
 							let neighbors = Cell.neighborhood(cell, range)
+								.filter(cell => !map.units.find(unit => Cell.equals(cell, unit.cell)))
 								.sort((a, b) =>
 									Cell.distance(a, unit.cell) - Cell.distance(b, unit.cell)
 								)
@@ -330,7 +331,7 @@ export function init(view, game) {
 					// 2. it's a move target, and we have a cached path to build off of
 					// 3. it's a move target, and we don't have a cached path
 					// the below conditional covers cases (1) and (2).
-					if (!path && select.path) {
+					if (!path && target && select.path) {
 						let cached = select.path
 						let prev = cached[cached.length - 1]
 						if (square.type !== "attack" || Cell.distance(prev, cell) > range) {
