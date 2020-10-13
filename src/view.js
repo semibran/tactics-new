@@ -115,9 +115,8 @@ export function init(view, game) {
 			pointer.clicking = true
 			pointer.pressed = pointer.pos
 			let cursor = snapToGrid(pointer.pos)
-			if (state.mode !== "select") return true
-
 			pointer.unit = Map.unitAt(map, cursor)
+			if (state.mode !== "select") return true
 			pointer.offset = {
 				x: camera.pos.x * view.scale,
 				y: camera.pos.y * view.scale
@@ -125,9 +124,8 @@ export function init(view, game) {
 			if (!state.select) return
 			let select = state.select
 			let unit = select.unit
-			let square = null
 			// if unit hasn't moved, we can
-			// start press and hold select
+			// start unit drag
 			if (game.phase.pending.includes(unit)) {
 				let selecting = actions.hover(cursor)
 				if (selecting) {
@@ -164,38 +162,39 @@ export function init(view, game) {
 				return
 			}
 			if (state.mode === "attack") {
-				state.mode = "select"
+				Game.endTurn(state.select.unit, game)
 				cache.forecast = null
+				state.mode = "select"
 				state.dirty = true
 				state.select = null
 				state.target = null
-				return
-			}
-			let cursor = null
-			if (pointer.clicking) {
-				cursor = snapToGrid(pointer.pressed)
-			}
-			if (pointer.select) {
-				cursor = snapToGrid(pointer.pos)
-			}
-			if (cursor) {
-				let unit = Map.unitAt(map, cursor)
-				if (state.select) {
-					let select = state.select
-					let unit = select.unit
-					let square = null
-					if (cache.range && game.phase.pending.includes(unit)) {
-						square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
+			} else {
+				let cursor = null
+				if (pointer.clicking) {
+					cursor = snapToGrid(pointer.pressed)
+				}
+				if (pointer.select) {
+					cursor = snapToGrid(pointer.pos)
+				}
+				if (cursor) {
+					let unit = Map.unitAt(map, cursor)
+					if (state.select) {
+						let select = state.select
+						let unit = select.unit
+						let square = null
+						if (cache.range && game.phase.pending.includes(unit)) {
+							square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
+						}
+						if (square && select.path) {
+							actions.move(unit, cursor)
+						} else if (pointer.clicking) {
+							actions.deselect()
+						} else {
+							actions.unhover()
+						}
+					} else if (unit) {
+						actions.select(unit)
 					}
-					if (square && select.path) {
-						actions.move(unit, cursor)
-					} else if (pointer.clicking) {
-						actions.deselect()
-					} else {
-						actions.unhover()
-					}
-				} else if (unit) {
-					actions.select(unit)
 				}
 			}
 			pointer.clicking = false
@@ -521,12 +520,12 @@ export function init(view, game) {
 					}
 					let unit = state.select.unit
 					Unit.move(unit, anim.cell, map)
-					Game.endTurn(unit, game)
 					state.select.anim = null
 					if (camera.follow) {
 						camera.follow = false
 					}
 					if (!state.target) {
+						Game.endTurn(unit, game)
 						state.select = null
 					} else {
 						state.mode = "attack"
