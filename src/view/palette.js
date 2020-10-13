@@ -10,6 +10,16 @@ const matrix = [
 ]
 
 const mappings = {
+	hp: {
+		opal: "opalhp",
+		redhp: "redhp",
+		orange: "orangehp",
+		yellow: "yellowhp",
+		green: "greenhp",
+		cyan: "cyanhp",
+		blue: "bluehp",
+		indigo: "indigohp"
+	},
 	factions: {
 		player: {
 			light: "opal",

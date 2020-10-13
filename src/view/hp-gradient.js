@@ -3,21 +3,21 @@
 // end -> yellow/lime/cyan/blue based on value
 export default function getGradient(hp, faction, palette, reverse) {
 	let start = faction === "player"
-		? palette.opalhp
-		: palette.redhp
-	let end = palette.redhp
+		? palette.hp.opal
+		: palette.hp.red
+	let end = palette.hp.red
 	if (hp === 15) {
-		end = palette.indigohp
+		end = palette.hp.indigo
 	} else if (hp >= 14) {
-		end = palette.bluehp
+		end = palette.hp.blue
 	} else if (hp >= 12) {
-		end = palette.cyanhp
+		end = palette.hp.cyan
 	} else if (hp >= 10) {
-		end = palette.greenhp
+		end = palette.hp.green
 	} else if (hp >= 8) {
-		end = palette.yellowhp
+		end = palette.hp.yellow
 	} else if (hp >= 3) {
-		end = palette.orangehp
+		end = palette.hp.orange
 	}
 	if (reverse) {
 		return [ end, start ]
