@@ -1,6 +1,7 @@
 import * as Home from "./game-home"
 import * as Select from "./game-select"
 import * as Forecast from "./game-forecast"
+import * as Map from "../game/map"
 import renderMap from "../view/render-map"
 import getOrigin from "../helpers/get-origin"
 import getCell from "../helpers/get-cell"
@@ -14,6 +15,7 @@ export function init(data, sprites) {
 		width: data.map.width,
 		height: data.map.height,
 		tilesize: tilesize,
+		data: data.map,
 		image: renderMap(data.map, tilesize, sprites.palette)
 	}
 	return {
@@ -30,44 +32,29 @@ export function init(data, sprites) {
 			target: { x: 0, y: 0 }
 		},
 		pointer: {
-			unit: null
+			unit: null,
+			offset: null
 		}
 	}
 }
 
-export function resize(viewport, screen) {
+export function onresize(screen, viewport) {
 	screen.camera.width = viewport.width
 	screen.camera.height = viewport.height
 	screen.camera.zoom = viewport.scale
 }
 
-export function press(pos, screen) {
-	let cell = getCell(pos, screen.map, screen.camera)
-	console.log(cell)
+export function onpress(screen, pointer) {
+	let cell = getCell(pointer.pos, screen.map, screen.camera)
+	let unit = Map.unitAt(screen.map.data, cell)
+	console.log(screen.map.data, cell, unit)
 }
 
-export function move() {
-	let cursor = snapToGrid(pointer.pos)
-	pointer.unit = Map.unitAt(map, cursor)
-	if (state.mode !== "select") return true
-	pointer.offset = {
-		x: camera.pos.x * view.scale,
-		y: camera.pos.y * view.scale
-	}
-	if (!state.select) return
-	let select = state.select
-	let unit = select.unit
-	// if unit hasn't moved, we can
-	// start unit drag
-	if (game.phase.pending.includes(unit)) {
-		let selecting = actions.hover(cursor)
-		if (selecting) {
-			pointer.select = true
-		}
-	}
+export function onmove(screen, pointer) {
+	let cell = getCell(pointer.pos, screen.map, screen.camera)
 }
 
-export function update() {
+export function onupdate(screen) {
 	// call mode hooks (for home press and hold)
 }
 

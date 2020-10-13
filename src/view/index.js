@@ -64,8 +64,8 @@ export function init(view, game) {
 		canvas.style.transform = `scale(${ viewport.scale })`
 
 		// resize hook
-		if (Screen.resize) {
-			Screen.resize(viewport, screen)
+		if (Screen.onresize) {
+			Screen.onresize(screen, viewport)
 		}
 	}
 
@@ -90,8 +90,8 @@ export function init(view, game) {
 			pointer.presspos = pointer.pos
 
 			// press hook
-			if (Screen.press) {
-				Screen.press(pointer.pos, screen)
+			if (Screen.onpress) {
+				Screen.onpress(screen, pointer)
 			}
 		},
 		move(event) {
@@ -105,9 +105,18 @@ export function init(view, game) {
 					pointer.mode = "drag"
 				}
 			}
+			// move hook
+			if (Screen.onmove) {
+				Screen.onmove(screen, pointer)
+			}
 		},
 		release(event) {
 			if (!pointer.presspos) return false
+			// release hook
+			if (Screen.onrelease) {
+				Screen.onrelease(screen, pointer)
+			}
+			// reset after hook in case the data is used
 			pointer.mode = null
 			pointer.presspos = null
 		}
@@ -118,6 +127,11 @@ export function init(view, game) {
 		if (view.dirty) {
 			view.dirty = false
 			render(view)
+		}
+
+		// update hook
+		if (Screen.onupdate) {
+			Screen.onupdate(screen)
 		}
 	}
 
