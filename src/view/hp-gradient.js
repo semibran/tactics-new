@@ -3,17 +3,21 @@
 // end -> yellow/lime/cyan/blue based on value
 export default function getGradient(unit, palette, reverse) {
 	let start = unit.faction === "player"
-		? palette.green
-		: palette.red
-	let end = palette.pink
+		? palette.opalhp
+		: palette.redhp
+	let end = palette.redhp
 	if (unit.stats.hp >= 14) {
-		end = palette.blue
-	} else if (unit.stats.hp >= 11) {
-		end = palette.cyan
-	} else if (unit.stats.hp >= 9) {
-		end = palette.lime
-	} else if (unit.stats.hp >= 7) {
-		end = palette.yellow
+		end = palette.indigohp
+	} else if (unit.stats.hp >= 12) {
+		end = palette.bluehp
+	} else if (unit.stats.hp >= 10) {
+		end = palette.cyanhp
+	} else if (unit.stats.hp >= 8) {
+		end = palette.greenhp
+	} else if (unit.stats.hp >= 6) {
+		end = palette.yellowhp
+	} else if (unit.stats.hp >= 4) {
+		end = palette.orangehp
 	}
 	if (reverse) {
 		return [ end, start ]

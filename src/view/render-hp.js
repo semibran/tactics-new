@@ -10,9 +10,9 @@ export function attacker(attacker, sprites) {
 	gradient.addColorStop(0, rgb(...start))
 	gradient.addColorStop(1, rgb(...end))
 	hp.fillStyle = gradient
-	hp.fillRect(6, 2, 55, 1)
-	hp.fillRect(7, 3, 55, 2)
-	hp.fillRect(8, 5, 55, 2)
+	hp.fillRect(6, 2, 55, 2)
+	hp.fillRect(7, 4, 55, 2)
+	hp.fillRect(8, 6, 55, 1)
 	return hp.canvas
 }
 
@@ -24,8 +24,8 @@ export function defender(defender, sprites) {
 	gradient.addColorStop(0, rgb(...start))
 	gradient.addColorStop(1, rgb(...end))
 	hp.fillStyle = gradient
-	hp.fillRect(7, 2, 55, 1)
-	hp.fillRect(6, 3, 55, 2)
-	hp.fillRect(5, 5, 55, 2)
+	hp.fillRect(7, 2, 55, 2)
+	hp.fillRect(6, 4, 55, 2)
+	hp.fillRect(5, 6, 55, 1)
 	return hp.canvas
 }

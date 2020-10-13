@@ -508,9 +508,36 @@ export function init(view, game) {
 						let hpright = RenderHP.defender(defender, sprites)
 						cache.hp = { left: hpleft, right: hpright }
 						cache.forecast = {
-							wpn: RenderForecast.renderWeapon(attacker, defender, sprites),
-							dmg: RenderForecast.renderDamage(attacker, defender, sprites),
-							hit: RenderForecast.renderHit(attacker, defender, sprites)
+							tags: {
+								atk: renderTag(attacker.name, attacker.faction, sprites),
+								def: renderTag(defender.name, defender.faction, sprites)
+							},
+							stats: {
+								wpn: {
+									image: RenderForecast.renderWeapon(attacker, defender, sprites),
+									anim: (_ => {
+										let anim = Anims.EaseOut.create(10, 10)
+										state.anims.push(anim)
+										return anim
+									})()
+								},
+								dmg: {
+									image: RenderForecast.renderDamage(attacker, defender, sprites),
+									anim: (_ => {
+										let anim = Anims.EaseOut.create(10, 13)
+										state.anims.push(anim)
+										return anim
+									})()
+								},
+								hit: {
+									image: RenderForecast.renderHit(attacker, defender, sprites),
+									anim: (_ => {
+										let anim = Anims.EaseOut.create(10, 16)
+										state.anims.push(anim)
+										return anim
+									})()
+								}
+							}
 						}
 					}
 					if (cache.playerview) {
@@ -766,34 +793,26 @@ export function render(view) {
 		x = view.width + lerp(hpright.width, -4 - hpright.width, cache.vs.anim.x) + 1
 		layers.ui.unshift({ image: hpright, x, y })
 
-		let attacker = state.select.unit
-		let atktag = renderTag(attacker.name, attacker.faction, sprites)
+		let atktag = cache.forecast.tags.atk
 		x = lerp(-atktag.width, 4, cache.vs.anim.x) + 1
 		y = y - atktag.height - 1
 		layers.ui.unshift({ image: atktag, x, y })
 
-		let defender = state.target
-		let deftag = renderTag(defender.name, defender.faction, sprites)
+		let deftag = cache.forecast.tags.def
 		x = view.width + lerp(deftag.width, -4 - deftag.width, cache.vs.anim.x) + 1
 		layers.ui.unshift({ image: deftag, x, y })
 
-		let weapon = cache.forecast.wpn
-		let height = weapon.height * cache.vs.anim.x
-		x = view.width / 2 - weapon.width / 2
-		y = view.height * 3 / 4 + 28 - height / 2
-		layers.ui.push({ image: weapon, x, y, height })
-
-		let damage = cache.forecast.dmg
-		height = damage.height * cache.vs.anim.x
-		x = view.width / 2 - damage.width / 2
-		y = y + 14
-		layers.ui.push({ image: damage, x, y, height })
-
-		let hit = cache.forecast.hit
-		height = hit.height * cache.vs.anim.x
-		x = view.width / 2 - hit.width / 2
-		y = y + 14
-		layers.ui.push({ image: hit, x, y, height })
+		let cached = cache.forecast
+		let stats = Object.keys(cached.stats)
+		for (let i = 0; i < stats.length; i++) {
+			let key = stats[i]
+			let data = cached.stats[key]
+			let image = data.image
+			let height = image.height * data.anim.x
+			let x = view.width / 2 - image.width / 2
+			let y = view.height * 3 / 4 + 28 + 14 * i - height / 2
+			layers.ui.push({ image, x, y, height })
+		}
 
 		// let text = renderText(
 		// 	`Select a techw to use, then tap "GO" to initiate combat.`,

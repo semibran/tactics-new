@@ -1,12 +1,12 @@
 import * as pixels from "../../lib/pixels"
 
 const matrix = [
-	[ "white",  "cyan",   "pink",   "lime"  ],
-	[ "black",  "opal",   "red",    "green" ],
-	[ "silver", "blue",   "maroon", "beige" ],
-	[ "gray",   "navy",   "purple", "taupe" ],
-	[ "coal",   "yellow", "gold",   "brass" ],
-	[ "jet",    "cream",  "sage",   "brown" ]
+	[ "white",  "opal",   "pink",   "opalhp", "orangehp" ],
+	[ "black",  "blue",   "red",    "redhp",  "yellowhp" ],
+	[ "silver", "navy",   "maroon", "beige",  "greenhp"  ],
+	[ "gray",   null,     "purple", "taupe",  "cyanhp"   ],
+	[ "coal",   "yellow", "gold",   "brass",  "bluehp"   ],
+	[ "jet",    "cream",  "sage",   "brown",  "indigohp" ]
 ]
 
 const mappings = {
