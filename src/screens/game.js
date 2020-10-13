@@ -1,10 +1,12 @@
-import renderMap from "./render-map"
-import modes from "./mode"
+import * as Home from "./game-home"
+import * as Select from "./game-select"
+import * as Forecast from "./game-forecast"
+import renderMap from "../view/render-map"
 const tilesize = 16
 
 export function init(data, sprites) {
 	let map = renderMap(data.map, tilesize, sprites.palette)
-	let mode = modes.Home.init()
+	let mode = Home.init()
 	return {
 		id: "Game",
 		data: data,

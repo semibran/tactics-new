@@ -7,8 +7,8 @@
 // import rgb from "../lib/rgb"
 // import pathfind from "../lib/pathfind"
 // import Anims from "./anims"
-import screens from "./view/screen"
-import drawNodes from "./view/draw-nodes"
+import screens from "../screens"
+import drawNodes from "./draw-nodes"
 
 export function create(width, height, sprites) {
 	return {
