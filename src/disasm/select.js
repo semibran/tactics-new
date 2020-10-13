@@ -1,5 +1,5 @@
 import * as Canvas from "../../lib/canvas"
-import disasmArrows from "./disasm-arrows"
+import disasmArrows from "./arrows"
 
 export default function disasmSelect(images, palette) {
 	let select = { glow: {}, ring: {}, cursor: {}, arrows: {} }

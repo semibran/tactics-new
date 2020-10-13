@@ -1,4 +1,4 @@
-import Font from "./font"
+import Font from "../view/font"
 
 export default function disasmFonts(images, fonts, palette) {
 	let result = {}

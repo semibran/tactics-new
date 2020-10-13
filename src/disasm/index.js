@@ -1,22 +1,22 @@
 import srcmap from "../../dist/tmp/sprites.json"
 import fontdata from "../fonts"
-import disasmSheet from "./disasm-sheet"
+import disasm from "./sheet"
 import disasmPalette from "./palette"
-import disasmIcons from "./disasm-icons"
-import disasmSelect from "./disasm-select"
-import disasmSquares from "./disasm-squares"
-import disasmButtons from "./disasm-buttons"
-import disasmVs from "./disasm-vs"
-import disasmBars from "./disasm-bars"
-import disasmTag from "./disasm-tag"
-import disasmLabels from "./disasm-labels"
-import disasmBadges from "./disasm-badges"
-import disasmPieces from "./disasm-pieces"
-import disasmFonts from "./disasm-fonts"
-import renderArrow from "./render-arrow"
+import disasmIcons from "./icons"
+import disasmSelect from "./select"
+import disasmSquares from "./squares"
+import disasmButtons from "./buttons"
+import disasmVs from "./vs"
+import disasmBars from "./bars"
+import disasmTag from "./tag"
+import disasmLabels from "./labels"
+import disasmBadges from "./badges"
+import disasmPieces from "./pieces"
+import disasmFonts from "./fonts"
+import renderArrow from "../view/render-arrow"
 
 export default function normalize(spritesheet) {
-	let images = disasmSheet(spritesheet, srcmap)
+	let images = disasm(spritesheet, srcmap)
 	let palette = disasmPalette(images.palette)
 	let icons = disasmIcons(images)
 	let select = disasmSelect(images, palette)

@@ -1,7 +1,7 @@
 import * as Canvas from "../../lib/canvas"
 import replaceColors from "../../lib/canvas-replace"
 import extract from "../../lib/img-extract"
-import renderText from "./render-text"
+import renderText from "../view/render-text"
 
 const texts = {
 	back: "Back",

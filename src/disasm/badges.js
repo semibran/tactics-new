@@ -1,7 +1,7 @@
 import replaceColors from "../../lib/canvas-replace"
 import extract from "../../lib/img-extract"
 import rgb from "../../lib/rgb"
-import stroke from "./style-stroke"
+import stroke from "../view/style-stroke"
 
 export default function disasmBadges(image, palette) {
 	let oldColors = [

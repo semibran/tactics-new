@@ -1,5 +1,5 @@
 import loadImage from "img-load"
-import disasm from "./view/disasm"
+import disasm from "./disasm"
 import * as View from "./view"
 import * as Map from "./game/map"
 import * as Game from "./game"
