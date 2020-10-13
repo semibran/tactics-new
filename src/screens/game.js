@@ -8,9 +8,10 @@ import getCell from "../helpers/get-cell"
 
 export const tilesize = 16
 export const layerseq = [ "map", "shadows", "pieces", "ui" ]
+const modes = { Home, Select, Forecast }
 
-export function init(data, sprites) {
-	let mode = Home.init()
+export function create(data, sprites) {
+	let mode = Home.create()
 	let map = {
 		width: data.map.width,
 		height: data.map.height,
@@ -23,6 +24,7 @@ export function init(data, sprites) {
 		data: data,
 		anims: [],
 		map: map,
+		mode: mode,
 		dirty: false,
 		camera: {
 			width: 0,
@@ -31,10 +33,6 @@ export function init(data, sprites) {
 			pos: { x: 0, y: 0 },
 			vel: { x: 0, y: 0 },
 			target: { x: 0, y: 0 }
-		},
-		pointer: {
-			unit: null,
-			offset: null
 		},
 		cache: {
 			camera: { x: 0, y: 0 }
@@ -49,18 +47,23 @@ export function onresize(screen, viewport) {
 }
 
 export function onpress(screen, pointer) {
-	let camera = screen.camera
-	screen.pointer.offset = {
-		x: camera.pos.x * camera.zoom,
-		y: camera.pos.y * camera.zoom
-	}
-	let cell = getCell(pointer.pos, screen.map, camera)
+	let cell = getCell(pointer.pos, screen.map, screen.camera)
 	let unit = Map.unitAt(screen.map.data, cell)
 	console.log(unit)
+
+	// call mode press hook
+	let mode = screen.mode
+	if (modes[mode.id].onpress) {
+		modes[mode.id].onpress(mode, screen)
+	}
 }
 
 export function onmove(screen, pointer) {
-	panCamera(screen, pointer)
+	// call mode move hook
+	let mode = screen.mode
+	if (modes[mode.id].onmove) {
+		modes[mode.id].onmove(mode, screen, pointer)
+	}
 }
 
 export function onupdate(screen) {
@@ -81,31 +84,9 @@ export function onupdate(screen) {
 	camera.vel.y += ((camera.target.y - camera.pos.y) / 8 - camera.vel.y) / 2
 
 	// call mode hooks (for home press and hold)
-}
-
-export function panCamera(screen, pointer) {
-	let camera = screen.camera
-	let delta = {
-		x: pointer.pos.x - pointer.presspos.x,
-		y: pointer.pos.y - pointer.presspos.y
-	}
-
-	camera.target.x = (delta.x + screen.pointer.offset.x) / camera.zoom
-	camera.target.y = (delta.y + screen.pointer.offset.y) / camera.zoom
-
-	let left = camera.width / 2
-	let right = -camera.width / 2
-	let top = camera.height / 2
-	let bottom = -camera.height / 2
-	if (camera.target.x > left) {
-		camera.target.x = left
-	} else if (camera.target.x < right) {
-		camera.target.x = right
-	}
-	if (camera.target.y > top) {
-		camera.target.y = top
-	} else if (camera.target.y < bottom) {
-		camera.target.y = bottom
+	let mode = screen.mode
+	if (modes[mode.id].onupdate) {
+		modes[mode.id].onupdate(mode, screen)
 	}
 }
 

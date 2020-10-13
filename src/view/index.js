@@ -39,7 +39,7 @@ export function init(view, game) {
 	let { viewport, sprites, pointer } = view
 
 	let Screen = screens.Game
-	let screen = Screen.init(game, sprites)
+	let screen = Screen.create(game, sprites)
 	let map = screen.map
 	view.screen = screen
 
