@@ -37,7 +37,7 @@ export function create(width, height, sprites) {
 			},
 			selection: null,
 			target: null,
-			screen: "select",
+			mode: "select",
 			pointer: {
 				pos: null,
 				time: 0,
@@ -105,16 +105,19 @@ export function init(view, game) {
 				device = switchDevice(event)
 			}
 			if (pointer.pressed) return false
-			if (anims.find(anim => anim.blocking) || state.screen !== "select") {
+			if (anims.find(anim => anim.blocking)) {
 				return false
 			}
 			pointer.time = state.time
 			pointer.pos = getPosition(event)
 			if (!pointer.pos) return false
-			let cursor = snapToGrid(pointer.pos)
+
 			pointer.clicking = true
-			pointer.unit = Map.unitAt(map, cursor)
 			pointer.pressed = pointer.pos
+			let cursor = snapToGrid(pointer.pos)
+			if (state.mode !== "select") return true
+
+			pointer.unit = Map.unitAt(map, cursor)
 			pointer.offset = {
 				x: camera.pos.x * view.scale,
 				y: camera.pos.y * view.scale
@@ -123,7 +126,8 @@ export function init(view, game) {
 			let select = state.select
 			let unit = select.unit
 			let square = null
-			// if unit hasn't moved yet
+			// if unit hasn't moved, we can
+			// start press and hold select
 			if (game.phase.pending.includes(unit)) {
 				let selecting = actions.hover(cursor)
 				if (selecting) {
@@ -142,7 +146,7 @@ export function init(view, game) {
 					pointer.unit = false
 				}
 			}
-			if (anims.find(anim => anim.blocking)) {
+			if (anims.find(anim => anim.blocking) || state.mode !== "select") {
 				return
 			}
 			if (!pointer.select) {
@@ -157,6 +161,14 @@ export function init(view, game) {
 		release(event) {
 			if (!pointer.pressed) return false
 			if (anims.find(anim => anim.blocking)) {
+				return
+			}
+			if (state.mode === "attack") {
+				state.mode = "select"
+				cache.forecast = null
+				state.dirty = true
+				state.select = null
+				state.target = null
 				return
 			}
 			let cursor = null
@@ -517,18 +529,22 @@ export function init(view, game) {
 					if (!state.target) {
 						state.select = null
 					} else {
-						state.screen = "attack"
+						state.mode = "attack"
 
 						let enter = Anims.EaseOut.create(15)
-						cache.vs = { anim: enter }
 						state.anims.push(enter)
 
 						let attacker = state.select.unit
 						let defender = state.target
-						let hpleft = RenderHP.attacker(attacker, sprites)
-						let hpright = RenderHP.defender(defender, sprites)
-						cache.hp = { left: hpleft, right: hpright }
 						cache.forecast = {
+							vs: {
+								image: sprites.vs,
+								anim: enter
+							},
+							hp: {
+								left: RenderHP.attacker(attacker, sprites),
+								right: RenderHP.defender(defender, sprites)
+							},
 							tags: {
 								atk: renderTag(attacker.name, attacker.faction, sprites),
 								def: renderTag(defender.name, defender.faction, sprites)
@@ -776,29 +792,29 @@ export function render(view) {
 		layers.ui.push({ image: preview.image, x, y })
 	}
 
-	if (cache.vs) {
+	if (cache.forecast) {
 		let vs = sprites.vs
-		let width = vs.width * cache.vs.anim.x
+		let width = vs.width * cache.forecast.vs.anim.x
 		let x = view.width / 2 - width  / 2
-		let y = view.height * 3 / 4 - vs.height / 2
+		let y = view.height * 2 / 3 - vs.height / 2
 		layers.ui.push({ image: vs, x, y, width })
 
-		let hpleft = cache.hp.left
-		x = lerp(-hpleft.width, 4, cache.vs.anim.x) + 1
+		let hpleft = cache.forecast.hp.left
+		x = lerp(-hpleft.width, 4, cache.forecast.vs.anim.x)
 		y = y + 22
 		layers.ui.unshift({ image: hpleft, x, y })
 
-		let hpright = cache.hp.right
-		x = view.width + lerp(hpright.width, -4 - hpright.width, cache.vs.anim.x) + 1
+		let hpright = cache.forecast.hp.right
+		x = view.width + lerp(hpright.width, -4 - hpright.width, cache.forecast.vs.anim.x)
 		layers.ui.unshift({ image: hpright, x, y })
 
 		let atktag = cache.forecast.tags.atk
-		x = lerp(-atktag.width, 4, cache.vs.anim.x) + 1
+		x = lerp(-atktag.width, 4, cache.forecast.vs.anim.x)
 		y = y - atktag.height - 1
 		layers.ui.unshift({ image: atktag, x, y })
 
 		let deftag = cache.forecast.tags.def
-		x = view.width + lerp(deftag.width, -4 - deftag.width, cache.vs.anim.x) + 1
+		x = view.width + lerp(deftag.width, -4 - deftag.width, cache.forecast.vs.anim.x)
 		layers.ui.unshift({ image: deftag, x, y })
 
 		let cached = cache.forecast
@@ -809,9 +825,12 @@ export function render(view) {
 			let image = data.image
 			let height = image.height * data.anim.x
 			let x = view.width / 2 - image.width / 2
-			let y = view.height * 3 / 4 + 28 + 14 * i - height / 2
+			let y = view.height * 2 / 3 + 28 + 14 * i - height / 2
 			layers.ui.push({ image, x, y, height })
 		}
+
+		let button = sprites.buttons.small
+		layers.ui.push({ image: button, x: 8, y: 8 })
 
 		// let text = renderText(
 		// 	`Select a techw to use, then tap "GO" to initiate combat.`,

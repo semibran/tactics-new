@@ -5,6 +5,7 @@ import disasmPalette from "./palette"
 import disasmIcons from "./disasm-icons"
 import disasmSelect from "./disasm-select"
 import disasmSquares from "./disasm-squares"
+import disasmButtons from "./disasm-buttons"
 import disasmVs from "./disasm-vs"
 import disasmBars from "./disasm-bars"
 import disasmTag from "./disasm-tag"
@@ -28,6 +29,7 @@ export default function normalize(spritesheet) {
 		tag: disasmTag(images.tag, palette),
 		bars: disasmBars(images.bars, palette),
 		labels: disasmLabels(images.labels, palette),
+		buttons: disasmButtons(images.buttons, palette),
 		badges: disasmBadges(images.badges, palette),
 		pieces: disasmPieces(images.piece, icons, palette),
 		fonts: disasmFonts(images, fonts, palette)
