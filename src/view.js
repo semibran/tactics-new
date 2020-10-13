@@ -35,7 +35,7 @@ export function create(width, height, sprites) {
 				vel: { x: 0, y: 0 },
 				target: { x: 0, y: 0 }
 			},
-			selection: null,
+			select: null,
 			target: null,
 			mode: "select",
 			pointer: {
@@ -162,7 +162,7 @@ export function init(view, game) {
 				return
 			}
 			if (state.mode === "attack") {
-				Game.endTurn(state.select.unit, game)
+				Unit.move(state.select.unit, state.select.src, map)
 				cache.forecast = null
 				state.mode = "select"
 				state.dirty = true
@@ -413,6 +413,8 @@ export function init(view, game) {
 				select.anim = move
 				state.anims.push(move)
 			}
+			state.select.src = state.select.unit.cell
+			state.select.dest = select.path[select.path.length - 1]
 			if (pointer.clicking) {
 				camera.follow = true
 			} else {
@@ -520,11 +522,11 @@ export function init(view, game) {
 						state.anims.push(exit)
 					}
 					let unit = state.select.unit
-					Unit.move(unit, anim.cell, map)
 					state.select.anim = null
 					if (camera.follow) {
 						camera.follow = false
 					}
+					Unit.move(unit, state.select.dest, map)
 					if (!state.target) {
 						Game.endTurn(unit, game)
 						state.select = null
@@ -711,9 +713,20 @@ export function render(view) {
 	for (let unit of game.map.units) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let cell = unit.cell
+		let z = 0
+		if (select && select.unit === unit) {
+			if (select.anim) {
+				if (select.anim.type === "PieceMove") {
+					cell = select.anim.cell
+				} else {
+					z = Math.round(select.anim.y)
+				}
+			} else if (select.dest) {
+				cell = select.dest
+			}
+		}
 		let x = origin.x + cell.x * tilesize
 		let y = origin.y + cell.y * tilesize
-		let z = 0
 		let layer = null
 		if (game.phase.faction === unit.faction) {
 			if (game.phase.pending.includes(unit)) {
@@ -731,12 +744,6 @@ export function render(view) {
 				if (anim.type !== "PieceMove" || state.time % 2) {
 					let ring = sprites.select.ring[unit.faction]
 					layers.markers.push({ image: ring, x: x - 2, y: y - 2, z: 0 })
-				}
-				if (anim.type === "PieceMove") {
-					x = origin.x + anim.cell.x * tilesize
-					y = origin.y + anim.cell.y * tilesize
-				} else {
-					z = Math.round(anim.y)
 				}
 			}
 			layer = "selection"
