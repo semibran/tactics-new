@@ -1,5 +1,4 @@
 import * as Cell from "../../lib/cell"
-import * as Unit from "./unit"
 
 export function create(width, height, units) {
 	return { width, height, units }

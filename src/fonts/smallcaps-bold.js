@@ -8,7 +8,7 @@ module.exports = {
 		W: { width: 7 },
 		",": { width: 2 },
 		".": { width: 2 },
-		"!": { width: 2 },
+		"-": { width: 4 },
 		"/": { width: 3 }
 	},
 	spacing: {
@@ -20,6 +20,6 @@ module.exports = {
 		"0123456789",
 		"ABCDEFGHIJ",
 		"KLMNOPQRST",
-		"UVWXYZ,.!/"
+		"UVWXYZ,.-/"
 	]
 }

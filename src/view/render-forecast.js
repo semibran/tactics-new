@@ -1,5 +1,6 @@
-import * as Canvas from "../../lib/canvas"
 import rgb from "../../lib/rgb"
+import * as Canvas from "../../lib/canvas"
+import * as Unit from "../game/unit"
 import renderText from "./render-text"
 import drawShadow from "./style-shadow"
 import getBadge from "./unit-badge"
@@ -15,11 +16,27 @@ export function renderWeapon(attacker, defender, sprites) {
 }
 
 export function renderDamage(attacker, defender, sprites) {
-	return renderPanel("DMG", 6, 7, sprites)
+	let dmg1 = Unit.dmg(attacker, defender)
+	let dmg2 = Unit.dmg(defender, attacker)
+	if (dmg1 === null) {
+		dmg1 = "-"
+	}
+	if (dmg2 === null || dmg1 >= defender.stats.hp) {
+		dmg2 = "-"
+	}
+	return renderPanel("DMG", dmg1, dmg2, sprites)
 }
 
 export function renderHit(attacker, defender, sprites) {
-	return renderPanel("HIT", 5, 1, sprites)
+	let hit1 = Unit.hit(attacker, defender)
+	let hit2 = Unit.hit(defender, attacker)
+	if (hit1 === null || hit1 < 0) {
+		hit1 = "-"
+	}
+	if (hit2 === null || hit2 < 0 || Unit.dmg(attacker, defender) >= defender.stats.hp) {
+		hit2 = "-"
+	}
+	return renderPanel("HIT", hit1, hit2, sprites)
 }
 
 function renderPanel(text, val1, val2, sprites) {
@@ -30,10 +47,10 @@ function renderPanel(text, val1, val2, sprites) {
 		color: palette.jet,
 		shadow: palette.sage
 	}
-	let atkHit = renderText(val1, style)
-	let ctrHit = renderText(val2, style)
-	panel.drawImage(atkHit, 5, 3)
-	panel.drawImage(ctrHit, 52, 3)
+	let atkVal = renderText(val1, style)
+	let ctrVal = renderText(val2, style)
+	panel.drawImage(atkVal, 8 - Math.floor(atkVal.width / 2), 3)
+	panel.drawImage(ctrVal, 55 - Math.floor(ctrVal.width / 2), 3)
 	return panel.canvas
 }
 

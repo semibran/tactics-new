@@ -6,17 +6,17 @@ export default function getGradient(unit, palette, reverse) {
 		? palette.opalhp
 		: palette.redhp
 	let end = palette.redhp
-	if (unit.stats.hp >= 14) {
+	if (unit.stats.hp === 15) {
 		end = palette.indigohp
-	} else if (unit.stats.hp >= 12) {
+	} else if (unit.stats.hp >= 14) {
 		end = palette.bluehp
-	} else if (unit.stats.hp >= 10) {
+	} else if (unit.stats.hp >= 12) {
 		end = palette.cyanhp
-	} else if (unit.stats.hp >= 8) {
+	} else if (unit.stats.hp >= 10) {
 		end = palette.greenhp
-	} else if (unit.stats.hp >= 6) {
+	} else if (unit.stats.hp >= 8) {
 		end = palette.yellowhp
-	} else if (unit.stats.hp >= 4) {
+	} else if (unit.stats.hp >= 6) {
 		end = palette.orangehp
 	}
 	if (reverse) {

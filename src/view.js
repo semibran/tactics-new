@@ -495,7 +495,28 @@ export function init(view, game) {
 				} else if (anim.type === "PieceDrop") {
 					state.select = null
 				} else if (anim.type === "PieceMove") {
-					if (state.target) {
+					if (cache.playerview) {
+						let exit = Anims.PreviewExit.create(cache.playerview.anim.x, "playerview")
+						cache.playerview.anim.done = true
+						cache.playerview.anim = exit
+						state.anims.push(exit)
+					}
+					if (cache.enemyview) {
+						let exit = Anims.PreviewExit.create(cache.enemyview.anim.x, "enemyview")
+						cache.enemyview.anim.done = true
+						cache.enemyview.anim = exit
+						state.anims.push(exit)
+					}
+					let unit = state.select.unit
+					Unit.move(unit, anim.cell, map)
+					Game.endTurn(unit, game)
+					state.select.anim = null
+					if (camera.follow) {
+						camera.follow = false
+					}
+					if (!state.target) {
+						state.select = null
+					} else {
 						state.screen = "attack"
 
 						let enter = Anims.EaseOut.create(15)
@@ -539,28 +560,6 @@ export function init(view, game) {
 								}
 							}
 						}
-					}
-					if (cache.playerview) {
-						let exit = Anims.PreviewExit.create(cache.playerview.anim.x, "playerview")
-						cache.playerview.anim.done = true
-						cache.playerview.anim = exit
-						state.anims.push(exit)
-					}
-					if (cache.enemyview) {
-						let exit = Anims.PreviewExit.create(cache.enemyview.anim.x, "enemyview")
-						cache.enemyview.anim.done = true
-						cache.enemyview.anim = exit
-						state.anims.push(exit)
-					}
-					let unit = state.select.unit
-					Unit.move(unit, anim.cell, map)
-					Game.endTurn(unit, game)
-					state.select.anim = null
-					if (camera.follow) {
-						camera.follow = false
-					}
-					if (!state.target) {
-						state.select = null
 					}
 				}
 			}

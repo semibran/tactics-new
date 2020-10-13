@@ -1,4 +1,5 @@
 import * as Map from "./map"
+import * as Cell from "../../lib/cell"
 
 export function create(name, type, faction, cell, stats) {
 	return {
@@ -33,4 +34,22 @@ export function rng(unit) {
 	if (unit.type === "mage") return 2
 	if (unit.type === "archer") return 2
 	return 1
+}
+
+export function dmg(unit, target) {
+	if (hit(unit, target) <= 0) {
+		return null
+	}
+	let dmg = unit.stats.atk - target.stats.def
+	if (dmg < 0) {
+		dmg = 0
+	}
+	return dmg
+}
+
+export function hit(unit, target) {
+	if (Cell.distance(unit.cell, target.cell) > rng(unit)) {
+		return null
+	}
+	return unit.stats.hit - target.stats.spd
 }

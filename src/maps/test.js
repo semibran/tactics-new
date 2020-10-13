@@ -4,9 +4,9 @@ export default {
 	height: 9,
 	units: [
 		[ "Arthur", "soldier", "enemy",  { x: 1, y: 4 },
-		  { hp: 13, atk: 8, hit: 7, def: 3, spd: 5, element: "holy" } ],
+		  { hp: 12, atk: 8, hit: 7, def: 3, spd: 5, element: "holy" } ],
 		[ "Percy",  "knight",  "enemy",  { x: 3, y: 3 },
-		  { hp: 12, atk: 7, hit: 8, def: 6, spd: 2, element: "plant" } ],
+		  { hp: 14, atk: 7, hit: 8, def: 6, spd: 2, element: "plant" } ],
 		[ "Merlin", "mage",    "enemy",  { x: 2, y: 6 },
 		  { hp:  7, atk: 8, hit: 7, def: 2, spd: 3, element: "ice" } ],
 		[ "Gilda",  "fighter", "player", { x: 5, y: 5 },
