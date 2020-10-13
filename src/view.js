@@ -387,8 +387,8 @@ export function init(view, game) {
 					select.cursor = null
 					// select.cursor.target = cell
 				}
-				select.arrow = null
-				select.path = null
+				// select.arrow = null
+				// select.path = null
 				select.valid = false
 				return false
 			}
