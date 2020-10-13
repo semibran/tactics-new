@@ -9,164 +9,102 @@
 // import Anims from "./anims"
 import screens from "../screens"
 import drawNodes from "./draw-nodes"
+import getDevice from "./get-device"
+import getPosition from "./get-position"
+import getCell from "./get-cell"
+import getQuadrance from "./get-quadrance"
 
 export function create(width, height, sprites) {
 	return {
 		native: { width, height },
-		width: window.innerWidth,
-		height: window.innerHeight,
-		scale: 1,
 		sprites: sprites,
 		element: document.createElement("canvas"),
-		state: {
+		screen: null,
+		time: 0,
+		dirty: false,
+		pointer: {
+			pos: null,
 			time: 0,
-			dirty: false,
-			screen: null,
-			nodes: [],
-			anims: [],
-			pointer: {
-				pos: null,
-				pressed: null,
-				mode: null,
-				time: 0
-			},
-			camera: {
-				pos: { x: 0, y: 0 },
-				vel: { x: 0, y: 0 },
-				target: { x: 0, y: 0 }
-			}
+			mode: null,
+			pressed: null
+		},
+		camera: {
+			width: window.innerWidth,
+			height: window.innerHeight,
+			zoom: 1,
+			pos: { x: 0, y: 0 },
+			vel: { x: 0, y: 0 },
+			target: { x: 0, y: 0 }
 		},
 		cache: {
+			nodes: [],
 			camera: { x: 0, y: 0 }
 		}
 	}
 }
 
 export function init(view, game) {
-	let state = view.state
-	let cache = view.cache
-	let sprites = view.sprites
-	let { camera, pointer, anims } = state
+	let { sprites, camera, pointer } = view
 
-	state.screen = screens.Game.init(game, sprites)
+	let screen = screens.Game.init(game, sprites)
+	let map = screen.map
+	view.screen = screen
 
 	function onresize() {
 		let scaleX = Math.max(1, Math.floor(window.innerWidth / view.native.width))
 		let scaleY = Math.max(1, Math.floor(window.innerHeight / view.native.height))
-		view.scale = Math.min(scaleX, scaleY)
-		view.width = Math.ceil(window.innerWidth / view.scale)
-		view.height = Math.ceil(window.innerHeight / view.scale)
+		camera.zoom = Math.min(scaleX, scaleY)
+		camera.width = Math.ceil(window.innerWidth / camera.zoom)
+		camera.height = Math.ceil(window.innerHeight / camera.zoom)
 
 		let canvas = view.element
-		canvas.width = view.width
-		canvas.height = view.height
-		canvas.style.transform = `scale(${ view.scale })`
+		canvas.width = camera.width
+		canvas.height = camera.height
+		canvas.style.transform = `scale(${ camera.zoom })`
 	}
 
 	let device = null
 	let events = {
 		resize() {
 			onresize()
-			state.dirty = true
+			view.dirty = true
 		},
 		press(event) {
 			if (!device) {
-				device = switchDevice(event)
+				device = getDevice(event)
 			}
 			if (pointer.pressed) return false
-			if (anims.find(anim => anim.blocking)) {
-				return false
-			}
-			pointer.time = state.time
 			pointer.pos = getPosition(event)
 			if (!pointer.pos) return false
 
+			// click is within bounds, we can use it
+			pointer.time = view.time
 			pointer.mode = "click"
 			pointer.pressed = pointer.pos
-			let cursor = snapToGrid(pointer.pos)
-			pointer.unit = Map.unitAt(map, cursor)
-			if (state.mode !== "select") return true
-			pointer.offset = {
-				x: camera.pos.x * view.scale,
-				y: camera.pos.y * view.scale
-			}
-			if (!state.select) return
-			let select = state.select
-			let unit = select.unit
-			// if unit hasn't moved, we can
-			// start unit drag
-			if (game.phase.pending.includes(unit)) {
-				let selecting = actions.hover(cursor)
-				if (selecting) {
-					pointer.select = true
-				}
-			}
+			console.log(pointer.pos)
 		},
 		move(event) {
 			pointer.pos = getPosition(event)
 			if (!pointer.pos || !pointer.pressed) return
-			if (pointer.clicking) {
+			if (pointer.mode === "click") {
 				let cursor = pointer.pos
 				let origin = pointer.pressed
-				if (Cell.distance(origin, cursor) > 4) {
-					pointer.clicking = false
-					pointer.unit = false
+				const maxdist = 3
+				if (getQuadrance(origin, cursor) > Math.pow(maxdist, 2)) {
+					pointer.mode = "drag"
 				}
-			}
-			if (anims.find(anim => anim.blocking) || state.mode !== "select") {
-				return
 			}
 			if (!pointer.select) {
 				actions.panCamera(camera, pointer)
 				return
 			}
-			let cursor = snapToGrid(pointer.pos)
+			let cursor = getCell(pointer.pos)
 			if (!Cell.equals(pointer.select, cursor)) {
 				actions.hover(cursor)
 			}
 		},
 		release(event) {
 			if (!pointer.pressed) return false
-			if (anims.find(anim => anim.blocking)) {
-				return
-			}
-			if (state.mode === "attack") {
-				Unit.move(state.select.unit, state.select.src, map)
-				cache.forecast = null
-				cache.range = null
-				state.mode = "select"
-				state.dirty = true
-				state.select = null
-				state.target = null
-			} else {
-				let cursor = null
-				if (pointer.clicking) {
-					cursor = snapToGrid(pointer.pressed)
-				}
-				if (pointer.select) {
-					cursor = snapToGrid(pointer.pos)
-				}
-				if (cursor) {
-					let unit = Map.unitAt(map, cursor)
-					if (state.select) {
-						let select = state.select
-						let unit = select.unit
-						let square = null
-						if (cache.range && game.phase.pending.includes(unit)) {
-							square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
-						}
-						if (square && select.path) {
-							actions.move(unit, cursor)
-						} else if (pointer.clicking) {
-							actions.deselect()
-						} else {
-							actions.unhover()
-						}
-					} else if (unit) {
-						actions.select(unit)
-					}
-				}
-			}
 			pointer.clicking = false
 			pointer.unit = null
 			pointer.select = false
@@ -174,6 +112,7 @@ export function init(view, game) {
 		}
 	}
 
+	/*
 	// let actions = {
 	// 	select(unit) {
 	// 		let range = findRange(unit, map)
@@ -416,14 +355,17 @@ export function init(view, game) {
 	// 		camera.target.y = cache.map.height / 2 - (cell.y + 0.5) * tilesize
 	// 	}
 	// }
+	*/
 
 	function update() {
-		state.time++
-		if (state.dirty) {
-			state.dirty = false
+		view.time++
+		if (view.dirty) {
+			view.dirty = false
 			render(view)
 		}
 	}
+
+	/*
 	//
 	// 	if (!state.select && !pointer.select && pointer.unit && state.time - pointer.time === 20) {
 	// 		if (game.phase.pending.includes(pointer.unit)) {
@@ -532,80 +474,34 @@ export function init(view, game) {
 	// 	requestAnimationFrame(update)
 	// }
 
+	*/
+
 	events.resize()
 	window.addEventListener("resize", events.resize)
-	// window.addEventListener("mousedown", events.press)
-	// window.addEventListener("mousemove", events.move)
-	// window.addEventListener("mouseup", events.release)
-	// window.addEventListener("touchstart", events.press)
-	// window.addEventListener("touchmove", events.move)
-	// window.addEventListener("touchend", events.release)
+	window.addEventListener("mousedown", events.press)
+	window.addEventListener("mousemove", events.move)
+	window.addEventListener("mouseup", events.release)
+	window.addEventListener("touchstart", events.press)
+	window.addEventListener("touchmove", events.move)
+	window.addEventListener("touchend", events.release)
 	requestAnimationFrame(update)
-
-	function switchDevice(event) {
-		let device = "desktop"
-		if (event.touches) {
-			device = "mobile"
-			window.removeEventListener("mousedown", events.press)
-			window.removeEventListener("mousemove", events.move)
-			window.removeEventListener("mouseup", events.release)
-		} else {
-			window.removeEventListener("touchstart", events.press)
-			window.removeEventListener("touchmove", events.move)
-			window.removeEventListener("touchend", events.release)
-		}
-		return device
-	}
-
-	// getPosition(event) -> pos
-	// > determines the pointer position from a given event.
-	// > detects both clicks and taps
-	function getPosition(event) {
-		let x = event.pageX || event.touches && event.touches[0].pageX
-		let y = event.pageY || event.touches && event.touches[0].pageY
-		if (x === undefined || y === undefined) return null
-		return { x, y }
-	}
-
-	// snapToGrid(pos) -> cell
-	// > gets the grid cell indicated by
-	// > a given real onscreen coord
-	function snapToGrid(pos) {
-		let map = game.map
-		// undo scaling
-		let realpos = {
-			x: (pos.x - window.innerWidth / 2) / view.scale,
-			y: (pos.y - window.innerHeight / 2) / view.scale,
-		}
-		// relative to top left corner of map
-		let gridpos = {
-			x: realpos.x + map.width * tilesize / 2 - camera.pos.x,
-			y: realpos.y + map.height * tilesize / 2 - camera.pos.y,
-		}
-		// fix to tiles
-		return {
-			x: Math.floor(gridpos.x / tilesize),
-			y: Math.floor(gridpos.y / tilesize)
-		}
-	}
 }
 
 export function render(view) {
-	let state = view.state
-	let nodes = state.nodes
-
 	// clear canvas
 	let canvas = view.element
 	let context = canvas.getContext("2d")
 	context.fillStyle = "black"
 	context.fillRect(0, 0, canvas.width, canvas.height)
 
-	// clear node list
+	// clear screen
+	let nodes = view.cache.nodes
 	nodes.length = 0
 
 	// queue nodes
-	let screennodes = screens[state.screen.id].render(state.screen, view)
+	let screennodes = screens[view.screen.id].render(view.screen, view)
 	nodes.push(...screennodes)
 
-	drawNodes(nodes, view)
+	// draw on canvas
+	drawNodes(nodes, context, view.camera)
 }

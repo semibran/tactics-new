@@ -41,6 +41,46 @@ export function enter(mode, view) {
 	}
 }
 
+export function release() {
+	if (state.mode === "attack") {
+		Unit.move(state.select.unit, state.select.src, map)
+		cache.forecast = null
+		cache.range = null
+		state.mode = "select"
+		state.dirty = true
+		state.select = null
+		state.target = null
+	} else {
+		let cursor = null
+		if (pointer.clicking) {
+			cursor = getCell(pointer.pressed)
+		}
+		if (pointer.select) {
+			cursor = getCell(pointer.pos)
+		}
+		if (cursor) {
+			let unit = Map.unitAt(map, cursor)
+			if (state.select) {
+				let select = state.select
+				let unit = select.unit
+				let square = null
+				if (cache.range && game.phase.pending.includes(unit)) {
+					square = cache.range.squares.find(({ cell }) => Cell.equals(cell, cursor))
+				}
+				if (square && select.path) {
+					actions.move(unit, cursor)
+				} else if (pointer.clicking) {
+					actions.deselect()
+				} else {
+					actions.unhover()
+				}
+			} else if (unit) {
+				actions.select(unit)
+			}
+		}
+	}
+}
+
 export function render(mode, view) {
 	let vs = sprites.vs
 	let width = vs.width * cache.forecast.vs.anim.x

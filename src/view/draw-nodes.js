@@ -1,8 +1,6 @@
 const order = [ "map", "shadows", "pieces" ]
 
-export default function drawNodes(nodes, view) {
-	let context = view.element.getContext("2d")
-
+export default function drawNodes(nodes, context, camera) {
 	nodes.sort((a, b) => zindex(a) - zindex(b))
 	for (let node of nodes) {
 		let image = node.image
@@ -31,6 +29,6 @@ export default function drawNodes(nodes, view) {
 		if (node.layer === "ui") {
 			y = 0
 		}
-		return z * view.height + y
+		return z * camera.height + y
 	}
 }
