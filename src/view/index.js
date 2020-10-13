@@ -9,10 +9,9 @@
 // import Anims from "./anims"
 import screens from "../screens"
 import drawNodes from "./draw-nodes"
-import getDevice from "./get-device"
-import getPosition from "./get-position"
-import getCell from "./get-cell"
-import getQuadrance from "./get-quadrance"
+import getPosition from "../helpers/get-position"
+import getCell from "../helpers/get-cell"
+import getQuadrance from "../helpers/get-quadrance"
 
 export function create(width, height, sprites) {
 	return {
@@ -70,10 +69,11 @@ export function init(view, game) {
 			view.dirty = true
 		},
 		press(event) {
-			if (!device) {
-				device = getDevice(event)
-			}
+			if (!device) device = switchDevice(event)
 			if (pointer.pressed) return false
+
+			// attempt to detect pointer position
+			// if we fail, ignore the event
 			pointer.pos = getPosition(event)
 			if (!pointer.pos) return false
 
@@ -85,7 +85,7 @@ export function init(view, game) {
 		},
 		move(event) {
 			pointer.pos = getPosition(event)
-			if (!pointer.pos || !pointer.pressed) return
+			if (!pointer.pos || !pointer.pressed) return false
 			if (pointer.mode === "click") {
 				let cursor = pointer.pos
 				let origin = pointer.pressed
@@ -485,6 +485,21 @@ export function init(view, game) {
 	window.addEventListener("touchmove", events.move)
 	window.addEventListener("touchend", events.release)
 	requestAnimationFrame(update)
+
+	function switchDevice(event) {
+		let device = "desktop"
+		if (event.touches) {
+			device = "mobile"
+			window.removeEventListener("mousedown", events.press)
+			window.removeEventListener("mousemove", events.move)
+			window.removeEventListener("mouseup", events.release)
+		} else {
+			window.removeEventListener("touchstart", events.press)
+			window.removeEventListener("touchmove", events.move)
+			window.removeEventListener("touchend", events.release)
+		}
+		return device
+	}
 }
 
 export function render(view) {
