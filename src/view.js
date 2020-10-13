@@ -537,8 +537,11 @@ export function init(view, game) {
 					} else {
 						state.mode = "attack"
 
+						let lift = Anims.PieceLift.create()
 						let enter = Anims.EaseOut.create(15)
-						state.anims.push(enter)
+						state.anims.push(enter, lift)
+						state.select.path = null
+						state.select.anim = lift
 
 						let attacker = state.select.unit
 						let defender = state.target
