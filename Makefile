@@ -11,6 +11,7 @@ all: clean
 	postcss src/style.scss -u autoprefixer -o dist/style.css -m
 	cleancss dist/style.css -o dist/style.css --source-map --source-map-inline-sources
 	html-minifier --collapse-whitespace src/index.html -o dist/index.html
+	rm dist *.map
 
 clean:
 	rm -rf dist
@@ -28,8 +29,12 @@ js:
 sprites:
 	bin/sprites.js $(shell find src/sprites -type f -name '*.png')
 
-serve: all
-	serve dist
+serve: clean html css sprites js
+	chokidar "src/**/*.js" -c "make js" \
+	& chokidar "src/**/*.scss" -c "make css" \
+	& chokidar "src/**/*.html" -c "make html" \
+	& chokidar "src/**/*.png" -c "make sprites js" \
+	& browser-sync start --server dist --files dist
 
 deploy: all
 	gh-pages -d dist -m "updates"
