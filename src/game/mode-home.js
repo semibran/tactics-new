@@ -1,5 +1,5 @@
-import { Modes, switchMode, panCamera } from "./game"
-import * as Map from "../game/map"
+import { Modes, switchMode, panCamera } from "."
+import * as Map from "./map"
 import getCell from "../helpers/get-cell"
 
 export function create() {

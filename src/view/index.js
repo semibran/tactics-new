@@ -7,7 +7,7 @@
 // import rgb from "../lib/rgb"
 // import pathfind from "../lib/pathfind"
 // import Anims from "./anims"
-import Screens from "../screens"
+import Screens from "./screens"
 import drawNodes from "./draw-nodes"
 import getPosition from "../helpers/get-position"
 import getCell from "../helpers/get-cell"

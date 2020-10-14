@@ -1,8 +1,7 @@
 import loadImage from "img-load"
 import disasm from "./disasm"
 import * as View from "./view"
-import * as Map from "./game/map"
-import * as Game from "./game"
+import * as Game from "./game/game"
 import map from "./maps/test"
 
 let state = Game.create(map)

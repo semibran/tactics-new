@@ -1,7 +1,7 @@
-import { Comps, Modes, switchMode, panCamera, centerCamera } from "./game"
+import { Comps, Modes, switchMode, panCamera, centerCamera } from "."
 import * as PieceLift from "../anims/piece-lift"
 import * as PieceDrop from "../anims/piece-drop"
-import findRange from "../game/range"
+import findRange from "./range"
 
 export function create(data) {
 	return {
