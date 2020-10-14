@@ -2,10 +2,10 @@ import renderRange from "../view/render-range"
 import * as RangeExpand from "../anims/range-expand"
 import * as RangeShrink from "../anims/range-shrink"
 
-export function create(data) {
+export function create(range) {
 	return {
 		id: "Range",
-		data: data,
+		data: range,
 		anims: [],
 		image: null,
 		sprites: null,
@@ -24,7 +24,7 @@ export function exit(range, screen) {
 	range.anims.push(RangeShrink.create(range.data))
 }
 
-export function render(range, origin) {
+export function render(range, screen) {
 	let image = range.image
 	let anim = range.anims[0]
 	if (anim) {
@@ -35,7 +35,7 @@ export function render(range, origin) {
 	return [ {
 		image: image,
 		layer: "range",
-		x: origin.x,
-		y: origin.y
+		x: screen.camera.origin.x,
+		y: screen.camera.origin.y
 	} ]
 }

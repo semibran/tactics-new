@@ -16,7 +16,7 @@ export function update(anim) {
 			anim.range.squares.splice(i--, 1)
 		}
 	}
-	if (anim.range.radius-- < 0) {
+	if (--anim.range.radius < 0) {
 		anim.done = true
 	}
 }

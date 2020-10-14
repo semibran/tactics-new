@@ -16,6 +16,9 @@ export default function drawNodes(nodes, layerseq, context) {
 		}
 		if (!width) width = image.width
 		if (!height) height = image.height
+		if (width === 0 || height === 0) {
+			continue
+		}
 		if (node.opacity !== undefined) {
 			context.globalAlpha = node.opacity
 			context.drawImage(image, x, y, width, height)

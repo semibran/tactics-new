@@ -12,7 +12,7 @@ const matrix = [
 const mappings = {
 	hp: {
 		opal: "opalhp",
-		redhp: "redhp",
+		red: "redhp",
 		orange: "orangehp",
 		yellow: "yellowhp",
 		green: "greenhp",

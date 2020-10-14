@@ -2,11 +2,12 @@ import * as Home from "./game-home"
 import * as Select from "./game-select"
 import * as Forecast from "./game-forecast"
 import * as Range from "./game-range"
+import * as Preview from "./game-preview"
 import * as Anims from "../anims"
 import renderMap from "../view/render-map"
 import getOrigin from "../helpers/get-origin"
 
-export const Comps = { Range }
+export const Comps = { Range, Preview }
 export const Modes = { Home, Select, Forecast }
 export const layerseq = [ "map", "range", "shadows", "ring", "pieces", "selection", "ui" ]
 export const tilesize = 16
@@ -32,7 +33,8 @@ export function create(data) {
 			zoom: 0,
 			pos: { x: 0, y: 0 },
 			vel: { x: 0, y: 0 },
-			target: { x: 0, y: 0 }
+			target: { x: 0, y: 0 },
+			origin: { x: 0, y: 0 }
 		},
 		cache: {
 			mode: null,
@@ -183,24 +185,23 @@ export function panCamera(screen, pointer) {
 }
 
 export function render(screen) {
+	let { map, mode, cache, camera } = screen
 	let game = screen.data
-	let map = screen.map
-	let mode = screen.mode
-	let cache = screen.cache
 	let sprites = screen.view.sprites
 	let nodes = []
-	let origin = getOrigin(map, screen.camera)
+
+	camera.origin = getOrigin(map, screen.camera)
 
 	// queue map
 	nodes.push({
 		image: map.image,
 		layer: "map",
-		x: origin.x,
-		y: origin.y
+		x: camera.origin.x,
+		y: camera.origin.y
 	})
 
 	for (let comp of screen.comps) {
-		let compnodes = Comps[comp.id].render(comp, origin)
+		let compnodes = Comps[comp.id].render(comp, screen)
 		nodes.push(...compnodes)
 	}
 
@@ -210,8 +211,8 @@ export function render(screen) {
 	for (let unit of map.data.units) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let cell = unit.cell
-		let x = origin.x + cell.x * map.tilesize
-		let y = origin.y + cell.y * map.tilesize
+		let x = camera.origin.x + cell.x * map.tilesize
+		let y = camera.origin.y + cell.y * map.tilesize
 		let z = 0
 		let piecelayer = "pieces"
 		if (mode.id === "Select" && mode.unit === unit

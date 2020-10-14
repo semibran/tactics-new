@@ -8,6 +8,7 @@ export function create(data) {
 		id: "Select",
 		unit: data,
 		range: null,
+		preview: null,
 		anim: null,
 		pointer: {
 			selecting: false
@@ -21,14 +22,22 @@ export function onenter(mode, screen) {
 	mode.range = Comps.Range.create(rangedata)
 	Comps.Range.enter(mode.range, screen)
 	screen.comps.push(mode.range)
+
+	// add preview component
+	mode.preview = Comps.Preview.create(mode.unit)
+	Comps.Preview.enter(mode.preview, screen)
+	screen.comps.push(mode.preview)
+
 	// add piece lift animation
 	mode.anim = PieceLift.create()
 	screen.anims.push(mode.anim)
 }
 
 export function onexit(mode, screen) {
-	// close range component
+	// close components
 	Comps.Range.exit(mode.range, screen)
+	Comps.Preview.exit(mode.preview, screen)
+
 	// remove piece lift animation
 	mode.anim.done = true
 	mode.anim = PieceDrop.create(mode.anim.y)
