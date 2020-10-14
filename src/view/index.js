@@ -129,7 +129,6 @@ export function init(view, game) {
 			render(view)
 		}
 
-		view.time++
 		requestAnimationFrame(update)
 
 		// onupdate hook

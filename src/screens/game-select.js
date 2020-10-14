@@ -6,7 +6,8 @@ import findRange from "../game/range"
 export function create(data) {
 	return {
 		id: "Select",
-		unit: data,
+		unit: data.unit,
+		held: data.held,
 		range: null,
 		preview: null,
 		anim: null,
@@ -49,7 +50,8 @@ export function onmove(mode, screen, pointer) {
 }
 
 export function onrelease(mode, screen, pointer) {
-	if (pointer.mode === "click") {
+	if (pointer.mode === "click" && !mode.held) {
 		switchMode(screen, Modes.Home)
 	}
+	mode.held = false
 }

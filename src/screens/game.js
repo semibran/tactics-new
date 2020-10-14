@@ -19,6 +19,7 @@ export function create(data) {
 		anims: [],
 		comps: [],
 		view: null,
+		time: 0,
 		dirty: false,
 		map: {
 			width: data.map.width,
@@ -85,6 +86,7 @@ export function onrelease(screen, pointer) {
 }
 
 export function onupdate(screen) {
+	screen.time++
 	updateCamera(screen)
 	updateAnims(screen)
 	updateComps(screen)
@@ -153,6 +155,7 @@ export function switchMode(screen, next, data) {
 	screen.dirty = true
 	screen.cache.mode = screen.mode
 	screen.mode = next.create(data)
+	screen.mode.time = screen.time
 	if (next.onenter) {
 		next.onenter(screen.mode, screen)
 	}
