@@ -187,6 +187,13 @@ export function panCamera(screen, pointer) {
 	}
 }
 
+export function centerCamera(screen, cell) {
+	let camera = screen.camera
+	let map = screen.map
+	camera.target.x = map.image.width / 2 - (cell.x + 0.5) * tilesize
+	camera.target.y = map.image.height / 2 - (cell.y + 0.5) * tilesize
+}
+
 export function render(screen) {
 	let { map, mode, cache, camera } = screen
 	let game = screen.data

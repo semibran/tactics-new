@@ -1,4 +1,4 @@
-import { Comps, Modes, switchMode, panCamera } from "./game"
+import { Comps, Modes, switchMode, panCamera, centerCamera } from "./game"
 import * as PieceLift from "../anims/piece-lift"
 import * as PieceDrop from "../anims/piece-drop"
 import findRange from "../game/range"
@@ -18,14 +18,21 @@ export function create(data) {
 }
 
 export function onenter(mode, screen) {
+	let unit = mode.unit
+
+	// center camera (unless holdselect was used)
+	if (!mode.held) {
+		centerCamera(screen, unit.cell)
+	}
+
 	// add range component
-	let rangedata = findRange(mode.unit, screen.map.data)
+	let rangedata = findRange(unit, screen.map.data)
 	mode.range = Comps.Range.create(rangedata)
 	Comps.Range.enter(mode.range, screen)
 	screen.comps.push(mode.range)
 
 	// add preview component
-	mode.preview = Comps.Preview.create(mode.unit)
+	mode.preview = Comps.Preview.create(unit)
 	Comps.Preview.enter(mode.preview, screen)
 	screen.comps.push(mode.preview)
 
