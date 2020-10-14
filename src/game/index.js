@@ -27,9 +27,7 @@ export function create(data) {
 			image: null
 		},
 		cache: {
-			mode: null,
-			camera: { x: 0, y: 0 },
-			panoffset: null,
+			camera: { x: 0, y: 0 }
 		}
 	}
 }
@@ -80,7 +78,7 @@ export function onupdate(screen) {
 	// begin transition if mode has mode change queued
 	let next = screen.mode.next
 	if (next && !screen.nextMode) {
-		switchMode(screen, next.id, next.data)
+		transition(screen, next.id, next.data)
 	}
 
 	// call mode onupdate hook
@@ -122,20 +120,24 @@ export function updateComps(screen) {
 			let anim = comp.anims[a]
 			if (anim.done) {
 				comp.anims.splice(a--, 1)
+
 			} else {
 				Anims[anim.id].update(anim)
 			}
 			screen.dirty = true
 		}
-		if (comp.exit && !comp.anims.length) {
+		if (!comp.anims.length && comp.exit) {
 			screen.comps.splice(c--, 1)
 		}
 	}
+	if (!screen.comps.length && screen.nextMode) {
+		switchMode(screen)
+	}
 }
 
-function switchMode(screen, next, data) {
-	if (!Modes[next]) {
-		throw new Error(`Attempting to switch to nonexistent mode ${next}`)
+function transition(screen, nextid, nextdata) {
+	if (!Modes[nextid]) {
+		throw new Error(`Attempting to switch to nonexistent mode ${nextid}`)
 	}
 
 	// call old mode onexit hook
@@ -144,18 +146,29 @@ function switchMode(screen, next, data) {
 		onexit(screen.mode, screen)
 	}
 
-	// set current mode as old mode
-	screen.cache.mode = screen.mode
 
-	// replace current mode with new node
-	screen.mode = Modes[next].create(data)
-	screen.mode.time = screen.time
-	if (Modes[next].onenter) {
-		Modes[next].onenter(screen.mode, screen)
+
+	// create new mode
+	let next = screen.nextMode = Modes[nextid].create(nextdata)
+	next.time = screen.time
+
+	// switch immediately if not animating
+	if (!screen.comps.length) {
+		switchMode(screen)
+	}
+
+	// call new mode onenter hook
+	if (Modes[nextid].onenter) {
+		Modes[nextid].onenter(next, screen)
 	}
 
 	// queue up redraw
 	screen.dirty = true
+}
+
+function switchMode(screen) {
+	screen.mode = screen.nextMode
+	screen.nextMode = null
 }
 
 export function render(screen) {
@@ -189,8 +202,7 @@ export function render(screen) {
 		let y = camera.origin.y + cell.y * map.tilesize
 		let z = 0
 		let piecelayer = "pieces"
-		if (mode.id === "Select" && mode.unit === unit
-		|| cache.mode && cache.mode.id === "Select" && cache.mode.unit === unit) {
+		if (mode.id === "Select" && mode.unit === unit) {
 			let anim = screen.anims.find(anim =>
 				[ "PieceLift", "PieceDrop" ].includes(anim.id))
 			if (anim) {
