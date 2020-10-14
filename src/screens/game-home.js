@@ -5,10 +5,7 @@ import getCell from "../helpers/get-cell"
 export function create() {
 	return {
 		id: "Home",
-		press: {
-			unit: null,
-			time: 0
-		}
+		press: null
 	}
 }
 
