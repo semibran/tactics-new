@@ -1,5 +1,6 @@
-import { Modes, switchMode, panCamera } from "."
+import { Modes, switchMode } from "."
 import * as Map from "./map"
+import * as Camera from "./camera"
 import getCell from "../helpers/get-cell"
 
 export function create() {
@@ -24,7 +25,7 @@ export function onmove(mode, screen, pointer) {
 	if (mode.press && pointer.mode !== "click") {
 		mode.press = null
 	}
-	panCamera(screen, pointer)
+	Camera.pan(screen.camera, pointer)
 }
 
 export function onrelease(mode, screen, pointer) {

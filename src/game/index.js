@@ -1,14 +1,14 @@
 import * as Home from "./mode-home"
 import * as Select from "./mode-select"
-import * as Forecast from "./mode-forecast"
 import * as Range from "./comp-range"
 import * as Preview from "./comp-preview"
 import * as Anims from "../anims"
+import * as Camera from "./camera"
 import renderMap from "../view/render-map"
 import getOrigin from "../helpers/get-origin"
 
 export const Comps = { Range, Preview }
-export const Modes = { Home, Select, Forecast }
+export const Modes = { Home, Select }
 export const layerseq = [ "map", "range", "shadows", "ring", "pieces", "selection", "ui" ]
 export const tilesize = 16
 
@@ -21,21 +21,13 @@ export function create(data) {
 		view: null,
 		time: 0,
 		dirty: false,
+		camera: Camera.create(),
 		map: {
 			width: data.map.width,
 			height: data.map.height,
 			tilesize: tilesize,
 			data: data.map,
 			image: null
-		},
-		camera: {
-			width: 0,
-			height: 0,
-			zoom: 0,
-			pos: { x: 0, y: 0 },
-			vel: { x: 0, y: 0 },
-			target: { x: 0, y: 0 },
-			origin: { x: 0, y: 0 }
 		},
 		cache: {
 			mode: null,
@@ -58,10 +50,7 @@ export function onresize(screen, viewport) {
 }
 
 export function onpress(screen, pointer) {
-	screen.cache.panoffset = {
-		x: screen.camera.pos.x * screen.camera.zoom,
-		y: screen.camera.pos.y * screen.camera.zoom
-	}
+	Camera.startPan(screen.camera)
 	// call mode onpress hook
 	let onpress = Modes[screen.mode.id].onpress
 	if (onpress) {
@@ -99,7 +88,6 @@ export function onupdate(screen) {
 }
 
 export function updateCamera(screen) {
-	// rerender if camera is at least a pixel off from its drawn position
 	let camera = screen.camera
 	let cache = screen.cache
 	if (Math.round(cache.camera.x) !== Math.round(camera.pos.x)
@@ -109,11 +97,7 @@ export function updateCamera(screen) {
 		screen.dirty = true
 	}
 
-	// update camera position
-	camera.pos.x += camera.vel.x
-	camera.pos.y += camera.vel.y
-	camera.vel.x += ((camera.target.x - camera.pos.x) / 8 - camera.vel.x) / 2
-	camera.vel.y += ((camera.target.y - camera.pos.y) / 8 - camera.vel.y) / 2
+	Camera.update(screen.camera)
 }
 
 export function updateAnims(screen) {
@@ -159,39 +143,6 @@ export function switchMode(screen, next, data) {
 	if (next.onenter) {
 		next.onenter(screen.mode, screen)
 	}
-}
-
-export function panCamera(screen, pointer) {
-	let camera = screen.camera
-	let delta = {
-		x: pointer.pos.x - pointer.presspos.x,
-		y: pointer.pos.y - pointer.presspos.y
-	}
-
-	camera.target.x = (delta.x + screen.cache.panoffset.x) / camera.zoom
-	camera.target.y = (delta.y + screen.cache.panoffset.y) / camera.zoom
-
-	let left = camera.width / 2
-	let right = -camera.width / 2
-	let top = camera.height / 2
-	let bottom = -camera.height / 2
-	if (camera.target.x > left) {
-		camera.target.x = left
-	} else if (camera.target.x < right) {
-		camera.target.x = right
-	}
-	if (camera.target.y > top) {
-		camera.target.y = top
-	} else if (camera.target.y < bottom) {
-		camera.target.y = bottom
-	}
-}
-
-export function centerCamera(screen, cell) {
-	let camera = screen.camera
-	let map = screen.map
-	camera.target.x = map.image.width / 2 - (cell.x + 0.5) * tilesize
-	camera.target.y = map.image.height / 2 - (cell.y + 0.5) * tilesize
 }
 
 export function render(screen) {

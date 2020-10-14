@@ -1,6 +1,7 @@
-import { Comps, Modes, switchMode, panCamera, centerCamera } from "."
+import { Comps, Modes, switchMode } from "."
 import * as PieceLift from "../anims/piece-lift"
 import * as PieceDrop from "../anims/piece-drop"
+import * as Camera from "./camera"
 import findRange from "./range"
 
 export function create(data) {
@@ -22,7 +23,7 @@ export function onenter(mode, screen) {
 
 	// center camera (unless holdselect was used)
 	if (!mode.held) {
-		centerCamera(screen, unit.cell)
+		Camera.center(screen.camera, screen.map, unit.cell)
 	}
 
 	// add range component
@@ -53,7 +54,7 @@ export function onexit(mode, screen) {
 }
 
 export function onmove(mode, screen, pointer) {
-	panCamera(screen, pointer)
+	Camera.pan(screen.camera, pointer)
 }
 
 export function onrelease(mode, screen, pointer) {
