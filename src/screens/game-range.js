@@ -9,12 +9,11 @@ export function create(data) {
 	}
 }
 
-export function add(range, screen) {
+export function onadd(range, screen) {
 	range.image = renderRange(range.data, screen.view.sprites)
-	screen.comps.push(range)
 }
 
-export function remove() {
+export function onremove(range, screen) {
 
 }
 

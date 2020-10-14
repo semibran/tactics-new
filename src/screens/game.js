@@ -14,9 +14,9 @@ export function create(data) {
 	return {
 		id: "Game",
 		mode: Home.create(),
-		view: null,
 		anims: [],
 		comps: [],
+		view: null,
 		dirty: false,
 		map: {
 			width: data.map.width,
@@ -41,28 +41,100 @@ export function create(data) {
 	}
 }
 
-export function enter(screen, view) {
+export function onenter(screen, view) {
 	let sprites = view.sprites
 	screen.view = view
 	screen.map.image = renderMap(screen.map.data, tilesize, sprites.palette)
 }
 
+export function onresize(screen, viewport) {
+	screen.camera.width = viewport.width
+	screen.camera.height = viewport.height
+	screen.camera.zoom = viewport.scale
+}
+
+export function onpress(screen, pointer) {
+	screen.cache.panoffset = {
+		x: screen.camera.pos.x * screen.camera.zoom,
+		y: screen.camera.pos.y * screen.camera.zoom
+	}
+	// call mode onpress hook
+	let onpress = Modes[screen.mode.id].onpress
+	if (onpress) {
+		onpress(screen.mode, screen, pointer)
+	}
+}
+
+export function onmove(screen, pointer) {
+	// call mode onmove hook
+	let onmove = Modes[screen.mode.id].onmove
+	if (onmove) {
+		onmove(screen.mode, screen, pointer)
+	}
+}
+
+export function onrelease(screen, pointer) {
+	// call mode onrelease hook
+	let onrelease = Modes[screen.mode.id].onrelease
+	if (onrelease) {
+		onrelease(screen.mode, screen, pointer)
+	}
+}
+
+export function onupdate(screen) {
+	// rerender if camera is at least a pixel off from its drawn position
+	let camera = screen.camera
+	let cache = screen.cache
+	if (Math.round(cache.camera.x) !== Math.round(camera.pos.x)
+	|| Math.round(cache.camera.y) !== Math.round(camera.pos.y)) {
+		cache.camera.x = camera.pos.x
+		cache.camera.y = camera.pos.y
+		screen.dirty = true
+	}
+
+	// update camera position
+	camera.pos.x += camera.vel.x
+	camera.pos.y += camera.vel.y
+	camera.vel.x += ((camera.target.x - camera.pos.x) / 8 - camera.vel.x) / 2
+	camera.vel.y += ((camera.target.y - camera.pos.y) / 8 - camera.vel.y) / 2
+
+	// call mode onupdate hook
+	let onupdate = Modes[screen.mode.id].onupdate
+	if (onupdate) {
+		onupdate(screen.mode, screen)
+	}
+}
+
 export function switchMode(screen, next, data) {
-	// call mode exit hook
-	let onexit = Modes[screen.mode.id].exit
+	// call old mode onexit hook
+	let onexit = Modes[screen.mode.id].onexit
 	if (onexit) {
 		onexit(screen.mode, screen)
 	}
+	screen.dirty = true
 	screen.cache.mode = screen.mode
 	screen.mode = next.create(data)
-	next.enter(screen.mode, screen)
-	screen.dirty = true
+	if (next.onenter) {
+		next.onenter(screen.mode, screen)
+	}
 }
 
-export function addComp(screen, data) {
-	screen.cache.range = {
-		data: data,
-		image: renderRange(data, screen.view.sprites)
+export function addComp(comp, screen) {
+	let onadd = Comps[comp.id].onadd
+	if (onadd) {
+		onadd(comp, screen)
+	}
+	screen.comps.push(comp)
+}
+
+export function removeComp(comp, screen) {
+	let onremove = Comps[comp.id].onremove
+	if (onremove) {
+		onremove(comp, screen)
+	}
+	let index = screen.comps.indexOf(comp)
+	if (index !== -1) {
+		screen.comps.splice(index, 1)
 	}
 }
 
@@ -89,64 +161,6 @@ export function panCamera(screen, pointer) {
 		camera.target.y = top
 	} else if (camera.target.y < bottom) {
 		camera.target.y = bottom
-	}
-}
-
-export function onresize(screen, viewport) {
-	screen.camera.width = viewport.width
-	screen.camera.height = viewport.height
-	screen.camera.zoom = viewport.scale
-}
-
-export function onpress(screen, pointer) {
-	screen.cache.panoffset = {
-		x: screen.camera.pos.x * screen.camera.zoom,
-		y: screen.camera.pos.y * screen.camera.zoom
-	}
-	// call mode press hook
-	let mode = screen.mode
-	if (Modes[mode.id].onpress) {
-		Modes[mode.id].onpress(mode, screen)
-	}
-}
-
-export function onmove(screen, pointer) {
-	// call mode move hook
-	let mode = screen.mode
-	if (Modes[mode.id].onmove) {
-		Modes[mode.id].onmove(mode, screen, pointer)
-	}
-}
-
-export function onrelease(screen, pointer) {
-	// call mode release hook
-	let mode = screen.mode
-	if (Modes[mode.id].onrelease) {
-		Modes[mode.id].onrelease(mode, screen, pointer)
-	}
-}
-
-export function onupdate(screen) {
-	// rerender if camera is at least a pixel off from its drawn position
-	let camera = screen.camera
-	let cache = screen.cache
-	if (Math.round(cache.camera.x) !== Math.round(camera.pos.x)
-	|| Math.round(cache.camera.y) !== Math.round(camera.pos.y)) {
-		cache.camera.x = camera.pos.x
-		cache.camera.y = camera.pos.y
-		screen.dirty = true
-	}
-
-	// update camera position
-	camera.pos.x += camera.vel.x
-	camera.pos.y += camera.vel.y
-	camera.vel.x += ((camera.target.x - camera.pos.x) / 8 - camera.vel.x) / 2
-	camera.vel.y += ((camera.target.y - camera.pos.y) / 8 - camera.vel.y) / 2
-
-	// call mode hooks (for home press and hold)
-	let mode = screen.mode
-	if (Modes[mode.id].onupdate) {
-		Modes[mode.id].onupdate(mode, screen)
 	}
 }
 

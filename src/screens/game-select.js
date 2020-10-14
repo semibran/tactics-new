@@ -1,4 +1,4 @@
-import { Comps, Modes, switchMode, panCamera } from "./game"
+import { Comps, addComp, removeComp, Modes, switchMode, panCamera } from "./game"
 import findRange from "../game/range"
 
 export function create(data) {
@@ -6,27 +6,22 @@ export function create(data) {
 		id: "Select",
 		anims: [],
 		unit: data,
+		range: null,
 		pointer: {
 			selecting: false
-		},
-		cache: {
-			range: null
 		}
 	}
 }
 
-export function enter(mode, screen) {
+export function onenter(mode, screen) {
 	let unit = mode.unit
 	let range = Comps.Range.create(findRange(unit, screen.map.data))
-	Comps.Range.add(range, screen)
-	// let preview = renderPreview(unit, sprites)
-	// let expand = Anims.RangeExpand.create(range)
-	// let enter = Anims.PreviewEnter.create()
-	// let lift = Anims.PieceLift.create()
+	mode.range = range
+	addComp(mode.range, screen)
 }
 
-export function exit() {
-
+export function onexit(mode, screen) {
+	removeComp(mode.range, screen)
 }
 
 export function onmove(mode, screen, pointer) {
@@ -35,12 +30,6 @@ export function onmove(mode, screen, pointer) {
 
 export function onrelease(mode, screen, pointer) {
 	if (pointer.mode === "click") {
-
+		switchMode(screen, Modes.Home)
 	}
-}
-
-export function render(mode, view) {
-	// queue unit previews
-	// queue unit mirage
-	// queue arrow
 }

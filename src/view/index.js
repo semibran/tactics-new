@@ -38,7 +38,7 @@ export function create(width, height, sprites) {
 export function init(view, game) {
 	let { viewport, sprites, pointer } = view
 	let screen = Screens.Game.create(game, sprites)
-	Screens.Game.enter(screen, view)
+	Screens.Game.onenter(screen, view)
 	view.screen = screen
 
 	let map = screen.map
@@ -58,9 +58,10 @@ export function init(view, game) {
 			canvas.height = viewport.height
 			canvas.style.transform = `scale(${ viewport.scale })`
 
-			// call resize hook
-			if (Screens[screen.id].onresize) {
-				Screens[screen.id].onresize(screen, viewport)
+			// call onresize hook
+			let onresize = Screens[screen.id].onresize
+			if (onresize) {
+				onresize(screen, viewport)
 			}
 			view.dirty = true
 		},
@@ -78,9 +79,10 @@ export function init(view, game) {
 			pointer.mode = "click"
 			pointer.presspos = pointer.pos
 
-			// call press hook
-			if (Screens[screen.id].onpress) {
-				Screens[screen.id].onpress(screen, pointer)
+			// call onpress hook
+			let onpress = Screens[screen.id].onpress
+			if (onpress) {
+				onpress(screen, pointer)
 				if (screen.dirty) view.dirty = true
 			}
 		},
@@ -103,9 +105,10 @@ export function init(view, game) {
 		},
 		release(event) {
 			if (!pointer.presspos) return false
-			// call release hook
-			if (Screens[screen.id].onrelease) {
-				Screens[screen.id].onrelease(screen, pointer)
+			// call onrelease hook
+			let onrelease = Screens[screen.id].onrelease
+			if (onrelease) {
+				onrelease(screen, pointer)
 				if (screen.dirty) view.dirty = true
 			}
 			// reset after hook in case the data is used
@@ -129,9 +132,10 @@ export function init(view, game) {
 		view.time++
 		requestAnimationFrame(update)
 
-		// update hook
-		if (Screens[screen.id].onupdate) {
-			Screens[screen.id].onupdate(screen)
+		// onupdate hook
+		let onupdate = Screens[screen.id].onupdate
+		if (onupdate) {
+			onupdate(screen)
 		}
 	}
 
