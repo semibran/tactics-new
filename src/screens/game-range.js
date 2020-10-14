@@ -1,28 +1,39 @@
 import renderRange from "../view/render-range"
+import * as RangeExpand from "../anims/range-expand"
+import * as RangeShrink from "../anims/range-shrink"
 
 export function create(data) {
 	return {
 		id: "Range",
 		data: data,
+		anims: [],
 		image: null,
-		anim: null
+		sprites: null,
+		exit: false
 	}
 }
 
-export function onadd(range, screen) {
-	range.image = renderRange(range.data, screen.view.sprites)
+export function onenter(range, screen) {
+	range.sprites = screen.view.sprites
+	range.image = renderRange(range.data, range.sprites)
+	range.anims.push(RangeExpand.create(range.data))
 }
 
-export function onremove(range, screen) {
-
+export function onexit(range, screen) {
+	range.exit = true
+	range.anims.push(RangeShrink.create(range.data))
 }
 
 export function render(range, origin) {
-	let node = {
-		image: range.image,
+	let image = range.image
+	let anim = range.anims[0]
+	if (anim) {
+		image = renderRange(anim.range, range.sprites)
+	}
+	return [ {
+		image: image,
 		layer: "range",
 		x: origin.x,
 		y: origin.y
-	}
-	return [ node ]
+	} ]
 }

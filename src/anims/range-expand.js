@@ -2,10 +2,10 @@ import { distance } from "../../lib/cell"
 
 export function create(range) {
 	return {
-		type: "RangeExpand",
+		id: "RangeExpand",
 		done: false,
 		time: 0,
-		src: range,
+		src: sort(range),
 		range: {
 			center: range.center,
 			radius: range.radius,
@@ -16,12 +16,21 @@ export function create(range) {
 
 export function update(anim) {
 	if (anim.done) return
-	for (let square of anim.src.squares) {
-		if (distance(anim.range.center, square.cell) === anim.time) {
-			anim.range.squares.push(square)
-		}
-	}
+	let edges = anim.src[anim.time]
+	anim.range.squares.push(...edges)
 	if (anim.time++ === anim.range.radius) {
 		anim.done = true
 	}
+}
+
+function sort(range) {
+	let sorted = new Array(range.radius + 1)
+	for (let i = 0; i < sorted.length; i++) {
+		sorted[i] = []
+	}
+	for (let square of range.squares) {
+		let steps = distance(range.center, square.cell)
+		sorted[steps].push(square)
+	}
+	return sorted
 }

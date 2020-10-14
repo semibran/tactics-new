@@ -2,7 +2,7 @@ import { distance } from "../../lib/cell"
 
 export function create(range) {
 	return {
-		type: "RangeShrink",
+		id: "RangeShrink",
 		done: false,
 		range: range
 	}

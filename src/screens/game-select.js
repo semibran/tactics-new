@@ -15,13 +15,13 @@ export function create(data) {
 
 export function onenter(mode, screen) {
 	let unit = mode.unit
-	let range = Comps.Range.create(findRange(unit, screen.map.data))
-	mode.range = range
+	let range = mode.range = Comps.Range.create(findRange(unit, screen.map.data))
 	addComp(mode.range, screen)
 }
 
 export function onexit(mode, screen) {
-	removeComp(mode.range, screen)
+	Comps.Range.onexit(mode.range, screen)
+	// removeComp(mode.range, screen)
 }
 
 export function onmove(mode, screen, pointer) {

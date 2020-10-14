@@ -2,6 +2,7 @@ import * as Home from "./game-home"
 import * as Select from "./game-select"
 import * as Forecast from "./game-forecast"
 import * as Range from "./game-range"
+import * as Anims from "../anims"
 import renderMap from "../view/render-map"
 import getOrigin from "../helpers/get-origin"
 
@@ -82,6 +83,17 @@ export function onrelease(screen, pointer) {
 }
 
 export function onupdate(screen) {
+	updateCamera(screen)
+	updateComps(screen)
+
+	// call mode onupdate hook
+	let onupdate = Modes[screen.mode.id].onupdate
+	if (onupdate) {
+		onupdate(screen.mode, screen)
+	}
+}
+
+export function updateCamera(screen) {
 	// rerender if camera is at least a pixel off from its drawn position
 	let camera = screen.camera
 	let cache = screen.cache
@@ -97,11 +109,23 @@ export function onupdate(screen) {
 	camera.pos.y += camera.vel.y
 	camera.vel.x += ((camera.target.x - camera.pos.x) / 8 - camera.vel.x) / 2
 	camera.vel.y += ((camera.target.y - camera.pos.y) / 8 - camera.vel.y) / 2
+}
 
-	// call mode onupdate hook
-	let onupdate = Modes[screen.mode.id].onupdate
-	if (onupdate) {
-		onupdate(screen.mode, screen)
+export function updateComps(screen) {
+	for (let c = 0; c < screen.comps.length; c++) {
+		let comp = screen.comps[c]
+		for (let a = 0; a < comp.anims.length; a++) {
+			let anim = comp.anims[a]
+			if (anim.done) {
+				comp.anims.splice(a--, 1)
+			} else {
+				Anims[anim.id].update(anim)
+			}
+			screen.dirty = true
+		}
+		if (comp.exit && !comp.anims.length) {
+			screen.comps.splice(c--, 1)
+		}
 	}
 }
 
@@ -120,9 +144,9 @@ export function switchMode(screen, next, data) {
 }
 
 export function addComp(comp, screen) {
-	let onadd = Comps[comp.id].onadd
-	if (onadd) {
-		onadd(comp, screen)
+	let onenter = Comps[comp.id].onenter
+	if (onenter) {
+		onenter(comp, screen)
 	}
 	screen.comps.push(comp)
 }
