@@ -8,7 +8,7 @@ import getOrigin from "../helpers/get-origin"
 
 export const Comps = { Range }
 export const Modes = { Home, Select, Forecast }
-export const layerseq = [ "map", "range", "shadows", "pieces", "ui" ]
+export const layerseq = [ "map", "range", "shadows", "ring", "pieces", "selection", "ui" ]
 export const tilesize = 16
 
 export function create(data) {
@@ -84,6 +84,7 @@ export function onrelease(screen, pointer) {
 
 export function onupdate(screen) {
 	updateCamera(screen)
+	updateAnims(screen)
 	updateComps(screen)
 
 	// call mode onupdate hook
@@ -109,6 +110,18 @@ export function updateCamera(screen) {
 	camera.pos.y += camera.vel.y
 	camera.vel.x += ((camera.target.x - camera.pos.x) / 8 - camera.vel.x) / 2
 	camera.vel.y += ((camera.target.y - camera.pos.y) / 8 - camera.vel.y) / 2
+}
+
+export function updateAnims(screen) {
+	for (let i = 0; i < screen.anims.length; i++) {
+		let anim = screen.anims[i]
+		if (anim.done) {
+			screen.anims.splice(i--, 1)
+		} else {
+			Anims[anim.id].update(anim)
+		}
+		screen.dirty = true
+	}
 }
 
 export function updateComps(screen) {
@@ -143,25 +156,6 @@ export function switchMode(screen, next, data) {
 	}
 }
 
-export function addComp(comp, screen) {
-	let onenter = Comps[comp.id].onenter
-	if (onenter) {
-		onenter(comp, screen)
-	}
-	screen.comps.push(comp)
-}
-
-export function removeComp(comp, screen) {
-	let onremove = Comps[comp.id].onremove
-	if (onremove) {
-		onremove(comp, screen)
-	}
-	let index = screen.comps.indexOf(comp)
-	if (index !== -1) {
-		screen.comps.splice(index, 1)
-	}
-}
-
 export function panCamera(screen, pointer) {
 	let camera = screen.camera
 	let delta = {
@@ -191,6 +185,7 @@ export function panCamera(screen, pointer) {
 export function render(screen) {
 	let game = screen.data
 	let map = screen.map
+	let mode = screen.mode
 	let cache = screen.cache
 	let sprites = screen.view.sprites
 	let nodes = []
@@ -218,47 +213,25 @@ export function render(screen) {
 		let x = origin.x + cell.x * map.tilesize
 		let y = origin.y + cell.y * map.tilesize
 		let z = 0
-		/*
-		// if (game.phase.faction === unit.faction) {
-		// 	if (game.phase.pending.includes(unit)) {
-		// 		if (!select || select.unit !== unit) {
-		// 			let glow = sprites.select.glow[unit.faction]
-		// 			nodes.push({
-		// 				image: glow,
-		// 				layer: "pieces",
-		// 				x: x,
-		// 				y: y - 2
-		// 			})
-		// 		}
-		// 	} else {
-		// 		sprite = sprites.pieces.done[unit.faction][unit.type]
-		// 	}
-		// }
-		// if (select && select.unit === unit) {
-		// 	let anim = select.anim
-		// 	if (anim) {
-		// 		if (anim.type !== "PieceMove" || state.time % 2) {
-		// 			let ring = sprites.select.ring[unit.faction]
-		// 			layers.markers.push({ image: ring, x: x - 2, y: y - 2, z: 0 })
-		// 		}
-		// 		if (anim.type === "PieceMove") {
-		// 			x = origin.x + anim.cell.x * tilesize
-		// 			y = origin.y + anim.cell.y * tilesize
-		// 		} else {
-		// 			z = Math.round(select.anim.y)
-		// 		}
-		// 	} else if (select.dest) {
-		// 		x = origin.x + select.dest.x * tilesize
-		// 		y = origin.y + select.dest.y * tilesize
-		// 	}
-		// 	piecelayer = "selection"
-		// } else {
-		// 	piecelayer = "pieces"
-		// }
-		*/
+		let piecelayer = "pieces"
+		if (mode.id === "Select" && mode.unit === unit
+		|| cache.mode && cache.mode.id === "Select" && cache.mode.unit === unit) {
+			let anim = screen.anims.find(anim =>
+				[ "PieceLift", "PieceDrop" ].includes(anim.id))
+			if (anim) {
+				z = anim.y
+				nodes.push({
+					image: sprites.select.ring[unit.faction],
+					layer: "ring",
+					x: x - 2,
+					y: y - 2
+				})
+				piecelayer = "selection"
+			}
+		}
 		nodes.push({
 			image: sprite,
-			layer: "pieces",
+			layer: piecelayer,
 			x: x + 1,
 			y: y - 1,
 			z: z

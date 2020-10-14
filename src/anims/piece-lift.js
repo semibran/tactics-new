@@ -8,7 +8,7 @@ export const height = 4
 // > - float (floating -> true)
 export function create() {
 	return {
-		type: "PieceLift",
+		id: "PieceLift",
 		done: false,
 		y: 0,
 		time: 0,

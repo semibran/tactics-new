@@ -13,13 +13,13 @@ export function create(data) {
 	}
 }
 
-export function onenter(range, screen) {
+export function enter(range, screen) {
 	range.sprites = screen.view.sprites
 	range.image = renderRange(range.data, range.sprites)
 	range.anims.push(RangeExpand.create(range.data))
 }
 
-export function onexit(range, screen) {
+export function exit(range, screen) {
 	range.exit = true
 	range.anims.push(RangeShrink.create(range.data))
 }
@@ -29,6 +29,8 @@ export function render(range, origin) {
 	let anim = range.anims[0]
 	if (anim) {
 		image = renderRange(anim.range, range.sprites)
+	} else if (range.exit) {
+		return []
 	}
 	return [ {
 		image: image,

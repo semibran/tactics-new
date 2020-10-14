@@ -1,12 +1,14 @@
-import { Comps, addComp, removeComp, Modes, switchMode, panCamera } from "./game"
+import { Comps, Modes, switchMode, panCamera } from "./game"
+import * as PieceLift from "../anims/piece-lift"
+import * as PieceDrop from "../anims/piece-drop"
 import findRange from "../game/range"
 
 export function create(data) {
 	return {
 		id: "Select",
-		anims: [],
 		unit: data,
 		range: null,
+		anim: null,
 		pointer: {
 			selecting: false
 		}
@@ -14,14 +16,23 @@ export function create(data) {
 }
 
 export function onenter(mode, screen) {
-	let unit = mode.unit
-	let range = mode.range = Comps.Range.create(findRange(unit, screen.map.data))
-	addComp(mode.range, screen)
+	// add range component
+	let rangedata = findRange(mode.unit, screen.map.data)
+	mode.range = Comps.Range.create(rangedata)
+	Comps.Range.enter(mode.range, screen)
+	screen.comps.push(mode.range)
+	// add piece lift animation
+	mode.anim = PieceLift.create()
+	screen.anims.push(mode.anim)
 }
 
 export function onexit(mode, screen) {
-	Comps.Range.onexit(mode.range, screen)
-	// removeComp(mode.range, screen)
+	// close range component
+	Comps.Range.exit(mode.range, screen)
+	// remove piece lift animation
+	mode.anim.done = true
+	mode.anim = PieceDrop.create(mode.anim.y)
+	screen.anims.push(mode.anim)
 }
 
 export function onmove(mode, screen, pointer) {
