@@ -1,4 +1,3 @@
-import { Modes, switchMode } from "."
 import * as Map from "./map"
 import * as Camera from "./camera"
 import getCell from "../helpers/get-cell"
@@ -30,7 +29,7 @@ export function onmove(mode, screen, pointer) {
 
 export function onrelease(mode, screen, pointer) {
 	if (mode.press && pointer.mode === "click") {
-		select(mode.press.unit, screen)
+		select(mode, mode.press.unit)
 	}
 	mode.press = null
 }
@@ -38,13 +37,16 @@ export function onrelease(mode, screen, pointer) {
 export function onupdate(mode, screen) {
 	let press = mode.press
 	if (press && press.time && screen.time - press.time >= 20) {
-		select(press.unit, screen, true)
+		select(mode, mode.press.unit, true)
 	}
 }
 
-function select(unit, screen, held) {
-	switchMode(screen, Modes.Select, {
-		unit: unit,
-		held: !!held
-	})
+function select(mode, unit, held) {
+	mode.next = {
+		id: "Select",
+		data: {
+			unit: unit,
+			held: !!held
+		}
+	}
 }

@@ -1,21 +1,18 @@
-import * as Home from "./mode-home"
-import * as Select from "./mode-select"
-import * as Range from "./comp-range"
-import * as Preview from "./comp-preview"
 import * as Anims from "../anims"
 import * as Camera from "./camera"
+import * as Comps from "./comps"
+import * as Modes from "./modes"
 import renderMap from "../view/render-map"
 import getOrigin from "../helpers/get-origin"
 
-export const Comps = { Range, Preview }
-export const Modes = { Home, Select }
 export const layerseq = [ "map", "range", "shadows", "ring", "pieces", "selection", "ui" ]
 export const tilesize = 16
 
 export function create(data) {
 	return {
 		id: "Game",
-		mode: Home.create(),
+		mode: Modes.Home.create(),
+		nextMode: null,
 		anims: [],
 		comps: [],
 		view: null,
@@ -80,6 +77,12 @@ export function onupdate(screen) {
 	updateAnims(screen)
 	updateComps(screen)
 
+	// begin transition if mode has mode change queued
+	let next = screen.mode.next
+	if (next && !screen.nextMode) {
+		switchMode(screen, next.id, next.data)
+	}
+
 	// call mode onupdate hook
 	let onupdate = Modes[screen.mode.id].onupdate
 	if (onupdate) {
@@ -130,19 +133,29 @@ export function updateComps(screen) {
 	}
 }
 
-export function switchMode(screen, next, data) {
+function switchMode(screen, next, data) {
+	if (!Modes[next]) {
+		throw new Error(`Attempting to switch to nonexistent mode ${next}`)
+	}
+
 	// call old mode onexit hook
 	let onexit = Modes[screen.mode.id].onexit
 	if (onexit) {
 		onexit(screen.mode, screen)
 	}
-	screen.dirty = true
+
+	// set current mode as old mode
 	screen.cache.mode = screen.mode
-	screen.mode = next.create(data)
+
+	// replace current mode with new node
+	screen.mode = Modes[next].create(data)
 	screen.mode.time = screen.time
-	if (next.onenter) {
-		next.onenter(screen.mode, screen)
+	if (Modes[next].onenter) {
+		Modes[next].onenter(screen.mode, screen)
 	}
+
+	// queue up redraw
+	screen.dirty = true
 }
 
 export function render(screen) {

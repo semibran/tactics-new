@@ -1,12 +1,13 @@
-import { Comps, Modes, switchMode } from "."
+import * as Comps from "./comps"
+import * as Camera from "./camera"
 import * as PieceLift from "../anims/piece-lift"
 import * as PieceDrop from "../anims/piece-drop"
-import * as Camera from "./camera"
 import findRange from "./range"
 
 export function create(data) {
 	return {
 		id: "Select",
+		next: null,
 		unit: data.unit,
 		held: data.held,
 		range: null,
@@ -59,7 +60,7 @@ export function onmove(mode, screen, pointer) {
 
 export function onrelease(mode, screen, pointer) {
 	if (pointer.mode === "click" && !mode.held) {
-		switchMode(screen, Modes.Home)
+		mode.next = { id: "Home" }
 	}
 	mode.held = false
 }
