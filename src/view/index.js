@@ -7,7 +7,7 @@
 // import rgb from "../lib/rgb"
 // import pathfind from "../lib/pathfind"
 // import Anims from "./anims"
-import screens from "../screens"
+import Screens from "../screens"
 import drawNodes from "./draw-nodes"
 import getPosition from "../helpers/get-position"
 import getCell from "../helpers/get-cell"
@@ -37,12 +37,11 @@ export function create(width, height, sprites) {
 
 export function init(view, game) {
 	let { viewport, sprites, pointer } = view
-
-	let Screen = screens.Game
-	let screen = Screen.create(game, sprites)
-	let map = screen.map
+	let screen = Screens.Game.create(game, sprites)
+	Screens.Game.enter(screen, view)
 	view.screen = screen
 
+	let map = screen.map
 	let device = null
 	let events = {
 		resize() {
@@ -60,8 +59,8 @@ export function init(view, game) {
 			canvas.style.transform = `scale(${ viewport.scale })`
 
 			// call resize hook
-			if (Screen.onresize) {
-				Screen.onresize(screen, viewport)
+			if (Screens[screen.id].onresize) {
+				Screens[screen.id].onresize(screen, viewport)
 			}
 			view.dirty = true
 		},
@@ -80,8 +79,8 @@ export function init(view, game) {
 			pointer.presspos = pointer.pos
 
 			// call press hook
-			if (Screen.onpress) {
-				Screen.onpress(screen, pointer)
+			if (Screens[screen.id].onpress) {
+				Screens[screen.id].onpress(screen, pointer)
 				if (screen.dirty) view.dirty = true
 			}
 		},
@@ -97,16 +96,16 @@ export function init(view, game) {
 				}
 			}
 			// call move hook
-			if (Screen.onmove) {
-				Screen.onmove(screen, pointer)
+			if (Screens[screen.id].onmove) {
+				Screens[screen.id].onmove(screen, pointer)
 				if (screen.dirty) view.dirty = true
 			}
 		},
 		release(event) {
 			if (!pointer.presspos) return false
 			// call release hook
-			if (Screen.onrelease) {
-				Screen.onrelease(screen, pointer)
+			if (Screens[screen.id].onrelease) {
+				Screens[screen.id].onrelease(screen, pointer)
 				if (screen.dirty) view.dirty = true
 			}
 			// reset after hook in case the data is used
@@ -116,17 +115,23 @@ export function init(view, game) {
 	}
 
 	function update() {
-		view.time++
+		let screen = view.screen
+		if (screen.dirty) {
+			screen.dirty = false
+			view.dirty = true
+		}
+
 		if (view.dirty) {
 			view.dirty = false
 			render(view)
 		}
+
+		view.time++
 		requestAnimationFrame(update)
 
 		// update hook
-		if (Screen.onupdate) {
-			Screen.onupdate(screen)
-			if (screen.dirty) view.dirty = true
+		if (Screens[screen.id].onupdate) {
+			Screens[screen.id].onupdate(screen)
 		}
 	}
 
@@ -169,10 +174,9 @@ export function render(view) {
 
 	// queue nodes
 	let screen = view.screen
-	let Screen = screens[screen.id]
-	let screennodes = Screen.render(screen, view)
+	let screennodes = Screens[screen.id].render(screen, view)
 	nodes.push(...screennodes)
 
 	// draw on canvas
-	drawNodes(nodes, Screen.layerseq, context)
+	drawNodes(nodes, Screens[screen.id].layerseq, context)
 }

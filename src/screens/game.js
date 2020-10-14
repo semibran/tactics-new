@@ -1,31 +1,30 @@
 import * as Home from "./game-home"
 import * as Select from "./game-select"
 import * as Forecast from "./game-forecast"
-import * as Map from "../game/map"
+import * as Range from "./game-range"
 import renderMap from "../view/render-map"
 import getOrigin from "../helpers/get-origin"
-import getCell from "../helpers/get-cell"
 
+export const Comps = { Range }
+export const Modes = { Home, Select, Forecast }
+export const layerseq = [ "map", "range", "shadows", "pieces", "ui" ]
 export const tilesize = 16
-export const layerseq = [ "map", "shadows", "pieces", "ui" ]
-const modes = { Home, Select, Forecast }
 
-export function create(data, sprites) {
-	let mode = Home.create()
-	let map = {
-		width: data.map.width,
-		height: data.map.height,
-		tilesize: tilesize,
-		data: data.map,
-		image: renderMap(data.map, tilesize, sprites.palette)
-	}
+export function create(data) {
 	return {
 		id: "Game",
-		data: data,
+		mode: Home.create(),
+		view: null,
 		anims: [],
-		map: map,
-		mode: mode,
+		comps: [],
 		dirty: false,
+		map: {
+			width: data.map.width,
+			height: data.map.height,
+			tilesize: tilesize,
+			data: data.map,
+			image: null
+		},
 		camera: {
 			width: 0,
 			height: 0,
@@ -35,8 +34,61 @@ export function create(data, sprites) {
 			target: { x: 0, y: 0 }
 		},
 		cache: {
-			camera: { x: 0, y: 0 }
+			mode: null,
+			camera: { x: 0, y: 0 },
+			panoffset: null,
 		}
+	}
+}
+
+export function enter(screen, view) {
+	let sprites = view.sprites
+	screen.view = view
+	screen.map.image = renderMap(screen.map.data, tilesize, sprites.palette)
+}
+
+export function switchMode(screen, next, data) {
+	// call mode exit hook
+	let onexit = Modes[screen.mode.id].exit
+	if (onexit) {
+		onexit(screen.mode, screen)
+	}
+	screen.cache.mode = screen.mode
+	screen.mode = next.create(data)
+	next.enter(screen.mode, screen)
+	screen.dirty = true
+}
+
+export function addComp(screen, data) {
+	screen.cache.range = {
+		data: data,
+		image: renderRange(data, screen.view.sprites)
+	}
+}
+
+export function panCamera(screen, pointer) {
+	let camera = screen.camera
+	let delta = {
+		x: pointer.pos.x - pointer.presspos.x,
+		y: pointer.pos.y - pointer.presspos.y
+	}
+
+	camera.target.x = (delta.x + screen.cache.panoffset.x) / camera.zoom
+	camera.target.y = (delta.y + screen.cache.panoffset.y) / camera.zoom
+
+	let left = camera.width / 2
+	let right = -camera.width / 2
+	let top = camera.height / 2
+	let bottom = -camera.height / 2
+	if (camera.target.x > left) {
+		camera.target.x = left
+	} else if (camera.target.x < right) {
+		camera.target.x = right
+	}
+	if (camera.target.y > top) {
+		camera.target.y = top
+	} else if (camera.target.y < bottom) {
+		camera.target.y = bottom
 	}
 }
 
@@ -47,22 +99,30 @@ export function onresize(screen, viewport) {
 }
 
 export function onpress(screen, pointer) {
-	let cell = getCell(pointer.pos, screen.map, screen.camera)
-	let unit = Map.unitAt(screen.map.data, cell)
-	console.log(unit)
-
+	screen.cache.panoffset = {
+		x: screen.camera.pos.x * screen.camera.zoom,
+		y: screen.camera.pos.y * screen.camera.zoom
+	}
 	// call mode press hook
 	let mode = screen.mode
-	if (modes[mode.id].onpress) {
-		modes[mode.id].onpress(mode, screen)
+	if (Modes[mode.id].onpress) {
+		Modes[mode.id].onpress(mode, screen)
 	}
 }
 
 export function onmove(screen, pointer) {
 	// call mode move hook
 	let mode = screen.mode
-	if (modes[mode.id].onmove) {
-		modes[mode.id].onmove(mode, screen, pointer)
+	if (Modes[mode.id].onmove) {
+		Modes[mode.id].onmove(mode, screen, pointer)
+	}
+}
+
+export function onrelease(screen, pointer) {
+	// call mode release hook
+	let mode = screen.mode
+	if (Modes[mode.id].onrelease) {
+		Modes[mode.id].onrelease(mode, screen, pointer)
 	}
 }
 
@@ -85,15 +145,16 @@ export function onupdate(screen) {
 
 	// call mode hooks (for home press and hold)
 	let mode = screen.mode
-	if (modes[mode.id].onupdate) {
-		modes[mode.id].onupdate(mode, screen)
+	if (Modes[mode.id].onupdate) {
+		Modes[mode.id].onupdate(mode, screen)
 	}
 }
 
-export function render(screen, view) {
+export function render(screen) {
 	let game = screen.data
 	let map = screen.map
-	let sprites = view.sprites
+	let cache = screen.cache
+	let sprites = screen.view.sprites
 	let nodes = []
 	let origin = getOrigin(map, screen.camera)
 
@@ -105,8 +166,15 @@ export function render(screen, view) {
 		y: origin.y
 	})
 
+	for (let comp of screen.comps) {
+		let compnodes = Comps[comp.id].render(comp, origin)
+		nodes.push(...compnodes)
+	}
+
+	// queue cursor
+
 	// queue units
-	for (let unit of game.map.units) {
+	for (let unit of map.data.units) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let cell = unit.cell
 		let x = origin.x + cell.x * map.tilesize
@@ -166,27 +234,4 @@ export function render(screen, view) {
 	}
 
 	return nodes
-
-	/*
-	// // queue range
-	// if (cache.range) {
-	// 	for (let square of cache.range.squares) {
-	// 		let sprite = sprites.squares[square.type]
-	// 		let x = origin.x + square.cell.x * tilesize
-	// 		let y = origin.y + square.cell.y * tilesize
-	// 		layers.range.push({ image: sprite, x, y })
-	// 	}
-	// }
-	// // queue cursor
-	// if (select && select.cursor
-	// && (!select.anim || select.anim && select.anim.type !== "PieceMove")
-	// && select.valid
-	// && !Cell.equals(select.cursor.target, select.unit.cell)
-	// && Map.contains(game.map, select.cursor.target)
-	// ) {
-	// 	let sprite = sprites.select.cursor[game.phase.faction]
-	// 	let x = origin.x + select.cursor.pos.x - 1
-	// 	let y = origin.y + select.cursor.pos.y - 1
-	// 	layers.selection.push({ image: sprite, x, y })
-	// }*/
 }
