@@ -108,7 +108,11 @@ export function onrelease(mode, screen, pointer) {
 		let target = select.target && select.target.unit
 		if (Cell.equals(unit.cell, dest)) {
 			// end turn
-			mode.commands.push({ type: "switchMode", mode: "Home" })
+			if (target) {
+				mode.commands.push({ type: "switchMode", mode: "Forecast", data: { target } })
+			} else {
+				mode.commands.push({ type: "switchMode", mode: "Home" })
+			}
 		} else {
 			// move to dest
 			move(mode, path, target)
