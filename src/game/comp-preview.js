@@ -53,7 +53,7 @@ export function onresize(preview, viewport) {
 			preview.corner = "topright"
 		}
 	}
-}
+} 
 
 export function render(preview, screen) {
 	let anim = preview.anim

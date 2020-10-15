@@ -1,10 +1,15 @@
 import * as EaseOut from "../anims/ease-out"
 import * as EaseLinear from "../anims/ease-linear"
+import earlyExit from "../helpers/early-exit"
+import lerp from "lerp"
+
+const enterDuration = 15
+const exitDuration = 7
 
 export function create(sprites) {
 	return {
 		id: "Vs",
-		anim: EaseOut.create(15),
+		anim: EaseOut.create(enterDuration),
 		image: sprites.vs,
 		sprites: sprites,
 		exit: false
@@ -13,7 +18,13 @@ export function create(sprites) {
 
 export function exit(vs) {
 	vs.exit = true
-	vs.anim = EaseLinear.create(5)
+
+	if (vs.anim) {
+		let { src, dest, duration } = earlyExit(0, 1, exitDuration, vs.anim.x)
+		vs.anim = EaseLinear.create(duration, { src, dest })
+	} else {
+		vs.anim = EaseLinear.create(exitDuration)
+	}
 }
 
 export function render(vs, screen) {
@@ -25,7 +36,11 @@ export function render(vs, screen) {
 	if (anim && !vs.exit) {
 		width *= anim.x
 	} else if (anim && vs.exit) {
-		width *= 1 - anim.x
+		if (anim.data) {
+			width *= lerp(anim.data.src, anim.data.dest, anim.x)
+		} else {
+			width *= (1 - anim.x)
+		}
 	}
 	return [ {
 		layer: "ui",
