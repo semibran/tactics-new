@@ -32,7 +32,7 @@ export function exit(preview) {
 	let duration = preview.anim
 		? earlyExit(exitDuration, preview.anim.x)
 		: exitDuration
-	preview.anim = EaseLinear.create(duration, src, 0)
+	preview.anim = EaseLinear.create(duration, { src, dest: 0 })
 	preview.exit = true
 }
 

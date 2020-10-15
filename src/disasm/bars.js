@@ -20,8 +20,8 @@ export default function disasmBars(image, palette) {
 		palette.jet
 	]
 	replaceColors(image, oldColors, newColors)
-	bars.left = extract(image, 0, 5, 68, 11)
-	bars.right = extract(image, 0, 16, 68, 11)
+	bars.left = extract(image, 0, 16, 68, 11)
+	bars.right = extract(image, 0, 5, 68, 11)
 	return bars
 }
 

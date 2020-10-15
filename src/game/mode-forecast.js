@@ -32,20 +32,24 @@ export function onenter(mode, screen) {
 	// add attacker name tag
 	// add attacker hp
 	let atktag = Comps.Tag.create(atkr.name, atkr.faction, sprites)
-	let atkrhp = Comps.Hp.create(atkr.stats.hp, Unit.dmg(defr, atkr), atkr.faction, sprites)
+	let atkrhp = Comps.Hp.create(
+		atkr.hp, atkr.stats.hp,
+		atkr.faction
+	)
 	mode.comps.push(atktag)
 	mode.comps.push(atkrhp)
+	Comps.Hp.startFlash(atkrhp, Unit.dmg(defr, atkr))
 
 	// add defender tag
 	// add defender hp
-	let deftag = Comps.Tag.create(defr.name, defr.faction, sprites, true)
+	let deftag = Comps.Tag.create(defr.name, defr.faction, sprites, { flipped: true })
 	let defrhp = Comps.Hp.create(
-		defr.stats.hp, Unit.dmg(atkr, defr),
-		defr.faction, sprites,
-		true
+		defr.hp, defr.stats.hp,
+		defr.faction, { flipped: true }
 	)
 	mode.comps.push(deftag)
 	mode.comps.push(defrhp)
+	Comps.Hp.startFlash(defrhp, Unit.dmg(atkr, defr))
 
 	// add stat panels
 	let wpn = Comps.StatPanel.create("wpn", atkr, defr, sprites)

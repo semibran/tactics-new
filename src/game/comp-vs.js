@@ -21,7 +21,7 @@ export function exit(vs) {
 	let duration = vs.anim
 		? earlyExit(exitDuration, vs.anim.x)
 		: exitDuration
-	vs.anim = EaseLinear.create(duration, src, 0)
+	vs.anim = EaseLinear.create(duration, { src, dest: 0 })
 	vs.exit = true
 }
 

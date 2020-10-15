@@ -36,7 +36,7 @@ export function exit(log) {
 	let duration = log.anim
 		? earlyExit(exitDuration, log.anim.x)
 		: exitDuration
-	log.anim = EaseLinear.create(duration, src, 0)
+	log.anim = EaseLinear.create(duration, { src, dest: 0 })
 	log.exit = true
 }
 

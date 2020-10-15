@@ -24,7 +24,7 @@ export function exit(tag) {
 	let duration = tag.anim
 		? earlyExit(exitDuration, tag.anim.x)
 		: exitDuration
-	tag.anim = EaseLinear.create(duration, src, 0)
+	tag.anim = EaseLinear.create(duration, { src, dest: 0 })
 	tag.exit = true
 }
 
