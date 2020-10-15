@@ -12,7 +12,7 @@ export function create() {
 
 export function onpress(mode, screen, pointer) {
 	let cell = getCell(pointer.pos, screen.map, screen.camera)
-	let unit = Map.unitAt(screen.map.data, cell)
+	let unit = Map.unitAt(screen.map, cell)
 	if (unit) {
 		mode.press = {
 			unit: unit,

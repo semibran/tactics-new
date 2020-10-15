@@ -13,7 +13,7 @@ export function create(range, sprites) {
 	}
 }
 
-export function exit(range, screen) {
+export function exit(range) {
 	range.exit = true
 	range.anims.push(RangeShrink.create(range.data))
 }

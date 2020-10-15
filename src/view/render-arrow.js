@@ -1,6 +1,10 @@
-export default function renderArrow(sprites, path) {
-	var arrow = []
+import * as Canvas from "../../lib/Canvas"
+
+export default function renderArrow(path, sprites) {
+	var nodes = []
 	var stubdir = null
+	let right = 0
+	let bottom = 0
 	for (var i = 0; i < path.length; i++) {
 		var cell = path[i]
 		var x = cell.x
@@ -9,6 +13,14 @@ export default function renderArrow(sprites, path) {
 		var r = false
 		var u = false
 		var d = false
+
+		if (x > right) {
+			right = x
+		}
+
+		if (y > bottom) {
+			bottom = y
+		}
 
 		var prev = path[i - 1]
 		if (prev) {
@@ -85,7 +97,7 @@ export default function renderArrow(sprites, path) {
 			}
 			if (direction) {
 				let sprite = sprites[direction]
-				arrow.push({
+				nodes.push({
 					image: sprite,
 					x: cell.x * sprite.width,
 					y: cell.y * sprite.height
@@ -93,5 +105,11 @@ export default function renderArrow(sprites, path) {
 			}
 		}
 	}
-	return arrow
+	let width = (right + 1) * 16
+	let height = (bottom + 1) * 16
+	let arrow = Canvas.create(width, height)
+	for (let node of nodes) {
+		arrow.drawImage(node.image, node.x, node.y)
+	}
+	return arrow.canvas
 }

@@ -7,8 +7,8 @@ export default function drawNodes(nodes, layerseq, context) {
 	nodes.sort((a, b) => zindex(a) - zindex(b))
 	for (let node of nodes) {
 		let image = node.image
-		let x = Math.round(node.x)
-		let y = Math.round(node.y - (node.z || 0))
+		let x = Math.round(node.x) || 0
+		let y = Math.round(node.y - (node.z || 0)) || 0
 		let width = Math.round(node.width)
 		let height = Math.round(node.height)
 		if (width === 0 || height === 0) {

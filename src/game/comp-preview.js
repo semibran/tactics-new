@@ -22,7 +22,7 @@ export function create(unit, sprites) {
 	}
 }
 
-export function exit(preview, screen) {
+export function exit(preview) {
 	preview.exit = true
 	let anim = preview.anims[0]
 	let src = margin

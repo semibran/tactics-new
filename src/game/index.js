@@ -5,8 +5,17 @@ import * as Modes from "./modes"
 import renderMap from "../view/render-map"
 import getOrigin from "../helpers/get-origin"
 
-export const layerseq = [ "map", "range", "shadows", "ring", "pieces", "selection", "ui" ]
 export const tilesize = 16
+export const layerseq = [
+	"map",
+	"range",
+	"shadows",
+	"arrow",
+	"ring",
+	"pieces",
+	"selection",
+	"ui"
+]
 
 export function create(data) {
 	return {
@@ -19,13 +28,7 @@ export function create(data) {
 		time: 0,
 		dirty: false,
 		camera: Camera.create(),
-		map: {
-			width: data.map.width,
-			height: data.map.height,
-			tilesize: tilesize,
-			data: data.map,
-			image: null
-		},
+		map: Object.assign({ tilesize, image: null }, data.map),
 		cache: {
 			camera: { x: 0, y: 0 }
 		}
@@ -35,7 +38,7 @@ export function create(data) {
 export function onenter(screen, view) {
 	let sprites = view.sprites
 	screen.view = view
-	screen.map.image = renderMap(screen.map.data, tilesize, sprites.palette)
+	screen.map.image = renderMap(screen.map, sprites)
 }
 
 export function onresize(screen, viewport) {
@@ -184,6 +187,11 @@ export function render(screen) {
 
 	camera.origin = getOrigin(map, screen.camera)
 
+	if (Modes[mode.id].render) {
+		let modenodes = Modes[mode.id].render(mode, screen)
+		nodes.push(...modenodes)
+	}
+
 	// queue map
 	nodes.push({
 		image: map.image,
@@ -205,7 +213,7 @@ export function render(screen) {
 	// queue cursor
 
 	// queue units
-	for (let unit of map.data.units) {
+	for (let unit of map.units) {
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let cell = unit.cell
 		let x = camera.origin.x + cell.x * map.tilesize
