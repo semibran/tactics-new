@@ -1,5 +1,6 @@
 import * as EaseOut from "../anims/ease-out"
 import * as EaseLinear from "../anims/ease-linear"
+import * as Config from "./config"
 import earlyExit from "../helpers/early-exit"
 
 const enterDuration = 15
@@ -27,7 +28,7 @@ export function render(vs, screen) {
 	let anim = vs.anim
 	let image = vs.image
 	let x = screen.camera.width / 2
-	let y = screen.camera.height / 2
+	let y = screen.camera.height - Config.forecastOffset
 	let width = image.width
 	if (anim) {
 		width *= anim.x

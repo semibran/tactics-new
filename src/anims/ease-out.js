@@ -5,7 +5,7 @@ export function create(duration, data) {
 		id: "EaseOut",
 		done: false,
 		duration: duration,
-		data: data,
+		data: Object.assign({ delay: 0 }, data),
 		x: 0,
 		time: 0
 	}
@@ -13,9 +13,10 @@ export function create(duration, data) {
 
 export function update(anim) {
 	if (anim.done) return
-	let t = anim.time / anim.duration
+	anim.time++
+	let t = Math.max(0, anim.time - anim.data.delay) / anim.duration
 	anim.x = easeOut(t)
-	if (++anim.time >= anim.duration) {
+	if (anim.time - anim.data.delay >= anim.duration) {
 		anim.done = true
 	}
 }

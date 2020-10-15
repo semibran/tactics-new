@@ -1,11 +1,14 @@
 import * as EaseOut from "../anims/ease-out"
 import * as EaseLinear from "../anims/ease-linear"
 import * as RenderStats from "../view/render-forecast"
+import * as Config from "./config"
 import earlyExit from "../helpers/early-exit"
 import lerp from "lerp"
 
 const enterDuration = 15
 const exitDuration = 7
+const offsetDelay = 5
+const offsetY = 13
 
 export function create(type, attacker, defender, sprites, data) {
 	let image = null
@@ -18,11 +21,12 @@ export function create(type, attacker, defender, sprites, data) {
 	} else {
 		throw new Error(`Failed to render statpanel component: type ${type} is not defined`)
 	}
+	data = Object.assign({ offset: 0 }, data)
 	return {
 		id: "StatPanel",
-		anim: EaseOut.create(enterDuration),
+		anim: EaseOut.create(enterDuration, { delay: data.offset * offsetDelay }),
 		image: image,
-		data: data || { offset: 0 },
+		data: data,
 		exit: false
 	}
 }
@@ -32,7 +36,8 @@ export function exit(panel) {
 	let duration = panel.anim
 		? earlyExit(exitDuration, panel.anim.x)
 		: exitDuration
-	panel.anim = EaseLinear.create(duration, src, 0)
+	let opts = { delay: panel.data.offset * offsetDelay }
+	panel.anim = EaseLinear.create(duration, src, 0, opts)
 	panel.exit = true
 }
 
@@ -40,7 +45,7 @@ export function render(panel, screen) {
 	let anim = panel.anim
 	let image = panel.image
 	let x = screen.camera.width / 2
-	let y = screen.camera.height / 2 + 40 + panel.data.offset * 13
+	let y = screen.camera.height - Config.forecastOffset + 28 + panel.data.offset * offsetY
 	let height = anim ? image.height * anim.x : image.height
 	return [ {
 		layer: "ui",

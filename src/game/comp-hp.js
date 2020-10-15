@@ -1,6 +1,7 @@
 import * as EaseOut from "../anims/ease-out"
 import * as EaseLinear from "../anims/ease-linear"
 import * as RenderHP from "../view/render-hp"
+import * as Config from "./config"
 import earlyExit from "../helpers/early-exit"
 import lerp from "lerp"
 
@@ -43,7 +44,7 @@ export function render(hp, screen) {
 	}
 
 	let x = anim ? lerp(start, goal, anim.x) : goal
-	let y = screen.camera.height / 2
+	let y = screen.camera.height - Config.forecastOffset
 	return [ {
 		layer: "ui",
 		image, x, y, origin

@@ -1,5 +1,6 @@
 import * as Comps from "./comps"
 import * as Unit from "./unit"
+import * as Camera from "./camera"
 
 export function create(data) {
 	return {
@@ -15,6 +16,14 @@ export function onenter(mode, screen) {
 	let sprites = screen.view.sprites
 	let atkr = mode.attacker
 	let defr = mode.defender
+
+	// center camera
+	let midpoint = {
+		x: (atkr.cell.x + defr.cell.x) / 2,
+		y: (atkr.cell.y + defr.cell.y) / 2
+	}
+	Camera.center(screen.camera, screen.map, midpoint)
+	screen.camera.target.y -= screen.camera.height / 4 - 6
 
 	// add vs component
 	let vs = Comps.Vs.create(sprites)
