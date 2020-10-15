@@ -112,13 +112,39 @@ export function onrelease(mode, screen, pointer) {
 }
 
 export function render(mode, screen) {
+	let nodes = []
+
 	let origin = screen.camera.origin
 	let pointer = screen.view.pointer
 	let sprites = screen.view.sprites
 	let viewport = screen.view.viewport
 	let select = mode.select
 	let unit = mode.unit
-	let nodes = []
+	let anim = mode.anim
+	let moving = anim && anim.id === "PieceMove"
+	let selectvis = anim && (!moving || screen.time % 2)
+
+	// render ring
+	if (selectvis) {
+		let image = sprites.select.ring[unit.faction]
+		let x = origin.x + unit.cell.x * screen.map.tilesize - 2
+		let y = origin.y + unit.cell.y * screen.map.tilesize - 2
+		nodes.push({
+			layer: "ring",
+			image, x, y
+		})
+	}
+
+	// render arrow
+	let arrow = select && select.arrow
+	if (arrow && selectvis) {
+		nodes.push({
+			layer: "arrow",
+			image: arrow,
+			x: origin.x,
+			y: origin.y
+		})
+	}
 
 	// render cursor
 	let cursor = select && select.cursor
@@ -131,35 +157,8 @@ export function render(mode, screen) {
 		})
 	}
 
-	// render ring
-	let anim = mode.anim
-	if (anim && (anim.id !== "PieceMove" || screen.time % 2)) {
-		let image = sprites.select.ring[unit.faction]
-		let x = origin.x + unit.cell.x * screen.map.tilesize - 2
-		let y = origin.y + unit.cell.y * screen.map.tilesize - 2
-		nodes.push({
-			layer: "ring",
-			image, x, y
-		})
-	}
-
-	// render arrow
-	let arrow = select && select.arrow
-	if (arrow
-	&& (anim && (anim.id !== "PieceMove" || screen.time % 2))
-	) {
-		nodes.push({
-			layer: "arrow",
-			image: arrow,
-			x: origin.x,
-			y: origin.y
-		})
-	}
-
 	// render mirage
-	if (select
-	&& (!cursor || !Cell.equals(cursor.target, unit.cell))
-	) {
+	if (select && !moving && (!cursor || !Cell.equals(cursor.target, unit.cell))) {
 		let image = sprites.pieces[unit.faction][unit.type]
 		let x = pointer.pos.x / viewport.scale - image.width / 2
 		let y = pointer.pos.y / viewport.scale - image.height - 8

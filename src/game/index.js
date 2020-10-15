@@ -266,6 +266,7 @@ export function render(screen) {
 	}
 
 	// queue selection
+	// move into mode-select?
 	if (mode.id === "Select") {
 		let unit = mode.unit
 		let sprite = sprites.pieces[unit.faction][unit.type]
