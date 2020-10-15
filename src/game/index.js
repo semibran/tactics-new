@@ -150,8 +150,9 @@ export function updateMode(mode) {
 	let anim = mode.anim
 	if (anim) {
 		if (anim.done) {
-			if (anim.onend) {
-				anim.onend()
+			let onend = anim.data && anim.data.onend
+			if (onend) {
+				onend()
 			}
 			mode.anim = null
 		} else {
@@ -168,8 +169,8 @@ export function updateMode(mode) {
 				comp.anim = null
 			} else {
 				Anims[anim.id].update(anim)
-				dirty = true
 			}
+			dirty = true
 		}
 		if (!comp.anim && comp.exit) {
 			mode.comps.splice(c--, 1)
@@ -184,10 +185,17 @@ function transition(screen, nextid, nextdata) {
 		throw new Error(`Attempting to switch to nonexistent mode ${nextid}`)
 	}
 
-	// call old mode onexit hook
-	let onexit = Modes[screen.mode.id].onexit
+	let mode = screen.mode
+
+	// call old mode onexit hooks
+	let onexit = Modes[mode.id].onexit
 	if (onexit) {
-		onexit(screen.mode, screen)
+		onexit(mode, screen)
+	}
+
+	// close components
+	for (let comp of mode.comps) {
+		Comps[comp.id].exit(comp)
 	}
 
 	// create new mode
@@ -195,7 +203,7 @@ function transition(screen, nextid, nextdata) {
 	next.time = screen.time
 
 	// switch immediately if not animating
-	if (!screen.mode.comps.length) {
+	if (!mode.comps.length) {
 		switchMode(screen)
 	}
 
@@ -235,7 +243,7 @@ export function render(screen) {
 	})
 
 	// queue components
-	let comps = mode.comps
+	let comps = mode.comps.slice()
 	if (nextMode) {
 		comps.push(...nextMode.comps)
 	}

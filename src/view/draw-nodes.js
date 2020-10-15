@@ -19,6 +19,11 @@ export default function drawNodes(nodes, layerseq, context) {
 		if (width === 0 || height === 0) {
 			continue
 		}
+		let origin = node.origin || "topleft"
+		if (origin === "center") {
+			x -= width / 2
+			y -= height / 2
+		}
 		if (node.opacity !== undefined) {
 			context.globalAlpha = node.opacity
 			context.drawImage(image, x, y, width, height)

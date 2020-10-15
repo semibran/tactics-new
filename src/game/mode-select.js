@@ -60,11 +60,6 @@ export function onenter(mode, screen) {
 }
 
 export function onexit(mode, screen) {
-	// close components
-	for (let comp of mode.comps) {
-		Comps[comp.id].exit(comp)
-	}
-
 	// remove piece lift animation
 	if (mode.anim && mode.anim.id === "PieceLift") {
 		mode.anim.done = true
@@ -346,10 +341,16 @@ function move(mode, path, target) {
 		let unit = mode.unit
 		let dest = path[path.length - 1]
 		mode.anim.done = true
-		mode.anim = PieceMove.create(path, _ => {
-			mode.commands.push({ type: "move", unit: unit, dest: dest })
-			mode.commands.push({ type: "endTurn", unit: unit })
-			mode.commands.push({ type: "switchMode", mode: "Home" })
+		mode.anim = PieceMove.create(path, {
+			onend() {
+				mode.commands.push({ type: "move", unit: unit, dest: dest })
+				if (!target) {
+					mode.commands.push({ type: "endTurn", unit: unit })
+					mode.commands.push({ type: "switchMode", mode: "Home" })
+				} else {
+					mode.commands.push({ type: "switchMode", mode: "Forecast", data: { target } })
+				}
+			}
 		})
 	} else {
 		mode.commands.push({ type: "switchMode", mode: "Home" })
