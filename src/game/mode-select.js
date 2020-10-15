@@ -259,14 +259,15 @@ function hover(mode, cell) {
 			}
 
 			// simple case: selecting adjacent enemy
-			if (!cpath && square.target && Cell.adjacent(unit.cell, dest)) {
+			if (!cpath && square.target && Cell.adjacent(unit.cell, cell)) {
 				path = [ unit.cell ]
 			} else {
+				let rng = Unit.rng(unit)
 				if (square.target) {
 					// if out of range
-					if (Cell.distance(cdest || unit.cell, dest) > Unit.rng(unit)) {
+					if (Cell.distance(cdest || unit.cell, cell) > rng) {
 						// find closest square to attack from
-						let neighbors = Cell.neighborhood(dest, range)
+						let neighbors = Cell.neighborhood(dest, rng)
 							.filter(cell => !map.units.find(unit => Cell.equals(cell, unit.cell)))
 							.sort((a, b) => Cell.distance(a, unit.cell) - Cell.distance(b, unit.cell))
 						dest = neighbors[0]
@@ -276,7 +277,7 @@ function hover(mode, cell) {
 					}
 				}
 				if (!path && dest && cpath) {
-					if (!square.target || Cell.distance(cdest, dest) > range) {
+					if (!square.target || Cell.distance(cdest, cell) > rng) {
 						path = pathfind(unit, dest, map, cpath)
 					} else {
 						path = cpath
