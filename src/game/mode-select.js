@@ -20,7 +20,6 @@ export function create(data) {
 		anim: null,
 		unit: data.unit,
 		held: data.held,
-		target: null,
 		sprites: null,
 		map: null,
 		range: null,
@@ -111,6 +110,7 @@ export function onrelease(mode, screen, pointer) {
 	} else if (select && select.valid) {
 		let path = select.path
 		let dest = path[path.length - 1]
+		// TODO: fit attacks into this model
 		if (Cell.equals(unit.cell, dest)) {
 			// end turn
 			mode.commands.push({ type: "switchMode", mode: "Home" })
@@ -208,7 +208,7 @@ function hover(mode, cell) {
 	let { map, unit, range, sprites, select } = mode
 
 	// break if the hovered cell hasn't changed
-	let cpath = mode.select && mode.select.path
+	let cpath = select && select.path
 	let cdest = cpath ? cpath[cpath.length - 1] : null
 	if (cpath && Cell.equals(cdest, cell)
 	&& (!select.cursor || Cell.equals(select.cursor.target, cell))
@@ -217,6 +217,7 @@ function hover(mode, cell) {
 	}
 
 	let path = null
+	let target = select && select.target
 
 	// initial case: hover is on unit cell
 	if (Cell.equals(unit.cell, cell)) {
@@ -233,25 +234,25 @@ function hover(mode, cell) {
 
 			// if there's an enemy in this square
 			// and no enemy is currently selected
-			if (square.target && !mode.target) {
+			if (square.target && !target) {
 				// create enemy preview component
 				let unit = square.target
 				let preview = Comps.Preview.create(unit, "topright", sprites)
 				mode.comps.push(preview)
 
 				// select enemy
-				mode.target = { unit, preview }
+				target = { unit, preview }
 			}
 
 			// if we're selecting an enemy,
 			// but now the current square is empty
 			// or houses a different unit than before
-			if (mode.target && (!square.target || mode.target.unit !== square.target)) {
+			if (target && (!square.target || target.unit !== square.target)) {
 				// close enemy preview component
-				Comps.Preview.exit(mode.target.preview)
+				Comps.Preview.exit(target.preview)
 
 				// deselect enemy component
-				mode.target = null
+				target = null
 			}
 
 			// simple case: selecting adjacent enemy
@@ -286,12 +287,13 @@ function hover(mode, cell) {
 		}
 	}
 
-	if (path && !select) {
+	if (!select && (path || target)) {
 		select = mode.select = {
 			cursor: null,
 			path: null,
 			arrow: null,
-			valid: false
+			valid: false,
+			target: null
 		}
 	}
 
@@ -312,10 +314,15 @@ function hover(mode, cell) {
 		select.valid = true
 		select.arrow = sprites.Arrow(path, unit.faction)
 		select.path = path
-		return true
 	} else if (mode.select) {
 		select.valid = false
 		select.cursor = null
+	}
+
+	if (target) {
+		select.target = target
+	} else {
+		select.target = null
 	}
 
 	return false
