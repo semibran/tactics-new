@@ -23,6 +23,18 @@ export function attacker(maxhp, damage, faction, sprites) {
 	return hp.canvas
 }
 
+export function attackerChunk(maxhp, damage, sprites) {
+	let base = sprites.bars.left
+	let chunk = Canvas.create(base.width, base.height)
+	let pct = (maxhp - damage) / maxhp
+	let width = maxwidth - (Math.round(maxwidth * pct) + 1)
+	chunk.fillStyle = "white"
+	chunk.fillRect(7, 2, width, 2)
+	chunk.fillRect(8, 4, width, 2)
+	chunk.fillRect(9, 6, width, 1)
+	return chunk.canvas
+}
+
 export function defender(maxhp, damage, faction, sprites) {
 	damage = damage || 0
 	let { bars, palette } = sprites
@@ -39,4 +51,17 @@ export function defender(maxhp, damage, faction, sprites) {
 	hp.fillRect(6, 4, width, 2)
 	hp.fillRect(5, 6, width, 1)
 	return hp.canvas
+}
+
+export function defenderChunk(maxhp, damage, sprites) {
+	let base = sprites.bars.right
+	let chunk = Canvas.create(base.width, base.height)
+	let pct = (maxhp - damage) / maxhp
+	let offset = Math.round(maxwidth * pct)
+	let width = maxwidth - offset
+	chunk.fillStyle = "white"
+	chunk.fillRect(7 + offset, 2, width, 2)
+	chunk.fillRect(6 + offset, 4, width, 2)
+	chunk.fillRect(5 + offset, 6, width, 1)
+	return chunk.canvas
 }

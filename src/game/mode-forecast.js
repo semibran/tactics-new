@@ -25,10 +25,6 @@ export function onenter(mode, screen) {
 	Camera.center(screen.camera, screen.map, midpoint)
 	screen.camera.target.y -= screen.camera.height / 4 - 6
 
-	// add vs component
-	let vs = Comps.Vs.create(sprites)
-	mode.comps.push(vs)
-
 	// add attacker name tag
 	let atktag = Comps.Tag.create(atkr.name, atkr.faction, sprites)
 	mode.comps.push(atktag)
@@ -49,14 +45,17 @@ export function onenter(mode, screen) {
 	)
 	mode.comps.push(defrhp)
 
+	// add stat panels
 	let wpn = Comps.StatPanel.create("wpn", atkr, defr, sprites)
-	mode.comps.push(wpn)
-
 	let dmg = Comps.StatPanel.create("dmg", atkr, defr, sprites, { offset: 1 })
-	mode.comps.push(dmg)
-
 	let hit = Comps.StatPanel.create("hit", atkr, defr, sprites, { offset: 2 })
+	mode.comps.push(wpn)
+	mode.comps.push(dmg)
 	mode.comps.push(hit)
+
+	// add vs component
+	let vs = Comps.Vs.create(sprites)
+	mode.comps.push(vs)
 }
 
 export function onrelease(mode, screen, pointer) {

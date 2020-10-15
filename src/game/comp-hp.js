@@ -12,10 +12,14 @@ export function create(maxhp, damage, faction, sprites, defending) {
 	let image = !defending
 		? RenderHP.attacker(maxhp, damage, faction, sprites)
 		: RenderHP.defender(maxhp, damage, faction, sprites)
+	let chunk = !defending
+		? RenderHP.attackerChunk(maxhp, damage, sprites)
+		: RenderHP.defenderChunk(maxhp, damage, sprites)
 	return {
 		id: "Hp",
 		anim: EaseOut.create(enterDuration),
 		image: image,
+		chunk: chunk,
 		flipped: !!defending,
 		exit: false
 	}
@@ -31,22 +35,36 @@ export function exit(hp) {
 }
 
 export function render(hp, screen) {
+	let nodes = []
 	let anim = hp.anim
 	let image = hp.image
 
 	let origin = "topright"
 	let start = 0
-	let goal = screen.camera.width / 2 - 20
+	let goal = screen.camera.width / 2 - 10
 	if (hp.flipped) {
 		origin = "topleft"
 		start = screen.camera.width
-		goal = screen.camera.width / 2 + 20
+		goal = screen.camera.width / 2 + 10
 	}
 
 	let x = anim ? lerp(start, goal, anim.x) : goal
 	let y = screen.camera.height - Config.forecastOffset
-	return [ {
+	nodes.push({
 		layer: "ui",
 		image, x, y, origin
-	} ]
+	})
+
+	if (hp.chunk) {
+		let d = screen.time % 60 / 60
+		let opacity = (Math.sin(2 * Math.PI * d) + 1) / 2 * 0.5
+		screen.dirty = true
+		nodes.push({
+			layer: "ui",
+			image: hp.chunk,
+			x, y, origin, opacity
+		})
+	}
+
+	return nodes
 }
