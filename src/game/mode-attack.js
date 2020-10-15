@@ -1,4 +1,5 @@
 import * as Comps from "./comps"
+import * as Unit from "./unit"
 
 export function create(data) {
 	return {
@@ -15,7 +16,14 @@ export function onenter(mode, screen) {
 	let sprites = screen.sprites
 	let attacker = mode.attacker
 	let defender = mode.defender
-	let log = Comps.Log.create([ attacker.name + " attacks " + defender.name ], sprites)
+	let damage = Unit.dmg(attacker, defender)
+	let content = [
+		[ `${attacker.name} attacks`
+	 	, `${defender.name} receives ${damage} damage.`
+		]
+	]
+
+	let log = Comps.Log.create(content, sprites)
 	mode.comps.push(log)
 }
 

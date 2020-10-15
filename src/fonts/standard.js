@@ -28,7 +28,7 @@ module.exports = {
 	spacing: {
 		char: 1,
 		word: 4,
-		line: 5
+		line: 6
 	},
 	layout: [
 		"0123456789",
