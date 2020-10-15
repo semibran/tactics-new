@@ -3,35 +3,46 @@ import * as EaseOut from "../anims/ease-out"
 import * as EaseLinear from "../anims/ease-linear"
 import lerp from "lerp"
 
-export function create(unit) {
+const margin = 2
+const enterDuration = 15
+const exitDuration = 5
+
+export function create(unit, sprites) {
+	let image = renderPreview(unit, sprites)
+	let anim = EaseOut.create(enterDuration, {
+		src: -image.width,
+		dest: margin
+	})
 	return {
 		id: "Preview",
+		anims: [ anim ],
 		unit: unit,
-		anims: [],
-		image: null,
+		image: image,
 		exit: false
 	}
 }
 
-export function enter(preview, screen) {
-	preview.image = renderPreview(preview.unit, screen.view.sprites)
-	preview.anims.push(EaseOut.create(10))
-}
-
 export function exit(preview, screen) {
 	preview.exit = true
-	preview.anims.push(EaseLinear.create(5))
+	let anim = preview.anims[0]
+	let src = margin
+	let dest = -preview.image.width
+	let duration = exitDuration
+	if (anim) {
+		anim.done = true
+		let normdist = anim.data.dest - anim.data.src
+		let truedist = anim.x * normdist
+		let normspeed = normdist / duration
+		duration = truedist / normspeed
+		src = anim.data.src + truedist
+	}
+	preview.anims.push(EaseLinear.create(duration, { src, dest }))
 }
 
 export function render(preview, screen) {
-	const margin = 2
 	let anim = preview.anims[0]
-	let t = 1
-	if (anim) {
-		t = !preview.exit ? anim.x : 1 - anim.x
-	}
 	let image = preview.image
-	let x = lerp(-image.width, margin, t)
+	let x = anim ? lerp(anim.data.src, anim.data.dest, anim.x) : margin
 	let y = screen.camera.height - image.height - margin + 1
 	return [ {
 		layer: "ui",

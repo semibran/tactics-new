@@ -70,21 +70,30 @@ export function onrelease(screen, pointer) {
 }
 
 export function onupdate(screen) {
+	let { mode, nextMode } = screen
+
 	screen.time++
 	updateCamera(screen)
 	updateAnims(screen)
-	updateComps(screen)
 
-	// begin transition if mode has mode change queued
-	let next = screen.mode.next
-	if (next && !screen.nextMode) {
-		transition(screen, next.id, next.data)
+	// update components
+	screen.dirty |= updateComps(mode)
+	if (nextMode) {
+		screen.dirty |= updateComps(nextMode)
+		if (!mode.comps.length && nextMode) {
+			switchMode(screen)
+		}
+	}
+
+	// begin transition if mode has change queued
+	if (mode.next && !nextMode) {
+		transition(screen, mode.next.id, mode.next.data)
 	}
 
 	// call mode onupdate hook
-	let onupdate = Modes[screen.mode.id].onupdate
+	let onupdate = Modes[mode.id].onupdate
 	if (onupdate) {
-		onupdate(screen.mode, screen)
+		onupdate(mode, screen)
 	}
 }
 
@@ -113,26 +122,24 @@ export function updateAnims(screen) {
 	}
 }
 
-export function updateComps(screen) {
-	for (let c = 0; c < screen.comps.length; c++) {
-		let comp = screen.comps[c]
-		for (let a = 0; a < comp.anims.length; a++) {
-			let anim = comp.anims[a]
+export function updateComps(mode) {
+	let dirty = false
+	for (let c = 0; c < mode.comps.length; c++) {
+		let comp = mode.comps[c]
+		let anim = comp.anims[0]
+		if (anim) {
+			dirty = true
 			if (anim.done) {
-				comp.anims.splice(a--, 1)
-
+				comp.anims.shift()
 			} else {
 				Anims[anim.id].update(anim)
 			}
-			screen.dirty = true
 		}
 		if (!comp.anims.length && comp.exit) {
-			screen.comps.splice(c--, 1)
+			mode.comps.splice(c--, 1)
 		}
 	}
-	if (!screen.comps.length && screen.nextMode) {
-		switchMode(screen)
-	}
+	return dirty
 }
 
 function transition(screen, nextid, nextdata) {
@@ -146,14 +153,12 @@ function transition(screen, nextid, nextdata) {
 		onexit(screen.mode, screen)
 	}
 
-
-
 	// create new mode
 	let next = screen.nextMode = Modes[nextid].create(nextdata)
 	next.time = screen.time
 
 	// switch immediately if not animating
-	if (!screen.comps.length) {
+	if (!screen.mode.comps.length) {
 		switchMode(screen)
 	}
 
@@ -172,7 +177,7 @@ function switchMode(screen) {
 }
 
 export function render(screen) {
-	let { map, mode, cache, camera } = screen
+	let { map, mode, nextMode, cache, camera } = screen
 	let game = screen.data
 	let sprites = screen.view.sprites
 	let nodes = []
@@ -187,7 +192,12 @@ export function render(screen) {
 		y: camera.origin.y
 	})
 
-	for (let comp of screen.comps) {
+	// queue components
+	let comps = mode.comps
+	if (nextMode) {
+		comps.push(...nextMode.comps)
+	}
+	for (let comp of comps) {
 		let compnodes = Comps[comp.id].render(comp, screen)
 		nodes.push(...compnodes)
 	}
@@ -206,7 +216,7 @@ export function render(screen) {
 			let anim = screen.anims.find(anim =>
 				[ "PieceLift", "PieceDrop" ].includes(anim.id))
 			if (anim) {
-				z = anim.y
+				z = Math.round(anim.y)
 				nodes.push({
 					image: sprites.select.ring[unit.faction],
 					layer: "ring",

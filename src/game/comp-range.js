@@ -2,21 +2,15 @@ import renderRange from "../view/render-range"
 import * as RangeExpand from "../anims/range-expand"
 import * as RangeShrink from "../anims/range-shrink"
 
-export function create(range) {
+export function create(range, sprites) {
 	return {
 		id: "Range",
 		data: range,
-		anims: [],
-		image: null,
-		sprites: null,
+		anims: [ RangeExpand.create(range) ],
+		image: renderRange(range, sprites),
+		sprites: sprites,
 		exit: false
 	}
-}
-
-export function enter(range, screen) {
-	range.sprites = screen.view.sprites
-	range.image = renderRange(range.data, range.sprites)
-	range.anims.push(RangeExpand.create(range.data))
 }
 
 export function exit(range, screen) {

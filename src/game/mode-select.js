@@ -12,6 +12,7 @@ export function create(data) {
 		held: data.held,
 		range: null,
 		preview: null,
+		comps: [],
 		anim: null,
 		pointer: {
 			selecting: false
@@ -29,14 +30,12 @@ export function onenter(mode, screen) {
 
 	// add range component
 	let rangedata = findRange(unit, screen.map.data)
-	mode.range = Comps.Range.create(rangedata)
-	Comps.Range.enter(mode.range, screen)
-	screen.comps.push(mode.range)
+	mode.range = Comps.Range.create(rangedata, screen.view.sprites)
+	mode.comps.push(mode.range)
 
 	// add preview component
-	mode.preview = Comps.Preview.create(unit)
-	Comps.Preview.enter(mode.preview, screen)
-	screen.comps.push(mode.preview)
+	mode.preview = Comps.Preview.create(unit, screen.view.sprites)
+	mode.comps.push(mode.preview)
 
 	// add piece lift animation
 	mode.anim = PieceLift.create()

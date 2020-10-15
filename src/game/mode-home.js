@@ -5,6 +5,7 @@ import getCell from "../helpers/get-cell"
 export function create() {
 	return {
 		id: "Home",
+		comps: [],
 		press: null
 	}
 }
