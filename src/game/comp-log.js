@@ -8,6 +8,7 @@ import lerp from "lerp"
 
 const enterDuration = 15
 const exitDuration = 7
+const hangDuration = 180
 const margin = 2
 const padx = 8
 const pady = 9
@@ -52,6 +53,12 @@ export function append(log, message) {
 
 export function onresize() {
 
+}
+
+export function onupdate(log, screen) {
+	if (screen.time - log.time >= hangDuration) {
+		exit(log)
+	}
 }
 
 export function render(log, screen) {
@@ -111,6 +118,7 @@ export function render(log, screen) {
 		} else {
 			log.updated = true
 		}
+		log.time = screen.time
 		screen.dirty = true
 	}
 

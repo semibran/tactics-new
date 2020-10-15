@@ -89,9 +89,9 @@ export function onupdate(screen) {
 
 	// update components
 	screen.dirty |= updateModeAnim(mode)
-	screen.dirty |= updateModeComps(mode)
+	screen.dirty |= updateModeComps(mode, screen)
 	if (nextMode) {
-		screen.dirty |= updateModeComps(nextMode)
+		screen.dirty |= updateModeComps(nextMode, screen)
 		if (!mode.comps.length && nextMode) {
 			switchMode(screen)
 		}
@@ -150,7 +150,7 @@ function updateModeAnim(mode) {
 	return dirty
 }
 
-function updateModeComps(mode) {
+function updateModeComps(mode, screen) {
 	let dirty = false
 
 	if (mode.comps.length) {
@@ -171,7 +171,7 @@ function updateModeComps(mode) {
 		if (!comp.anim && comp.exit) {
 			mode.comps.splice(c--, 1)
 		} else if (Comps[comp.id].onupdate) {
-			Comps[comp.id].onupdate(comp)
+			Comps[comp.id].onupdate(comp, screen)
 		}
 	}
 
