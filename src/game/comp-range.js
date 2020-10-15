@@ -6,7 +6,7 @@ export function create(range, sprites) {
 	return {
 		id: "Range",
 		data: range,
-		anims: [ RangeExpand.create(range) ],
+		anim: RangeExpand.create(range),
 		image: renderRange(range, sprites),
 		sprites: sprites,
 		exit: false
@@ -15,12 +15,15 @@ export function create(range, sprites) {
 
 export function exit(range) {
 	range.exit = true
-	range.anims.push(RangeShrink.create(range.data))
+	if (range.anim) {
+		range.anim.done = true
+	}
+	range.anim = RangeShrink.create(range.data)
 }
 
 export function render(range, screen) {
 	let image = range.image
-	let anim = range.anims[0]
+	let anim = range.anim
 	if (anim) {
 		image = renderRange(anim.range, range.sprites)
 	} else if (range.exit) {

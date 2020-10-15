@@ -15,7 +15,7 @@ export function create(unit, sprites) {
 	})
 	return {
 		id: "Preview",
-		anims: [ anim ],
+		anim: null,
 		unit: unit,
 		image: image,
 		exit: false
@@ -24,7 +24,7 @@ export function create(unit, sprites) {
 
 export function exit(preview) {
 	preview.exit = true
-	let anim = preview.anims[0]
+	let anim = preview.anim
 	let src = margin
 	let dest = -preview.image.width
 	let duration = exitDuration
@@ -36,11 +36,11 @@ export function exit(preview) {
 		duration = truedist / normspeed
 		src = anim.data.src + truedist
 	}
-	preview.anims.push(EaseLinear.create(duration, { src, dest }))
+	preview.anim = EaseLinear.create(duration, { src, dest })
 }
 
 export function render(preview, screen) {
-	let anim = preview.anims[0]
+	let anim = preview.anim
 	let image = preview.image
 	let x = anim ? lerp(anim.data.src, anim.data.dest, anim.x) : margin
 	let y = screen.camera.height - image.height - margin + 1

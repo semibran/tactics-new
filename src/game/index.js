@@ -157,16 +157,16 @@ export function updateMode(mode) {
 
 	for (let c = 0; c < mode.comps.length; c++) {
 		let comp = mode.comps[c]
-		let anim = comp.anims[0]
+		let anim = comp.anim
 		if (anim) {
 			dirty = true
 			if (anim.done) {
-				comp.anims.shift()
+				comp.anim = null
 			} else {
 				Anims[anim.id].update(anim)
 			}
 		}
-		if (!comp.anims.length && comp.exit) {
+		if (!comp.anim && comp.exit) {
 			mode.comps.splice(c--, 1)
 		}
 	}
