@@ -154,7 +154,7 @@ function updateModeComps(mode, screen) {
 	let dirty = false
 
 	if (mode.comps.length) {
-		// console.warn(mode.id, mode.comps.map(comp => comp.id).join(" "))
+		console.warn(mode.id, mode.comps.map(comp => comp.id).join(" "))
 	}
 
 	for (let c = 0; c < mode.comps.length; c++) {

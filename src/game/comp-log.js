@@ -56,7 +56,7 @@ export function onresize() {
 }
 
 export function onupdate(log, screen) {
-	if (screen.time - log.time >= hangDuration) {
+	if (screen.time - log.time >= hangDuration && !log.exit) {
 		exit(log)
 	}
 }
