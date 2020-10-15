@@ -110,13 +110,13 @@ export function onrelease(mode, screen, pointer) {
 	} else if (select && select.valid) {
 		let path = select.path
 		let dest = path[path.length - 1]
-		// TODO: fit attacks into this model
+		let target = select.target && select.target.unit
 		if (Cell.equals(unit.cell, dest)) {
 			// end turn
 			mode.commands.push({ type: "switchMode", mode: "Home" })
 		} else {
 			// move to dest
-			move(mode, path)
+			move(mode, path, target)
 		}
 	} else if (select) {
 		unhover(mode)
@@ -321,7 +321,7 @@ function hover(mode, cell) {
 
 	if (target) {
 		select.target = target
-	} else {
+	} else if (select) {
 		select.target = null
 	}
 
@@ -336,7 +336,7 @@ function endTurn() {
 
 }
 
-function move(mode, path) {
+function move(mode, path, target) {
 	// close range component
 	let rangecomp = mode.comps.find(comp => comp.id === "Range")
 	Comps.Range.exit(rangecomp)
