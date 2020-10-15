@@ -248,31 +248,47 @@ export function render(screen) {
 		let x = origin.x + cell.x * map.tilesize
 		let y = origin.y + cell.y * map.tilesize
 		let z = 0
-		let piecelayer = "pieces"
-		if (mode.id === "Select" && mode.unit === unit) {
-			let anim = mode.anim
-			if (anim) {
-				if (anim.id === "PieceLift" || anim.id === "PieceDrop") {
-					z = Math.round(anim.y)
-					piecelayer = "selection"
-				} else if (anim.id === "PieceMove") {
-					x = origin.x + anim.cell.x * map.tilesize
-					y = origin.y + anim.cell.y * map.tilesize
-				}
-			}
+		if (mode.id !== "Select" || mode.unit !== unit) {
+			nodes.push({
+				layer: "pieces",
+				image: sprite,
+				x: x + 1,
+				y: y - 1,
+				z: z
+			})
 		}
-		nodes.push({
-			layer: piecelayer,
-			image: sprite,
-			x: x + 1,
-			y: y - 1,
-			z: z
-		})
 		nodes.push({
 			layer: "shadows",
 			image: sprites.pieces.shadow,
 			x: x + 1,
 			y: y + 3
+		})
+	}
+
+	// queue selection
+	if (mode.id === "Select") {
+		let unit = mode.unit
+		let sprite = sprites.pieces[unit.faction][unit.type]
+		let cell = unit.cell
+		let x = origin.x + cell.x * map.tilesize
+		let y = origin.y + cell.y * map.tilesize
+		let z = 0
+		let anim = mode.anim
+		if (anim) {
+			if (anim.id === "PieceLift" || anim.id === "PieceDrop") {
+				z = Math.round(anim.y)
+			} else if (anim.id === "PieceMove") {
+				x = origin.x + anim.cell.x * map.tilesize
+				y = origin.y + anim.cell.y * map.tilesize
+				Camera.center(camera, map, anim.cell)
+			}
+		}
+		nodes.push({
+			layer: "selection",
+			image: sprite,
+			x: x + 1,
+			y: y - 1,
+			z: z
 		})
 	}
 
