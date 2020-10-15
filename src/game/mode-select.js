@@ -113,6 +113,7 @@ export function onrelease(mode, screen, pointer) {
 		let dest = path[path.length - 1]
 		if (Cell.equals(unit.cell, dest)) {
 			// end turn
+			mode.commands.push({ type: "switchMode", mode: "Home" })
 		} else {
 			// move to dest
 			move(mode, path)
@@ -334,12 +335,16 @@ function move(mode, path) {
 	Comps.Range.exit(rangecomp)
 
 	// add piecemove animation
-	let unit = mode.unit
-	let dest = path[path.length - 1]
-	mode.anim.done = true
-	mode.anim = PieceMove.create(path, _ => {
-		mode.commands.push({ type: "move", unit: unit, dest: dest })
-		mode.commands.push({ type: "endTurn", unit: unit })
+	if (path.length > 1) {
+		let unit = mode.unit
+		let dest = path[path.length - 1]
+		mode.anim.done = true
+		mode.anim = PieceMove.create(path, _ => {
+			mode.commands.push({ type: "move", unit: unit, dest: dest })
+			mode.commands.push({ type: "endTurn", unit: unit })
+			mode.commands.push({ type: "switchMode", mode: "Home" })
+		})
+	} else {
 		mode.commands.push({ type: "switchMode", mode: "Home" })
-	})
+	}
 }
