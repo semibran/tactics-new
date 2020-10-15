@@ -4,6 +4,7 @@ import * as PieceLift from "../anims/piece-lift"
 import * as PieceDrop from "../anims/piece-drop"
 import * as PieceMove from "../anims/piece-move"
 import * as Cell from "../../lib/cell"
+import * as Unit from "./unit"
 import findRange from "./range"
 import getCell from "../helpers/get-cell"
 import pathfind from "./pathfind"
@@ -19,6 +20,7 @@ export function create(data) {
 		anim: null,
 		unit: data.unit,
 		held: data.held,
+		target: null,
 		sprites: null,
 		map: null,
 		range: null,
@@ -148,7 +150,7 @@ export function render(mode, screen) {
 
 	// render cursor
 	let cursor = select && select.cursor
-	if (cursor && !Cell.equals(cursor.target, unit.cell)) {
+	if (cursor && selectvis && !Cell.equals(cursor.target, unit.cell)) {
 		nodes.push({
 			layer: "cursor",
 			image: sprites.select.cursor[mode.unit.faction],
@@ -158,7 +160,7 @@ export function render(mode, screen) {
 	}
 
 	// render mirage
-	if (select && !moving && (!cursor || !Cell.equals(cursor.target, unit.cell))) {
+	if (select && anim && !moving && (!cursor || !Cell.equals(cursor.target, unit.cell))) {
 		let image = sprites.pieces[unit.faction][unit.type]
 		let x = pointer.pos.x / viewport.scale - image.width / 2
 		let y = pointer.pos.y / viewport.scale - image.height - 8
@@ -209,10 +211,53 @@ function hover(mode, cell) {
 	} else {
 		// check if the selected square is walkable
 		let square = range.squares.find(square => {
-			return square.type === "move" && Cell.equals(square.cell, cell)
+			return Cell.equals(square.cell, cell)
+			    && (square.type === "move"
+			    || square.type === "attack" && square.target)
 		})
 		if (square) {
-			path = pathfind(unit, cell, map, cpath)
+			let dest = cell
+
+			// if there's an enemy in this square
+			// and no enemy is currently selected
+			if (square.target && !mode.target) {
+				// select enemy
+				// create enemy preview component
+			}
+
+			// if we're selecting an enemy,
+			// but now the current square is empty
+			// or houses a different unit than before
+			if (mode.target && (!square.target || mode.target !== square.target)) {
+				// deselect enemy component
+				// close enemy preview component
+			}
+
+			// simple case: selecting adjacent enemy
+			if (!cpath && square.target && Cell.adjacent(unit.cell, dest)) {
+				path = [ unit.cell ]
+			} else {
+				if (square.target) {
+					// if out of range
+					if (Cell.distance(cdest || unit.cell, dest) > Unit.rng(unit)) {
+						// find closest square to attack from
+						let neighbors = Cell.neighborhood(dest, range)
+							.filter(cell => !map.units.find(unit => Cell.equals(cell, unit.cell)))
+							.sort((a, b) => Cell.distance(a, unit.cell) - Cell.distance(b, unit.cell))
+						dest = neighbors[0]
+					} else if (!cpath) {
+						// simple case: if no path is cached and the enemy is in range, we can just attack from the start cell
+						path = [ unit.cell ]
+					}
+				}
+				if (!path && dest && cpath) {
+					if (!square.target || Cell.distance(cdest, dest) > range) {
+						path = pathfind(unit, dest, map, cpath)
+					} else {
+						path = cpath
+					}
+				}
+			}
 		}
 	}
 
