@@ -1,8 +1,13 @@
+const origins = [
+	"topleft", "top", "topright",
+	"left", "center", "right",
+	"bottomleft", "bottom", "bottomright"
+]
+
 // drawNodes(nodes, layerseq context) -> n/a
 // > draws all nodes on the given context
 // > layerseq determines order using node.layer
 // > TODO: only draw nodes within camera bounds
-// > TODO: origin-based positioning (would streamline centering)
 export default function drawNodes(nodes, layerseq, context) {
 	nodes.sort((a, b) => zindex(a) - zindex(b))
 	for (let node of nodes) {
@@ -19,11 +24,30 @@ export default function drawNodes(nodes, layerseq, context) {
 		if (width === 0 || height === 0) {
 			continue
 		}
+
 		let origin = node.origin || "topleft"
-		if (origin === "center") {
-			x -= width / 2
-			y -= height / 2
+		if (origin === "top") {
+			origin = "topcenter"
+		} else if (origin === "right") {
+			origin = "centerright"
+		} else if (origin === "bottom") {
+			origin = "bottomcenter"
+		} else if (origin === "left") {
+			origin = "centerleft"
 		}
+
+		if (origin.startsWith("center")) {
+			y -= height / 2
+		} else if (origin.endsWith("bottom")) {
+			y -= height
+		}
+
+		if (origin.endsWith("center")) {
+			x -= width / 2
+		} else if (origin.endsWith("right")) {
+			x -= width
+		}
+
 		if (node.opacity !== undefined) {
 			context.globalAlpha = node.opacity
 			context.drawImage(image, x, y, width, height)

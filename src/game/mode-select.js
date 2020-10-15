@@ -109,7 +109,11 @@ export function onrelease(mode, screen, pointer) {
 		if (Cell.equals(unit.cell, dest)) {
 			// end turn
 			if (target) {
-				mode.commands.push({ type: "switchMode", mode: "Forecast", data: { target } })
+				mode.commands.push({
+					type: "switchMode",
+					mode: "Forecast",
+					data: { attacker: unit, defender: target }
+				})
 			} else {
 				mode.commands.push({ type: "switchMode", mode: "Home" })
 			}
@@ -348,11 +352,15 @@ function move(mode, path, target) {
 		mode.anim = PieceMove.create(path, {
 			onend() {
 				mode.commands.push({ type: "move", unit: unit, dest: dest })
-				if (!target) {
+				if (target) {
+					mode.commands.push({
+						type: "switchMode",
+						mode: "Forecast",
+						data: { attacker: unit, defender: target }
+					})
+				} else {
 					mode.commands.push({ type: "endTurn", unit: unit })
 					mode.commands.push({ type: "switchMode", mode: "Home" })
-				} else {
-					mode.commands.push({ type: "switchMode", mode: "Forecast", data: { target } })
 				}
 			}
 		})

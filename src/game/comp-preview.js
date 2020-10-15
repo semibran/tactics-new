@@ -1,6 +1,7 @@
 import renderPreview from "../view/render-preview"
 import * as EaseOut from "../anims/ease-out"
 import * as EaseLinear from "../anims/ease-linear"
+import earlyExit from "../helpers/early-exit"
 import lerp from "lerp"
 
 const margin = 2
@@ -28,19 +29,11 @@ export function create(unit, corner, sprites) {
 
 export function exit(preview) {
 	preview.exit = true
-	let anim = preview.anim
-	let src = margin
-	let dest = -preview.image.width
-	let duration = exitDuration
-	if (anim) {
-		anim.done = true
-		let normdist = anim.data.dest - anim.data.src
-		let truedist = anim.x * normdist
-		let normspeed = normdist / duration
-		duration = truedist / normspeed
-		src = anim.data.src + truedist
-	}
-	preview.anim = EaseLinear.create(duration, { src, dest })
+	let src = preview.anim ? preview.anim.x : 1
+	let duration = preview.anim
+		? earlyExit(exitDuration, preview.anim.x)
+		: exitDuration
+	preview.anim = EaseLinear.create(duration, src, 0)
 }
 
 export function onresize(preview, viewport) {
@@ -58,25 +51,24 @@ export function onresize(preview, viewport) {
 export function render(preview, screen) {
 	let anim = preview.anim
 	let image = preview.image
-	let x = 0
+
+	// first resize
 	if (!preview.renders) {
 		onresize(preview, screen.camera)
 	}
 	preview.renders++
+
+	// determine endpoints
+	let start, end
 	if (preview.corner.endsWith("left")) {
-		if (anim) {
-			x += lerp(anim.data.src, anim.data.dest, anim.x)
-		} else {
-			x += margin
-		}
+		start = -image.width
+		end = margin
 	} else if (preview.corner.endsWith("right")) {
-		x = screen.camera.width - preview.image.width
-		if (anim) {
-			x -= lerp(anim.data.src, anim.data.dest, anim.x)
-		} else {
-			x -= margin
-		}
+		start = screen.camera.width + preview.image.width
+		end = screen.camera.width - preview.image.width - margin + 1
 	}
+
+	let x = anim ? lerp(start, end, anim.x) : end
 	let y = margin
 	if (preview.corner.startsWith("bottom")) {
 		y = screen.camera.height - image.height - margin + 1
