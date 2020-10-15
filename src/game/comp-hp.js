@@ -9,12 +9,15 @@ const enterDuration = 15
 const exitDuration = 7
 
 export function create(maxhp, damage, faction, sprites, defending) {
-	let image = !defending
-		? RenderHP.attacker(maxhp, damage, faction, sprites)
-		: RenderHP.defender(maxhp, damage, faction, sprites)
-	let chunk = !defending
-		? RenderHP.attackerChunk(maxhp, damage, sprites)
-		: RenderHP.defenderChunk(maxhp, damage, sprites)
+	let image = null
+	let chunk = null
+	if (!defending) {
+		image = RenderHP.attacker(maxhp, damage, faction, sprites)
+		chunk = damage && RenderHP.attackerChunk(maxhp, damage, sprites)
+	} else {
+		image = RenderHP.defender(maxhp, damage, faction, sprites)
+		chunk = damage && RenderHP.defenderChunk(maxhp, damage, sprites)
+	}
 	return {
 		id: "Hp",
 		anim: EaseOut.create(enterDuration),

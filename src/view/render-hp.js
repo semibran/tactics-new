@@ -27,11 +27,11 @@ export function attackerChunk(maxhp, damage, sprites) {
 	let base = sprites.bars.left
 	let chunk = Canvas.create(base.width, base.height)
 	let pct = (maxhp - damage) / maxhp
-	let width = maxwidth - (Math.round(maxwidth * pct) + 1)
+	let width = maxwidth - Math.round(maxwidth * pct)
 	chunk.fillStyle = "white"
-	chunk.fillRect(7, 2, width, 2)
-	chunk.fillRect(8, 4, width, 2)
-	chunk.fillRect(9, 6, width, 1)
+	chunk.fillRect(6, 2, width, 2)
+	chunk.fillRect(7, 4, width, 2)
+	chunk.fillRect(8, 6, width, 1)
 	return chunk.canvas
 }
 
