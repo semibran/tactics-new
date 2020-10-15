@@ -50,6 +50,11 @@ export function onresize(screen, viewport) {
 	screen.camera.width = viewport.width
 	screen.camera.height = viewport.height
 	screen.camera.zoom = viewport.scale
+	// call mode onresize hook
+	let onresize = Modes[screen.mode.id].onresize
+	if (onresize) {
+		onresize(screen.mode, viewport)
+	}
 }
 
 export function onpress(screen, pointer) {
@@ -159,11 +164,11 @@ export function updateMode(mode) {
 		let comp = mode.comps[c]
 		let anim = comp.anim
 		if (anim) {
-			dirty = true
 			if (anim.done) {
 				comp.anim = null
 			} else {
 				Anims[anim.id].update(anim)
+				dirty = true
 			}
 		}
 		if (!comp.anim && comp.exit) {

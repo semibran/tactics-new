@@ -6,19 +6,23 @@ import lerp from "lerp"
 const margin = 2
 const enterDuration = 15
 const exitDuration = 5
+const corners = [ "bottomleft", "bottomright", "topleft", "topright" ]
 
-export function create(unit, sprites) {
+export function create(unit, corner, sprites) {
+	if (!corners.includes(corner)) {
+		throw new Error(`Failed to create preview component: ${corner} is not a valid corner identifier`)
+	}
 	let image = renderPreview(unit, sprites)
-	let anim = EaseOut.create(enterDuration, {
-		src: -image.width,
-		dest: margin
-	})
+	let endpts = { src: -image.width, dest: margin }
+	let anim = EaseOut.create(enterDuration, endpts)
 	return {
 		id: "Preview",
-		anim: null,
+		anim: anim,
 		unit: unit,
+		corner: corner,
 		image: image,
-		exit: false
+		exit: false,
+		renders: 0
 	}
 }
 
@@ -39,11 +43,44 @@ export function exit(preview) {
 	preview.anim = EaseLinear.create(duration, { src, dest })
 }
 
+export function onresize(preview, viewport) {
+	if (viewport.width >= 160) {
+		if (preview.corner === "topright") {
+			preview.corner = "bottomright"
+		}
+	} else {
+		if (preview.corner === "bottomright") {
+			preview.corner = "topright"
+		}
+	}
+}
+
 export function render(preview, screen) {
 	let anim = preview.anim
 	let image = preview.image
-	let x = anim ? lerp(anim.data.src, anim.data.dest, anim.x) : margin
-	let y = screen.camera.height - image.height - margin + 1
+	let x = 0
+	if (!preview.renders) {
+		onresize(preview, screen.camera)
+	}
+	preview.renders++
+	if (preview.corner.endsWith("left")) {
+		if (anim) {
+			x += lerp(anim.data.src, anim.data.dest, anim.x)
+		} else {
+			x += margin
+		}
+	} else if (preview.corner.endsWith("right")) {
+		x = screen.camera.width - preview.image.width
+		if (anim) {
+			x -= lerp(anim.data.src, anim.data.dest, anim.x)
+		} else {
+			x -= margin
+		}
+	}
+	let y = margin
+	if (preview.corner.startsWith("bottom")) {
+		y = screen.camera.height - image.height - margin + 1
+	}
 	return [ {
 		layer: "ui",
 		image: image,

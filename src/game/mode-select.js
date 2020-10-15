@@ -38,7 +38,7 @@ export function onenter(mode, screen) {
 	mode.range = rangedata
 
 	// add preview component
-	let preview = Comps.Preview.create(unit, screen.view.sprites)
+	let preview = Comps.Preview.create(unit, "bottomleft", screen.view.sprites)
 	mode.comps.push(preview)
 
 	// add piece lift animation
@@ -70,6 +70,16 @@ export function onexit(mode, screen) {
 	if (mode.anim && mode.anim.id === "PieceLift") {
 		mode.anim.done = true
 		mode.anim = PieceDrop.create(mode.anim.y)
+	}
+}
+
+export function onresize(mode, viewport) {
+	// call comp onresize hooks
+	for (let comp of mode.comps) {
+		let onresize = Comps[comp.id].onresize
+		if (onresize) {
+			onresize(comp, viewport)
+		}
 	}
 }
 
@@ -221,16 +231,24 @@ function hover(mode, cell) {
 			// if there's an enemy in this square
 			// and no enemy is currently selected
 			if (square.target && !mode.target) {
-				// select enemy
 				// create enemy preview component
+				let unit = square.target
+				let preview = Comps.Preview.create(unit, "topright", sprites)
+				mode.comps.push(preview)
+
+				// select enemy
+				mode.target = { unit, preview }
 			}
 
 			// if we're selecting an enemy,
 			// but now the current square is empty
 			// or houses a different unit than before
-			if (mode.target && (!square.target || mode.target !== square.target)) {
-				// deselect enemy component
+			if (mode.target && (!square.target || mode.target.unit !== square.target)) {
 				// close enemy preview component
+				Comps.Preview.exit(mode.target.preview)
+
+				// deselect enemy component
+				mode.target = null
 			}
 
 			// simple case: selecting adjacent enemy
@@ -257,6 +275,10 @@ function hover(mode, cell) {
 						path = cpath
 					}
 				}
+			}
+
+			if (!path) {
+				path = pathfind(unit, dest, map)
 			}
 		}
 	}
