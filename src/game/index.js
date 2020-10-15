@@ -161,6 +161,10 @@ export function updateMode(mode) {
 		dirty = true
 	}
 
+	if (mode.comps.length) {
+		// console.warn(mode.id, mode.comps.map(comp => comp.id).join(" "))
+	}
+
 	for (let c = 0; c < mode.comps.length; c++) {
 		let comp = mode.comps[c]
 		let anim = comp.anim
@@ -266,8 +270,9 @@ export function render(screen) {
 	// queue cursor
 
 	// queue units
+	let prompting = mode.id === "Select" || mode.id === "Forecast"
 	for (let unit of map.units) {
-		if (mode.id === "Select" && mode.unit === unit) {
+		if (prompting && mode.unit === unit) {
 			continue
 		}
 		let sprite = sprites.pieces[unit.faction][unit.type]
@@ -292,7 +297,7 @@ export function render(screen) {
 
 	// queue selection
 	// move into mode-select?
-	if (mode.id === "Select") {
+	if (prompting) {
 		let unit = mode.unit
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let cell = unit.cell

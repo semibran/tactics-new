@@ -2,21 +2,24 @@ import * as Comps from "./comps"
 import * as Unit from "./unit"
 import * as Camera from "./camera"
 import * as Cell from "../../lib/cell"
+import * as PieceLift from "../anims/piece-lift"
+import * as PieceDrop from "../anims/piece-drop"
 
 export function create(data) {
 	return {
 		id: "Forecast",
-		attacker: data.attacker,
-		defender: data.defender,
+		unit: data.attacker,
+		target: data.defender,
 		comps: [],
-		commands: []
+		commands: [],
+		anim: null
 	}
 }
 
 export function onenter(mode, screen) {
 	let sprites = screen.view.sprites
-	let atkr = mode.attacker
-	let defr = mode.defender
+	let atkr = mode.unit
+	let defr = mode.target
 
 	// center camera
 	let midpoint = {
@@ -64,6 +67,17 @@ export function onenter(mode, screen) {
 			.map(cell => ({ cell, type: "attack" }))
 	}, sprites)
 	mode.comps.push(range)
+
+	// lift piece
+	mode.anim = PieceLift.create()
+}
+
+export function onexit(mode, screen) {
+	// remove piece lift animation
+	if (mode.anim && mode.anim.id === "PieceLift") {
+		mode.anim.done = true
+		mode.anim = PieceDrop.create(mode.anim.y)
+	}
 }
 
 export function onrelease(mode, screen, pointer) {
@@ -73,8 +87,8 @@ export function onrelease(mode, screen, pointer) {
 			type: "switchMode",
 			mode: "Attack",
 			data: {
-				attacker: mode.attacker,
-				defender: mode.defender
+				attacker: mode.unit,
+				defender: mode.target
 			}
 		})
 	}
