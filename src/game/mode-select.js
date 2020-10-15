@@ -109,8 +109,8 @@ export function render(mode, screen) {
 	let nodes = []
 
 	// render cursor
-	if (select && select.cursor) {
-		let cursor = select.cursor
+	let cursor = select && select.cursor
+	if (cursor && !Cell.equals(cursor.target, unit.cell)) {
 		nodes.push({
 			layer: "cursor",
 			image: sprites.select.cursor[mode.unit.faction],
@@ -120,10 +120,11 @@ export function render(mode, screen) {
 	}
 
 	// render arrow
-	if (select && select.arrow) {
+	let arrow = select && select.arrow
+	if (arrow) {
 		nodes.push({
 			layer: "arrow",
-			image: select.arrow,
+			image: arrow,
 			x: origin.x,
 			y: origin.y
 		})
@@ -135,7 +136,7 @@ export function render(mode, screen) {
 		let x = pointer.pos.x / viewport.scale - image.width / 2
 		let y = pointer.pos.y / viewport.scale - image.height - 8
 		let opacity = 0.75
-		if (!mode.select.valid) {
+		if (!select.valid) {
 			opacity = 0.25
 		}
 		nodes.push({
@@ -219,6 +220,7 @@ function hover(mode, cell) {
 		mode.select.valid = false
 		mode.select.cursor = null
 	}
+
 	return false
 }
 
