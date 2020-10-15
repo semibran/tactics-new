@@ -19,12 +19,13 @@ export function create(sprites) {
 export function exit(vs) {
 	vs.exit = true
 
+	let src = 1
+	let dest = 0
+	let duration = exitDuration
 	if (vs.anim) {
-		let { src, dest, duration } = earlyExit(0, 1, exitDuration, vs.anim.x)
-		vs.anim = EaseLinear.create(duration, { src, dest })
-	} else {
-		vs.anim = EaseLinear.create(exitDuration)
+		({ src, dest, duration } = earlyExit(0, 1, exitDuration, vs.anim.x))
 	}
+	vs.anim = EaseLinear.create(duration, { src, dest })
 }
 
 export function render(vs, screen) {
@@ -36,11 +37,7 @@ export function render(vs, screen) {
 	if (anim && !vs.exit) {
 		width *= anim.x
 	} else if (anim && vs.exit) {
-		if (anim.data) {
-			width *= lerp(anim.data.src, anim.data.dest, anim.x)
-		} else {
-			width *= (1 - anim.x)
-		}
+		width *= lerp(anim.data.src, anim.data.dest, anim.x)
 	}
 	return [ {
 		layer: "ui",
