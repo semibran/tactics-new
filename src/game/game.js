@@ -1,5 +1,6 @@
 import * as Map from "./map"
 import * as Unit from "./unit"
+import * as Cell from "../../lib/cell"
 
 export function create(map) {
 	let units = map.units.map(unit => Unit.create(...unit))
@@ -14,6 +15,17 @@ export function create(map) {
 
 export function move(unit, dest, game) {
 	unit.cell = dest
+}
+
+export function attack(unit, target, game) {
+	if (Cell.distance(unit.cell, target.cell) > Unit.rng(unit)) return false
+	let dmg = Unit.dmg(unit, target)
+	if (dmg) {
+		target.hp = Math.max(0, target.hp - dmg)
+		if (target.hp < 0) {
+			// remove unit from playing field
+		}
+	}
 }
 
 export function endTurn(unit, game) {

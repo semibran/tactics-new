@@ -102,7 +102,7 @@ export function onupdate(screen) {
 		if (command.type === "move") {
 			Game.move(command.unit, command.dest, screen.state)
 		} else if (command.type === "attack") {
-			// Game.attack(unit, enemy)
+			Game.attack(command.unit, command.target, screen.state)
 		} else if (command.type === "endTurn") {
 			Game.endTurn(command.unit, screen.state)
 		} else if (command.type === "switchMode") {
@@ -153,9 +153,9 @@ function updateModeAnim(mode) {
 function updateModeComps(mode, screen) {
 	let dirty = false
 
-	if (mode.comps.length) {
-		console.warn(mode.id, mode.comps.map(comp => comp.id).join(" "))
-	}
+	// if (mode.comps.length) {
+	// 	console.warn(mode.id, mode.comps.map(comp => comp.id).join(" "))
+	// }
 
 	for (let c = 0; c < mode.comps.length; c++) {
 		let comp = mode.comps[c]

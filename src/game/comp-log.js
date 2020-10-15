@@ -83,7 +83,7 @@ export function render(log, screen) {
 
 	if (!log.surface) {
 		let width = viewport.width - margin * 2 - padx * 2
-		let height = log.box.height - pady * 2
+		let height = log.box.height - pady * 2 + 2
 		log.surface = Canvas.create(width, height)
 	}
 

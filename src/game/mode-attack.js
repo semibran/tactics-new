@@ -108,8 +108,15 @@ export function onupdate(mode, screen) {
 			} else if (defr.faction === "enemy") {
 				Log.append(log, `${defr.name} receives ${attack.damage} damage.`)
 			}
+			if (attack.damage >= defr.hp && defr.faction === "player") {
+				Log.append(log, `${defr.name} is defeated.`)
+			}
+			if (attack.damage >= defr.hp && defr.faction === "enemy") {
+				Log.append(log, `Defeated ${defr.name}.`)
+			}
 			Hp.startReduce(mode.defrhp, attack.damage)
 		} else if (!anim && screen.time - attack.time >= attackDuration) {
+			mode.commands.push({ type: "attack", unit: atkr, target: defr })
 			mode.attacks.shift()
 		}
 	} else {

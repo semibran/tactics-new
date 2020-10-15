@@ -20,20 +20,21 @@ export default function renderUnitPreview(unit, sprites) {
 		let content = Canvas.create(68, 29)
 		let padx = 2
 		let label = sprites.labels.hp
-		let value = renderText(unit.stats.hp + "/" + unit.stats.hp, {
+		let value = renderText(unit.hp + "/" + unit.stats.hp, {
 			font: fonts.smallcapsRadiant
 		})
 
 		// draw hp bar
 		let health = Canvas.create(48, 3)
-		let [ start, end ] = getGradient(unit.stats.hp, unit.faction, palette)
+		let width = Math.round((health.canvas.width - 2) * unit.hp / unit.stats.hp)
+		let [ start, end ] = getGradient(unit.hp, unit.faction, palette)
 		let gradient = health.createLinearGradient(0, 1, health.canvas.width - 2, 1)
 		gradient.addColorStop(0, rgb(...start))
 		gradient.addColorStop(1, rgb(...end))
 		health.fillStyle = gradient
-		health.fillRect(2, 0, health.canvas.width - 2, 1)
-		health.fillRect(1, 1, health.canvas.width - 2, 1)
-		health.fillRect(0, 2, health.canvas.width - 2, 1)
+		health.fillRect(2, 0, width, 1)
+		health.fillRect(1, 1, width, 1)
+		health.fillRect(0, 2, width, 1)
 
 		// pre-shadow prep
 		content.drawImage(label, padx, 0)
