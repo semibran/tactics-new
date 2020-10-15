@@ -10,6 +10,8 @@ import getCell from "../helpers/get-cell"
 import pathfind from "../../lib/pathfind"
 import renderArrow from "../../lib/pathfind"
 
+const tilesize = 16
+
 export function create(data) {
 	return {
 		id: "Select",
@@ -21,8 +23,7 @@ export function create(data) {
 		sprites: null,
 		map: null,
 		range: null,
-		cursor: null,
-		path: null,
+		select: null,
 		pointer: {
 			selecting: false
 		}
@@ -35,6 +36,12 @@ export function onenter(mode, screen) {
 	// center camera (unless holdselect was used)
 	if (!mode.held) {
 		Camera.center(screen.camera, screen.map, unit.cell)
+	} else {
+		mode.select = {
+			cursor: null,
+			path: null,
+			valid: false
+		}
 	}
 
 	// add range component
@@ -89,32 +96,74 @@ export function onrelease(mode, screen, pointer) {
 }
 
 export function render(mode, screen) {
-	let camera = screen.camera
+	let origin = screen.camera.origin
+	let pointer = screen.view.pointer
+	let sprites = screen.view.sprites
+	let viewport = screen.view.viewport
+	let select = mode.select
+	let unit = mode.unit
 	let nodes = []
 
 	// render cursor
-	if (mode.cursor) {
-
+	if (select && select.cursor) {
+		let cursor = select.cursor
+		nodes.push({
+			layer: "cursor",
+			image: sprites.select.cursor[mode.unit.faction],
+			x: origin.x + cursor.pos.x - 1,
+			y: origin.y + cursor.pos.y - 1
+		})
 	}
 
 	// render arrow
-	if (mode.path) {
+	if (select && select.arrow) {
 		nodes.push({
 			layer: "arrow",
-			image: mode.path.arrow,
-			x: camera.origin.x,
-			y: camera.origin.y
+			image: select.arrow,
+			x: origin.x,
+			y: origin.y
+		})
+	}
+
+	// render mirage
+	if (select) {
+		let image = sprites.pieces[unit.faction][unit.type]
+		let x = pointer.pos.x / viewport.scale - image.width / 2
+		let y = pointer.pos.y / viewport.scale - image.height - 8
+		let opacity = 0.75
+		if (!mode.select.valid) {
+			opacity = 0.25
+		}
+		nodes.push({
+			layer: "mirage",
+			image, x, y, opacity
 		})
 	}
 
 	return nodes
 }
 
+export function onupdate(mode, screen) {
+	// update cursor
+	let select = mode.select
+	if (select && select.cursor) {
+		let cursor = select.cursor
+		if (Math.round(cursor.cached.x) !== Math.round(cursor.pos.x)
+		|| Math.round(cursor.cached.y) !== Math.round(cursor.pos.y)) {
+			cursor.cached.x = cursor.pos.x
+			cursor.cached.y = cursor.pos.y
+			screen.dirty = true
+		}
+		cursor.pos.x += (cursor.target.x * tilesize - cursor.pos.x) / 4
+		cursor.pos.y += (cursor.target.y * tilesize - cursor.pos.y) / 4
+	}
+}
+
 function hover(mode, cell) {
 	let { map, unit, range, sprites } = mode
 
 	// break if the hovered cell hasn't changed
-	let cpath = mode.path && mode.path.data
+	let cpath = mode.path
 	let cdest = cpath ? cpath[cpath.length - 1] : null
 	if (cpath && Cell.equals(cdest, cell)) {
 		return
@@ -169,13 +218,28 @@ function hover(mode, cell) {
 		}
 	}
 	if (path) {
-		mode.path = {
-			arrow: sprites.Arrow(path, unit.faction),
-			data: path
+		if (!mode.select.cursor) {
+			let pos = {
+				x: cell.x * tilesize,
+				y: cell.y * tilesize
+			}
+			mode.select.cursor = {
+				pos: pos,
+				target: cell,
+				cached: pos
+			}
+		} else {
+			mode.select.cursor.target = cell
 		}
+		mode.select.valid = true
+		mode.select.arrow = sprites.Arrow(path, unit.faction)
+		mode.select.path = path
+	} else {
+		mode.select.valid = false
+		mode.select.cursor = null
 	}
 }
 
 function unhover(mode) {
-	mode.path = null
+	mode.select = null
 }

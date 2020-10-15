@@ -13,7 +13,9 @@ export const layerseq = [
 	"arrow",
 	"ring",
 	"pieces",
+	"cursor",
 	"selection",
+	"mirage",
 	"ui"
 ]
 
