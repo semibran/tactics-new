@@ -196,7 +196,7 @@ function hover(mode, cell) {
 	let { map, unit, range, sprites } = mode
 
 	// break if the hovered cell hasn't changed
-	let cpath = mode.path
+	let cpath = mode.select && mode.select.path
 	let cdest = cpath ? cpath[cpath.length - 1] : null
 	if (cpath && Cell.equals(cdest, cell)) {
 		return true
