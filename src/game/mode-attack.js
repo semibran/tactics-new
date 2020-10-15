@@ -23,6 +23,12 @@ export function onenter(mode, screen) {
 	let atkr = mode.unit
 	let defr = mode.target
 
+	for (let comp of mode.comps) {
+		if (comp.id === "Hp") {
+			comp.mode = "damage"
+		}
+	}
+
 	mode.log = Log.create()
 	mode.comps.push(mode.log)
 

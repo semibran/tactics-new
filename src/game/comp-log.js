@@ -111,6 +111,7 @@ export function render(log, screen) {
 		} else {
 			log.updated = true
 		}
+		screen.dirty = true
 	}
 
 	if (pos.row >= 2) {

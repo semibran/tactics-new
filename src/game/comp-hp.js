@@ -9,20 +9,22 @@ const enterDuration = 15
 const exitDuration = 7
 
 export function create(maxhp, damage, faction, sprites, defending) {
-	let image = null
+	let full = null
+	let damaged = null
 	let chunk = null
 	if (!defending) {
-		image = RenderHP.attacker(maxhp, damage, faction, sprites)
+		full = RenderHP.attacker(maxhp, 0, faction, sprites)
+		damaged = damage ? RenderHP.attacker(maxhp, damage, faction, sprites) : full
 		chunk = damage && RenderHP.attackerChunk(maxhp, damage, sprites)
 	} else {
-		image = RenderHP.defender(maxhp, damage, faction, sprites)
+		full = RenderHP.defender(maxhp, 0, faction, sprites)
+		damaged = damage ? RenderHP.defender(maxhp, damage, faction, sprites) : full
 		chunk = damage && RenderHP.defenderChunk(maxhp, damage, sprites)
 	}
 	return {
 		id: "Hp",
 		anim: EaseOut.create(enterDuration),
-		image: image,
-		chunk: chunk,
+		cache: { full, damaged, chunk },
 		flipped: !!defending,
 		mode: "flash",
 		persist: true,
@@ -41,8 +43,6 @@ export function exit(hp) {
 
 export function render(hp, screen) {
 	let nodes = []
-	let anim = hp.anim
-	let image = hp.image
 
 	let origin = "topright"
 	let start = 0
@@ -53,23 +53,30 @@ export function render(hp, screen) {
 		goal = screen.camera.width / 2 + 10
 	}
 
+	let anim = hp.anim
 	let x = anim ? lerp(start, goal, anim.x) : goal
 	let y = screen.camera.height - Config.forecastOffset
-	nodes.push({
+	let image = hp.cache.full
+	if (hp.mode === "flash") {
+		image = hp.cache.full
+		if (hp.cache.chunk) {
+			let d = screen.time % 60 / 60
+			let opacity = (Math.sin(2 * Math.PI * d) + 1) / 2 * 0.75
+			screen.dirty = true
+			nodes.push({
+				layer: "ui",
+				image: hp.cache.chunk,
+				x, y, origin, opacity
+			})
+		}
+	} else {
+		image = hp.cache.full
+	}
+
+	nodes.unshift({
 		layer: "ui",
 		image, x, y, origin
 	})
-
-	if (hp.chunk) {
-		let d = screen.time % 60 / 60
-		let opacity = (Math.sin(2 * Math.PI * d) + 1) / 2 * 0.5
-		screen.dirty = true
-		nodes.push({
-			layer: "ui",
-			image: hp.chunk,
-			x, y, origin, opacity
-		})
-	}
 
 	return nodes
 }
