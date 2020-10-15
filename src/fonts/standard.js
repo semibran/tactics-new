@@ -9,6 +9,7 @@ module.exports = {
 		g: { height: 9 },
 		i: { width: 1 },
 		j: { width: 2, height: 8 },
+		k: { width: 4 },
 		l: { width: 1, x: 0 },
 		m: { width: 7 },
 		p: { height: 9 },

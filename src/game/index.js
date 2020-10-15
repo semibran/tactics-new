@@ -193,14 +193,25 @@ function transition(screen, nextid, nextdata) {
 		onexit(mode, screen)
 	}
 
-	// close components
-	for (let comp of mode.comps) {
-		Comps[comp.id].exit(comp)
-	}
-
 	// create new mode
 	let next = screen.nextMode = Modes[nextid].create(nextdata)
 	next.time = screen.time
+
+	// pass persistent components to next mode
+	for (let c = 0; c < mode.comps.length; c++) {
+		let comp = mode.comps[c]
+		if (comp.persist) {
+			// can we remove persistent flag after one carry?
+			comp.persist = false
+			mode.comps.splice(c--, 1)
+			next.comps.push(comp)
+		}
+	}
+
+	// close remaining components
+	for (let comp of mode.comps) {
+		Comps[comp.id].exit(comp)
+	}
 
 	// switch immediately if not animating
 	if (!mode.comps.length) {

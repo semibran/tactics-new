@@ -21,6 +21,7 @@ export function create(maxhp, damage, faction, sprites, defending) {
 		image: image,
 		chunk: chunk,
 		flipped: !!defending,
+		persist: true,
 		exit: false
 	}
 }

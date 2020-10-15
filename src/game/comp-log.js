@@ -9,9 +9,10 @@ const enterDuration = 15
 const exitDuration = 7
 const margin = 2
 
-export function create(sprites) {
+export function create(content, sprites) {
 	return {
 		id: "Log",
+		content: content,
 		anim: EaseOut.create(enterDuration),
 		image: null,
 		exit: false
@@ -30,7 +31,7 @@ export function exit(log) {
 export function render(log, screen) {
 	let viewport = screen.view.viewport
 	if (!log.image) {
-		log.image = renderLog(viewport, screen.view.sprites)
+		log.image = renderLog(log.content, viewport, screen.view.sprites)
 	}
 
 	let anim = log.anim
@@ -47,12 +48,12 @@ export function render(log, screen) {
 	} ]
 }
 
-function renderLog(viewport, sprites) {
+function renderLog(lines, viewport, sprites) {
 	const { fonts, palette } = sprites
 	let width = viewport.width - margin * 2
 	let height = 40
 	let box = renderBox(width, height, sprites).getContext("2d")
-	let text = renderText("Hello world!", {
+	let text = renderText(lines[0], {
 		font: fonts.standard,
 		color: palette.jet,
 		shadow: palette.taupe

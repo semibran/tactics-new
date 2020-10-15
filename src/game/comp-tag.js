@@ -14,6 +14,7 @@ export function create(name, faction, sprites, defending) {
 		anim: EaseOut.create(enterDuration),
 		image: renderNameTag(name, faction, sprites),
 		flipped: !!defending,
+		persist: true,
 		exit: false
 	}
 }
