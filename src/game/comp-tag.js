@@ -7,12 +7,12 @@ import lerp from "lerp"
 const enterDuration = 15
 const exitDuration = 7
 
-export function create(name, faction, defending, sprites) {
+export function create(name, faction, sprites, defending) {
 	return {
 		id: "Tag",
 		anim: EaseOut.create(enterDuration),
 		image: renderNameTag(name, faction, sprites),
-		flipped: defending,
+		flipped: !!defending,
 		exit: false
 	}
 }
@@ -32,11 +32,11 @@ export function render(tag, screen) {
 	let image = tag.image
 
 
-	let origin = "right"
+	let origin = "bottomright"
 	let start = 0
 	let goal = screen.camera.width / 2 - 20
 	if (tag.flipped) {
-		origin = "left"
+		origin = "bottomleft"
 		start = screen.camera.width
 		goal = screen.camera.width / 2 + 20
 	}

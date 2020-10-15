@@ -38,7 +38,7 @@ export default function drawNodes(nodes, layerseq, context) {
 
 		if (origin.startsWith("center")) {
 			y -= height / 2
-		} else if (origin.endsWith("bottom")) {
+		} else if (origin.startsWith("bottom")) {
 			y -= height
 		}
 

@@ -4,15 +4,15 @@ import getGradient from "../helpers/get-gradient"
 
 const maxwidth = 55
 
-export function attacker(unit, damage, sprites) {
+export function attacker(maxhp, damage, faction, sprites) {
 	damage = damage || 0
 	let { bars, palette } = sprites
 	let hp = Canvas.copy(bars.left)
-	let pct = (unit.stats.hp - damage) / unit.stats.hp
+	let pct = (maxhp - damage) / maxhp
 	let width = Math.round(maxwidth * pct)
 	let chunk = maxwidth - width
 	let x = 6 + chunk
-	let [ start, end ] = getGradient(unit.stats.hp - damage, unit.faction, palette, true)
+	let [ start, end ] = getGradient(maxhp - damage, faction, palette, true)
 	let gradient = hp.createLinearGradient(x + 2, 0, x + 2 + (width - 1), 0)
 	gradient.addColorStop(0, rgb(...start))
 	gradient.addColorStop(1, rgb(...end))
@@ -23,14 +23,14 @@ export function attacker(unit, damage, sprites) {
 	return hp.canvas
 }
 
-export function defender(unit, damage, sprites) {
+export function defender(maxhp, damage, faction, sprites) {
 	damage = damage || 0
 	let { bars, palette } = sprites
 	let hp = Canvas.copy(bars.right)
-	let pct = (unit.stats.hp - damage) / unit.stats.hp
+	let pct = (maxhp - damage) / maxhp
 	let width = Math.round(maxwidth * pct)
 	let x = 5
-	let [ start, end ] = getGradient(unit.stats.hp - damage, unit.faction, palette)
+	let [ start, end ] = getGradient(maxhp - damage, faction, palette)
 	let gradient = hp.createLinearGradient(x, 0, x + width, 0)
 	gradient.addColorStop(0, rgb(...start))
 	gradient.addColorStop(1, rgb(...end))
