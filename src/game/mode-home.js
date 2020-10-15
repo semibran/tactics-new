@@ -21,6 +21,12 @@ export function onpress(mode, screen, pointer) {
 			time: screen.time
 		}
 	}
+
+	if (mode.comps.length) {
+		for (let comp of mode.comps) {
+			Comps[comp.id].exit(comp)
+		}
+	}
 }
 
 export function onmove(mode, screen, pointer) {
@@ -28,12 +34,6 @@ export function onmove(mode, screen, pointer) {
 		mode.press = null
 	}
 	Camera.pan(screen.camera, pointer)
-
-	if (mode.comps.length) {
-		for (let comp of mode.comps) {
-			Comps[comp.id].exit(comp)
-		}
-	}
 }
 
 export function onrelease(mode, screen, pointer) {
