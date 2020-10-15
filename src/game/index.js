@@ -256,20 +256,21 @@ export function render(screen) {
 
 	// queue units
 	for (let unit of map.units) {
+		if (mode.id === "Select" && mode.unit === unit) {
+			continue
+		}
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let cell = unit.cell
 		let x = origin.x + cell.x * map.tilesize
 		let y = origin.y + cell.y * map.tilesize
 		let z = 0
-		if (mode.id !== "Select" || mode.unit !== unit) {
-			nodes.push({
-				layer: "pieces",
-				image: sprite,
-				x: x + 1,
-				y: y - 1,
-				z: z
-			})
-		}
+		nodes.push({
+			layer: "pieces",
+			image: sprite,
+			x: x + 1,
+			y: y - 1,
+			z: z
+		})
 		nodes.push({
 			layer: "shadows",
 			image: sprites.pieces.shadow,
@@ -303,6 +304,12 @@ export function render(screen) {
 			x: x + 1,
 			y: y - 1,
 			z: z
+		})
+		nodes.push({
+			layer: "shadows",
+			image: sprites.pieces.shadow,
+			x: x + 1,
+			y: y + 3
 		})
 	}
 

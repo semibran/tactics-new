@@ -11,7 +11,7 @@ all: clean
 	postcss src/style.scss -u autoprefixer -o dist/style.css -m
 	cleancss dist/style.css -o dist/style.css --source-map --source-map-inline-sources
 	html-minifier --collapse-whitespace src/index.html -o dist/index.html
-	rm dist *.map
+	rm dist/*.map
 
 clean:
 	rm -rf dist
