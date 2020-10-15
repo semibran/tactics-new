@@ -1,5 +1,6 @@
 import * as Log from "./comp-log"
 import * as Unit from "./unit"
+import * as Cell from "../../lib/cell/"
 import * as PieceAttack from "../anims/piece-attack"
 
 const attackDuration = 45
@@ -35,7 +36,7 @@ export function onenter(mode, screen) {
 		counter: false
 	})
 
-	if (Number(damage) < defr.hp) {
+	if (Number(damage) < defr.hp && Cell.distance(defr.cell, atkr.cell) <= Unit.rng(defr)) {
 		let damage = Unit.dmg(defr, atkr)
 		mode.attacks.push({
 			source: defr,
@@ -75,7 +76,15 @@ export function onupdate(mode, screen) {
 		} else if (anim && anim.connect && !attack.connect) {
 			attack.connect = true
 			Log.append(log, `${atkr.name} ${attack.counter ? "counters" : "attacks"}`)
-			Log.append(log, `${defr.name} ${defr.faction === "player" ? "suffers" : "receives"} ${attack.damage} damage.`)
+			if (attack.damage === 0) {
+				Log.append(log, `${defr.name} blocks the attack.`)
+			} else if (attack.damage === null) {
+				Log.append(log, `${defr.name} dodges the attack.`)
+			} else if (defr.faction === "player") {
+				Log.append(log, `${defr.name} suffers ${attack.damage} damage.`)
+			} else if (defr.faction === "enemy") {
+				Log.append(log, `${defr.name} receives ${attack.damage} damage.`)
+			}
 		} else if (!anim && screen.time - attack.time >= attackDuration) {
 			mode.attacks.shift()
 		}

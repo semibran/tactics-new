@@ -5,7 +5,7 @@ module.exports = {
 	exceptions: {
 		1: { width: 3 },
 		I: { width: 3 },
-		f: { width: 5 },
+		f: { width: 4 },
 		g: { height: 9 },
 		i: { width: 1 },
 		j: { width: 2, height: 8 },
