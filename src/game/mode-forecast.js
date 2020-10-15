@@ -1,6 +1,7 @@
 import * as Comps from "./comps"
 import * as Unit from "./unit"
 import * as Camera from "./camera"
+import * as Cell from "../../lib/cell"
 
 export function create(data) {
 	return {
@@ -26,23 +27,21 @@ export function onenter(mode, screen) {
 	screen.camera.target.y -= screen.camera.height / 4 - 6
 
 	// add attacker name tag
-	let atktag = Comps.Tag.create(atkr.name, atkr.faction, sprites)
-	mode.comps.push(atktag)
-
 	// add attacker hp
+	let atktag = Comps.Tag.create(atkr.name, atkr.faction, sprites)
 	let atkrhp = Comps.Hp.create(atkr.stats.hp, Unit.dmg(defr, atkr), atkr.faction, sprites)
+	mode.comps.push(atktag)
 	mode.comps.push(atkrhp)
 
 	// add defender tag
-	let deftag = Comps.Tag.create(defr.name, defr.faction, sprites, true)
-	mode.comps.push(deftag)
-
 	// add defender hp
+	let deftag = Comps.Tag.create(defr.name, defr.faction, sprites, true)
 	let defrhp = Comps.Hp.create(
 		defr.stats.hp, Unit.dmg(atkr, defr),
 		defr.faction, sprites,
 		true
 	)
+	mode.comps.push(deftag)
 	mode.comps.push(defrhp)
 
 	// add stat panels
@@ -53,9 +52,18 @@ export function onenter(mode, screen) {
 	mode.comps.push(dmg)
 	mode.comps.push(hit)
 
-	// add vs component
+	// add vs diamond
 	let vs = Comps.Vs.create(sprites)
 	mode.comps.push(vs)
+
+	// add attack range
+	let range = Comps.Range.create({
+		center: atkr.cell,
+		radius: Unit.rng(atkr),
+		squares: Cell.neighborhood(atkr.cell, Unit.rng(atkr))
+			.map(cell => ({ cell, type: "attack" }))
+	}, sprites)
+	mode.comps.push(range)
 }
 
 export function onrelease(mode, screen, pointer) {
