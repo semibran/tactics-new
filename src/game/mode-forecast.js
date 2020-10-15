@@ -59,7 +59,15 @@ export function onenter(mode, screen) {
 }
 
 export function onrelease(mode, screen, pointer) {
+	// TODO: buttons
 	if (pointer.mode === "click") {
-		mode.commands.push({ type: "switchMode", mode: "Home" })
+		mode.commands.push({
+			type: "switchMode",
+			mode: "Attack",
+			data: {
+				attacker: mode.attacker,
+				defender: mode.defender
+			}
+		})
 	}
 }

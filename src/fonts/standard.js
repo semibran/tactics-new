@@ -15,7 +15,7 @@ module.exports = {
 		q: { height: 9 },
 		r: { width: 4 },
 		t: { width: 4 },
-		w: { width: 9 },
+		w: { width: 7 },
 		y: { height: 9 },
 		",": { width: 2, height: 9 },
 		".": { width: 1 },
