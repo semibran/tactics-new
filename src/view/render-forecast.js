@@ -5,7 +5,7 @@ import renderText from "./render-text"
 import drawShadow from "./style-shadow"
 import getBadge from "./unit-badge"
 
-export function renderWeapon(attacker, defender, sprites) {
+export function renderWpn(attacker, defender, sprites) {
 	let palette = sprites.palette
 	let panel = renderBase("WPN", sprites).getContext("2d")
 	let badges = Canvas.create(panel.canvas.width, panel.canvas.height)
@@ -15,7 +15,7 @@ export function renderWeapon(attacker, defender, sprites) {
 	return panel.canvas
 }
 
-export function renderDamage(attacker, defender, sprites) {
+export function renderDmg(attacker, defender, sprites) {
 	let dmg1 = Unit.dmg(attacker, defender)
 	let dmg2 = Unit.dmg(defender, attacker)
 	if (dmg1 === null) {

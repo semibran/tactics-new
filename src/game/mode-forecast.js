@@ -33,12 +33,21 @@ export function onenter(mode, screen) {
 	mode.comps.push(deftag)
 
 	// add defender hp
-	mode.comps.push(Comps.Hp.create(
+	let defrhp = Comps.Hp.create(
 		defr.stats.hp, Unit.dmg(atkr, defr),
 		defr.faction, sprites,
 		true
-	))
+	)
+	mode.comps.push(defrhp)
 
+	let wpn = Comps.StatPanel.create("wpn", atkr, defr, sprites)
+	mode.comps.push(wpn)
+
+	let dmg = Comps.StatPanel.create("dmg", atkr, defr, sprites, { offset: 1 })
+	mode.comps.push(dmg)
+
+	let hit = Comps.StatPanel.create("hit", atkr, defr, sprites, { offset: 2 })
+	mode.comps.push(hit)
 }
 
 export function onrelease(mode, screen, pointer) {

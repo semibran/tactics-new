@@ -21,13 +21,12 @@ export function create(maxhp, damage, faction, sprites, defending) {
 }
 
 export function exit(hp) {
-	hp.exit = true
-
 	let src = hp.anim ? hp.anim.x : 1
 	let duration = hp.anim
 		? earlyExit(exitDuration, hp.anim.x)
 		: exitDuration
 	hp.anim = EaseLinear.create(duration, src, 0)
+	hp.exit = true
 }
 
 export function render(hp, screen) {

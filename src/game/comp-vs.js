@@ -15,13 +15,12 @@ export function create(sprites) {
 }
 
 export function exit(vs) {
-	vs.exit = true
-
 	let src = vs.anim ? vs.anim.x : 1
 	let duration = vs.anim
 		? earlyExit(exitDuration, vs.anim.x)
 		: exitDuration
 	vs.anim = EaseLinear.create(duration, src, 0)
+	vs.exit = true
 }
 
 export function render(vs, screen) {

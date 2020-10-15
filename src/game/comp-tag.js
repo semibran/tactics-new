@@ -18,13 +18,12 @@ export function create(name, faction, sprites, defending) {
 }
 
 export function exit(tag) {
-	tag.exit = true
-
 	let src = tag.anim ? tag.anim.x : 1
 	let duration = tag.anim
 		? earlyExit(exitDuration, tag.anim.x)
 		: exitDuration
 	tag.anim = EaseLinear.create(duration, src, 0)
+	tag.exit = true
 }
 
 export function render(tag, screen) {
