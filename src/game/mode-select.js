@@ -204,12 +204,14 @@ export function onupdate(mode, screen) {
 }
 
 function hover(mode, cell) {
-	let { map, unit, range, sprites } = mode
+	let { map, unit, range, sprites, select } = mode
 
 	// break if the hovered cell hasn't changed
 	let cpath = mode.select && mode.select.path
 	let cdest = cpath ? cpath[cpath.length - 1] : null
-	if (cpath && Cell.equals(cdest, cell)) {
+	if (cpath && Cell.equals(cdest, cell)
+	&& (!select.cursor || Cell.equals(select.cursor.target, cell))
+	) {
 		return true
 	}
 
@@ -283,8 +285,8 @@ function hover(mode, cell) {
 		}
 	}
 
-	if (path && !mode.select) {
-		mode.select = {
+	if (path && !select) {
+		select = mode.select = {
 			cursor: null,
 			path: null,
 			arrow: null,
@@ -298,21 +300,21 @@ function hover(mode, cell) {
 				x: cell.x * tilesize,
 				y: cell.y * tilesize
 			}
-			mode.select.cursor = {
+			select.cursor = {
 				pos: pos,
 				target: cell,
 				cached: pos
 			}
 		} else {
-			mode.select.cursor.target = cell
+			select.cursor.target = cell
 		}
-		mode.select.valid = true
-		mode.select.arrow = sprites.Arrow(path, unit.faction)
-		mode.select.path = path
+		select.valid = true
+		select.arrow = sprites.Arrow(path, unit.faction)
+		select.path = path
 		return true
 	} else if (mode.select) {
-		mode.select.valid = false
-		mode.select.cursor = null
+		select.valid = false
+		select.cursor = null
 	}
 
 	return false
