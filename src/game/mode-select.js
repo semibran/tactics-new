@@ -2,13 +2,11 @@ import * as Comps from "./comps"
 import * as Camera from "./camera"
 import * as PieceLift from "../anims/piece-lift"
 import * as PieceDrop from "../anims/piece-drop"
+import * as PieceMove from "../anims/piece-move"
 import * as Cell from "../../lib/cell"
-import * as Unit from "./unit"
-import * as Map from "./map"
 import findRange from "./range"
 import getCell from "../helpers/get-cell"
-import astar from "../../lib/pathfind"
-import renderArrow from "../../lib/pathfind"
+import pathfind from "./pathfind"
 
 const tilesize = 16
 
@@ -17,6 +15,7 @@ export function create(data) {
 		id: "Select",
 		next: null,
 		comps: [],
+		commands: [],
 		anim: null,
 		unit: data.unit,
 		held: data.held,
@@ -42,7 +41,6 @@ export function onenter(mode, screen) {
 
 	// add piece lift animation
 	mode.anim = PieceLift.create()
-	screen.anims.push(mode.anim)
 
 	// cache screen refs
 	mode.sprites = screen.view.sprites
@@ -67,12 +65,14 @@ export function onexit(mode, screen) {
 	}
 
 	// remove piece lift animation
-	mode.anim.done = true
-	mode.anim = PieceDrop.create(mode.anim.y)
-	screen.anims.push(mode.anim)
+	if (mode.anim && mode.anim.id === "PieceLift") {
+		mode.anim.done = true
+		mode.anim = PieceDrop.create(mode.anim.y)
+	}
 }
 
 export function onpress(mode, screen, pointer) {
+	if (mode.anim && mode.anim.blocking) return
 	let cursor = getCell(pointer.pos, screen.map, screen.camera)
 	if (cursor) {
 		hover(mode, cursor)
@@ -80,6 +80,7 @@ export function onpress(mode, screen, pointer) {
 }
 
 export function onmove(mode, screen, pointer) {
+	if (mode.anim && mode.anim.blocking) return
 	if (!mode.select) {
 		Camera.pan(screen.camera, pointer)
 		return
@@ -91,9 +92,20 @@ export function onmove(mode, screen, pointer) {
 }
 
 export function onrelease(mode, screen, pointer) {
-	if (pointer.mode === "click" && !mode.held) {
-		mode.next = { id: "Home" }
-	} else {
+	if (mode.anim && mode.anim.blocking) return
+	let { select, unit } = mode
+	if (pointer.mode === "click" && !mode.held && !select) {
+		mode.commands.push({ type: "switchMode", mode: "Home" })
+	} else if (select && select.valid) {
+		let path = select.path
+		let dest = path[path.length - 1]
+		if (Cell.equals(unit.cell, dest)) {
+			// end turn
+		} else {
+			// move to dest
+			move(mode, path)
+		}
+	} else if (select) {
 		unhover(mode)
 	}
 	mode.held = false
@@ -119,9 +131,23 @@ export function render(mode, screen) {
 		})
 	}
 
+	// render ring
+	let anim = mode.anim
+	if (anim && (anim.id !== "PieceMove" || screen.time % 2)) {
+		let image = sprites.select.ring[unit.faction]
+		let x = origin.x + unit.cell.x * screen.map.tilesize - 2
+		let y = origin.y + unit.cell.y * screen.map.tilesize - 2
+		nodes.push({
+			layer: "ring",
+			image, x, y
+		})
+	}
+
 	// render arrow
 	let arrow = select && select.arrow
-	if (arrow) {
+	if (arrow
+	&& (anim && (anim.id !== "PieceMove" || screen.time % 2))
+	) {
 		nodes.push({
 			layer: "arrow",
 			image: arrow,
@@ -131,7 +157,9 @@ export function render(mode, screen) {
 	}
 
 	// render mirage
-	if (select) {
+	if (select
+	&& (!cursor || !Cell.equals(cursor.target, unit.cell))
+	) {
 		let image = sprites.pieces[unit.faction][unit.type]
 		let x = pointer.pos.x / viewport.scale - image.width / 2
 		let y = pointer.pos.y / viewport.scale - image.height - 8
@@ -228,49 +256,22 @@ function unhover(mode) {
 	mode.select = null
 }
 
-function pathfind(unit, dest, map, cache) {
-	let path = null
-	let opts = {
-		width: map.width,
-		height: map.height,
-		blacklist: map.units // make enemy units unwalkable
-			.filter(other => !Unit.allied(unit, other))
-			.map(unit => unit.cell)
-	}
+function endTurn() {
 
-	// add to previous path if existent
-	if (cache) {
-		let cpath = cache
-		let cdest = cpath[cpath.length - 1]
-		let apath = astar(cdest, dest, opts)
+}
 
-		// cut path if it loops in on itself
-		for (let i = apath.length; --i >= 1;) {
-			for (let j = 0; j < cpath.length; j++) {
-				if (Cell.equals(apath[i], cpath[j])) {
-					path = cpath.slice(0, j).concat(apath.slice(i))
-					break
-				}
-			}
-			if (path) {
-				break
-			}
-		}
+function move(mode, path) {
+	// close range component
+	let rangecomp = mode.comps.find(comp => comp.id === "Range")
+	Comps.Range.exit(rangecomp)
 
-		// path does not loop in on itself
-		if (!path) {
-			// add addendum to cached if it's not too long
-			let length = cpath.length + apath.length - 2
-			if (length <= Unit.mov(unit)) {
-				path = cpath.concat(apath.slice(1))
-			}
-		}
-	}
-
-	// no path cached, start from scratch
-	if (!path) {
-		path = astar(unit.cell, dest, opts)
-	}
-
-	return path
+	// add piecemove animation
+	let unit = mode.unit
+	let dest = path[path.length - 1]
+	mode.anim.done = true
+	mode.anim = PieceMove.create(path, _ => {
+		mode.commands.push({ type: "move", unit: unit, dest: dest })
+		mode.commands.push({ type: "endTurn", unit: unit })
+		mode.commands.push({ type: "switchMode", mode: "Home" })
+	})
 }

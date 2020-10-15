@@ -12,13 +12,17 @@ export function create(map) {
 	}
 }
 
+export function move(unit, dest, game) {
+	unit.cell = dest
+}
+
 export function endTurn(unit, game) {
 	let pending = game.phase.pending
 	let index = pending.indexOf(unit)
 	if (index !== -1) {
 		pending.splice(index, 1)
 		if (!pending.length) {
-			nextPhase(game)
+			switchPhase(game)
 		}
 		return true
 	} else {
@@ -26,7 +30,7 @@ export function endTurn(unit, game) {
 	}
 }
 
-export function nextPhase(game) {
+export function switchPhase(game) {
 	let { map, phase } = game
 	if (phase.faction === "player") {
 		phase.faction = "enemy"
@@ -35,6 +39,6 @@ export function nextPhase(game) {
 	}
 	phase.pending = map.units.filter(unit => unit.faction === phase.faction)
 	if (!phase.pending.length) {
-		nextPhase(game)
+		switchPhase(game)
 	}
 }

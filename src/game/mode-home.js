@@ -6,6 +6,7 @@ export function create() {
 	return {
 		id: "Home",
 		comps: [],
+		commands: [],
 		press: null
 	}
 }
@@ -43,11 +44,12 @@ export function onupdate(mode, screen) {
 }
 
 function select(mode, unit, held) {
-	mode.next = {
-		id: "Select",
+	mode.commands.push({
+		type: "switchMode",
+		mode: "Select",
 		data: {
 			unit: unit,
 			held: !!held
 		}
-	}
+	})
 }
