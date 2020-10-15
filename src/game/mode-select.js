@@ -112,7 +112,7 @@ export function onrelease(mode, screen, pointer) {
 				mode.commands.push({
 					type: "switchMode",
 					mode: "Forecast",
-					data: { attacker: unit, defender: target }
+					data: { unit, target }
 				})
 			} else {
 				mode.commands.push({ type: "switchMode", mode: "Home" })
@@ -357,7 +357,7 @@ function move(mode, path, target) {
 					mode.commands.push({
 						type: "switchMode",
 						mode: "Forecast",
-						data: { attacker: unit, defender: target }
+						data: { unit, target }
 					})
 				} else {
 					mode.commands.push({ type: "endTurn", unit: unit })

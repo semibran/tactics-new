@@ -13,7 +13,7 @@ export default function disasmVs(image, palette) {
 		palette.white,
 		palette.opal,
 		palette.gray,
-		palette.coal,
+		palette.brown,
 		palette.jet
 	]
 	replaceColors(image, oldColors, newColors)

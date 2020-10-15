@@ -8,6 +8,7 @@ export function create(name, type, faction, cell, stats) {
 		faction: faction,
 		cell: cell,
 		stats: stats,
+		hp: stats.hp
 	}
 }
 

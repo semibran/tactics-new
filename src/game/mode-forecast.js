@@ -8,8 +8,8 @@ import * as PieceDrop from "../anims/piece-drop"
 export function create(data) {
 	return {
 		id: "Forecast",
-		unit: data.attacker,
-		target: data.defender,
+		unit: data.unit,
+		target: data.target,
 		comps: [],
 		commands: [],
 		anim: null
@@ -87,8 +87,8 @@ export function onrelease(mode, screen, pointer) {
 			type: "switchMode",
 			mode: "Attack",
 			data: {
-				attacker: mode.unit,
-				defender: mode.target
+				unit: mode.unit,
+				target: mode.target
 			}
 		})
 	}

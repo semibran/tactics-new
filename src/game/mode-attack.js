@@ -1,12 +1,17 @@
-import * as Comps from "./comps"
+import * as Log from "./comp-log"
 import * as Unit from "./unit"
+import * as PieceAttack from "../anims/piece-attack"
+
+const attackDuration = 45
 
 export function create(data) {
 	return {
 		id: "Attack",
-		attacker: data.attacker,
-		defender: data.defender,
+		unit: data.unit,
+		target: data.target,
 		log: null,
+		anim: null,
+		attacks: [],
 		comps: [],
 		commands: []
 	}
@@ -14,23 +19,67 @@ export function create(data) {
 
 export function onenter(mode, screen) {
 	let sprites = screen.sprites
-	let attacker = mode.attacker
-	let defender = mode.defender
-	let damage = Unit.dmg(attacker, defender)
-	let content = [
-		[ `${attacker.name} attacks`
-	 	, `${defender.name} receives ${damage} damage.`
-		]
-	]
+	let atkr = mode.unit
+	let defr = mode.target
 
-	let log = Comps.Log.create(content, sprites)
-	mode.comps.push(log)
+	mode.log = Log.create()
+	mode.comps.push(mode.log)
+
+	let damage = Unit.dmg(atkr, defr)
+	mode.attacks.push({
+		source: atkr,
+		target: defr,
+		damage: damage,
+		time: 0,
+		connect: false,
+		counter: false
+	})
+
+	if (Number(damage) < defr.hp) {
+		let damage = Unit.dmg(defr, atkr)
+		mode.attacks.push({
+			source: defr,
+			target: atkr,
+			damage: damage,
+			time: 0,
+			connect: false,
+			counter: true
+		})
+	}
 }
 
 export function onrelease(mode, screen, pointer) {
 	// TODO: buttons
 	if (pointer.mode === "click") {
 
+		// mode.commands.push({ type: "switchMode", mode: "Home" })
+	}
+}
+
+export function onupdate(mode, screen) {
+	let anim = mode.anim
+	let cache = mode.cache
+	let atkr = mode.unit
+	let defr = mode.target
+	let log = mode.log
+
+	let attack = mode.attacks[0]
+	if (attack) {
+		let atkr = attack.source
+		let defr = attack.target
+		let anim = mode.anim
+		if (!attack.time) {
+			mode.anim = PieceAttack.create(atkr.cell, defr.cell)
+			mode.unit = atkr
+			attack.time = screen.time
+		} else if (anim && anim.connect && !attack.connect) {
+			attack.connect = true
+			Log.append(log, `${atkr.name} ${attack.counter ? "counters" : "attacks"}`)
+			Log.append(log, `${defr.name} ${defr.faction === "player" ? "suffers" : "receives"} ${attack.damage} damage.`)
+		} else if (!anim && screen.time - attack.time >= attackDuration) {
+			mode.attacks.shift()
+		}
+	} else {
 		mode.commands.push({ type: "switchMode", mode: "Home" })
 	}
 }

@@ -26,7 +26,6 @@ export function create(data) {
 		id: "Game",
 		mode: Modes.Home.create(),
 		nextMode: null,
-		anims: [],
 		comps: [],
 		view: null,
 		time: 0,
@@ -87,12 +86,12 @@ export function onupdate(screen) {
 
 	screen.time++
 	updateCamera(screen)
-	updateAnims(screen)
 
 	// update components
-	screen.dirty |= updateMode(mode)
+	screen.dirty |= updateModeAnim(mode)
+	screen.dirty |= updateModeComps(mode)
 	if (nextMode) {
-		screen.dirty |= updateMode(nextMode)
+		screen.dirty |= updateModeComps(nextMode)
 		if (!mode.comps.length && nextMode) {
 			switchMode(screen)
 		}
@@ -133,19 +132,7 @@ export function updateCamera(screen) {
 	Camera.update(screen.camera)
 }
 
-export function updateAnims(screen) {
-	for (let i = 0; i < screen.anims.length; i++) {
-		let anim = screen.anims[i]
-		if (anim.done) {
-			screen.anims.splice(i--, 1)
-		} else {
-			Anims[anim.id].update(anim)
-		}
-		screen.dirty = true
-	}
-}
-
-export function updateMode(mode) {
+function updateModeAnim(mode) {
 	let dirty = false
 	let anim = mode.anim
 	if (anim) {
@@ -160,6 +147,11 @@ export function updateMode(mode) {
 		}
 		dirty = true
 	}
+	return dirty
+}
+
+function updateModeComps(mode) {
+	let dirty = false
 
 	if (mode.comps.length) {
 		// console.warn(mode.id, mode.comps.map(comp => comp.id).join(" "))
@@ -178,6 +170,8 @@ export function updateMode(mode) {
 		}
 		if (!comp.anim && comp.exit) {
 			mode.comps.splice(c--, 1)
+		} else if (Comps[comp.id].onupdate) {
+			Comps[comp.id].onupdate(comp)
 		}
 	}
 
@@ -270,9 +264,9 @@ export function render(screen) {
 	// queue cursor
 
 	// queue units
-	let prompting = mode.id === "Select" || mode.id === "Forecast"
+	let select = mode.id === "Select" || mode.id === "Forecast" || mode.id === "Attack"
 	for (let unit of map.units) {
-		if (prompting && mode.unit === unit) {
+		if (select && mode.unit === unit) {
 			continue
 		}
 		let sprite = sprites.pieces[unit.faction][unit.type]
@@ -296,8 +290,7 @@ export function render(screen) {
 	}
 
 	// queue selection
-	// move into mode-select?
-	if (prompting) {
+	if (select) {
 		let unit = mode.unit
 		let sprite = sprites.pieces[unit.faction][unit.type]
 		let cell = unit.cell
@@ -308,10 +301,12 @@ export function render(screen) {
 		if (anim) {
 			if (anim.id === "PieceLift" || anim.id === "PieceDrop") {
 				z = Math.round(anim.y)
-			} else if (anim.id === "PieceMove") {
+			} else if (anim.id === "PieceMove" || anim.id === "PieceAttack") {
 				x = origin.x + anim.cell.x * map.tilesize
 				y = origin.y + anim.cell.y * map.tilesize
-				Camera.center(camera, map, anim.cell)
+				if (anim.id === "PieceMove") {
+					Camera.center(camera, map, anim.cell)
+				}
 			}
 		}
 		nodes.push({
