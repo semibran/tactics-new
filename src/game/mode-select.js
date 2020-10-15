@@ -7,7 +7,7 @@ import * as Unit from "./unit"
 import * as Map from "./map"
 import findRange from "./range"
 import getCell from "../helpers/get-cell"
-import pathfind from "../../lib/pathfind"
+import astar from "../../lib/pathfind"
 import renderArrow from "../../lib/pathfind"
 
 const tilesize = 16
@@ -23,26 +23,12 @@ export function create(data) {
 		sprites: null,
 		map: null,
 		range: null,
-		select: null,
-		pointer: {
-			selecting: false
-		}
+		select: null
 	}
 }
 
 export function onenter(mode, screen) {
 	let unit = mode.unit
-
-	// center camera (unless holdselect was used)
-	if (!mode.held) {
-		Camera.center(screen.camera, screen.map, unit.cell)
-	} else {
-		mode.select = {
-			cursor: null,
-			path: null,
-			valid: false
-		}
-	}
 
 	// add range component
 	let rangedata = findRange(unit, screen.map)
@@ -61,6 +47,17 @@ export function onenter(mode, screen) {
 	// cache screen refs
 	mode.sprites = screen.view.sprites
 	mode.map = screen.map
+
+	// center camera (unless holdselect was used)
+	if (!mode.held) {
+		Camera.center(screen.camera, screen.map, unit.cell)
+	} else {
+		let pointer = screen.view.pointer
+		let cursor = getCell(pointer.pos, screen.map, screen.camera)
+		if (cursor) {
+			hover(mode, cursor)
+		}
+	}
 }
 
 export function onexit(mode, screen) {
@@ -75,8 +72,15 @@ export function onexit(mode, screen) {
 	screen.anims.push(mode.anim)
 }
 
+export function onpress(mode, screen, pointer) {
+	let cursor = getCell(pointer.pos, screen.map, screen.camera)
+	if (cursor) {
+		hover(mode, cursor)
+	}
+}
+
 export function onmove(mode, screen, pointer) {
-	if (!mode.held) {
+	if (!mode.select) {
 		Camera.pan(screen.camera, pointer)
 		return
 	}
@@ -166,57 +170,33 @@ function hover(mode, cell) {
 	let cpath = mode.path
 	let cdest = cpath ? cpath[cpath.length - 1] : null
 	if (cpath && Cell.equals(cdest, cell)) {
-		return
+		return true
 	}
-
-	// check if the selected square is walkable
-	let square = range.squares.find(square => {
-		return square.type === "move" && Cell.equals(square.cell, cell)
-	})
 
 	let path = null
-	if (square) {
-		let dest = cell
-		let opts = {
-			width: map.width,
-			height: map.height,
-			blacklist: map.units // make enemy units unwalkable
-				.filter(other => !Unit.allied(unit, other))
-				.map(unit => unit.cell)
-		}
 
-		// add to previous path if existent
-		if (cpath) {
-			let apath = pathfind(cdest, dest, opts)
-
-			// cut path if it loops in on itself
-			for (let i = apath.length; --i >= 1;) {
-				for (let j = 0; j < cpath.length; j++) {
-					if (Cell.equals(apath[i], cpath[j])) {
-						path = cpath.slice(0, j).concat(apath.slice(i))
-						break
-					}
-				}
-				if (path) {
-					break
-				}
-			}
-
-			// path does not loop in on itself
-			if (!path) {
-				// add addendum to cached if it's not too long
-				let length = cpath.length + apath.length - 2
-				if (length <= Unit.mov(unit)) {
-					path = cpath.concat(apath.slice(1))
-				}
-			}
-		}
-
-		// no path cached
-		if (!path) {
-			path = pathfind(unit.cell, dest, opts)
+	// initial case: hover is on unit cell
+	if (Cell.equals(unit.cell, cell)) {
+		path = [ unit.cell ]
+	} else {
+		// check if the selected square is walkable
+		let square = range.squares.find(square => {
+			return square.type === "move" && Cell.equals(square.cell, cell)
+		})
+		if (square) {
+			path = pathfind(unit, cell, map, cpath)
 		}
 	}
+
+	if (path && !mode.select) {
+		mode.select = {
+			cursor: null,
+			path: null,
+			arrow: null,
+			valid: false
+		}
+	}
+
 	if (path) {
 		if (!mode.select.cursor) {
 			let pos = {
@@ -234,12 +214,61 @@ function hover(mode, cell) {
 		mode.select.valid = true
 		mode.select.arrow = sprites.Arrow(path, unit.faction)
 		mode.select.path = path
-	} else {
+		return true
+	} else if (mode.select) {
 		mode.select.valid = false
 		mode.select.cursor = null
 	}
+	return false
 }
 
 function unhover(mode) {
 	mode.select = null
+}
+
+function pathfind(unit, dest, map, cache) {
+	let path = null
+	let opts = {
+		width: map.width,
+		height: map.height,
+		blacklist: map.units // make enemy units unwalkable
+			.filter(other => !Unit.allied(unit, other))
+			.map(unit => unit.cell)
+	}
+
+	// add to previous path if existent
+	if (cache) {
+		let cpath = cache
+		let cdest = cpath[cpath.length - 1]
+		let apath = astar(cdest, dest, opts)
+
+		// cut path if it loops in on itself
+		for (let i = apath.length; --i >= 1;) {
+			for (let j = 0; j < cpath.length; j++) {
+				if (Cell.equals(apath[i], cpath[j])) {
+					path = cpath.slice(0, j).concat(apath.slice(i))
+					break
+				}
+			}
+			if (path) {
+				break
+			}
+		}
+
+		// path does not loop in on itself
+		if (!path) {
+			// add addendum to cached if it's not too long
+			let length = cpath.length + apath.length - 2
+			if (length <= Unit.mov(unit)) {
+				path = cpath.concat(apath.slice(1))
+			}
+		}
+	}
+
+	// no path cached, start from scratch
+	if (!path) {
+		path = astar(unit.cell, dest, opts)
+	}
+
+	return path
 }
