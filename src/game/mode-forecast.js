@@ -96,9 +96,5 @@ export function onrelease(mode, screen, pointer) {
 				target: mode.target
 			}
 		})
-		mode.commands.push({
-			type: "endTurn",
-			unit: mode.unit
-		})
 	}
 }

@@ -42,6 +42,10 @@ export function remove(unit, game) {
 
 export function endTurn(unit, game) {
 	let pending = game.phase.pending
+	if (!pending.length) {
+		switchPhase(game)
+		return true
+	}
 	let index = pending.indexOf(unit)
 	if (index !== -1) {
 		pending.splice(index, 1)

@@ -13,6 +13,8 @@ export function create(data) {
 		id: "Attack",
 		unit: data.unit,
 		target: data.target,
+		atkr: data.unit,
+		defr: data.target,
 		log: null,
 		anim: null,
 		lhshp: null,
@@ -131,6 +133,10 @@ export function onupdate(mode, screen) {
 			}
 		}
 	} else {
+		mode.commands.push({
+			type: "endTurn",
+			unit: mode.atkr
+		})
 		mode.commands.push({ type: "switchMode", mode: "Home" })
 	}
 }
