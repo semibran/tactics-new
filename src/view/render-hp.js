@@ -25,12 +25,13 @@ export function left(value, maxhp, faction, sprites) {
 export function leftChunk(damage, value, maxhp, sprites, color) {
 	let base = sprites.bars.left
 	let chunk = Canvas.create(base.width, base.height)
-	let chunkwidth = Math.round(maxwidth - (value - damage) / maxhp * maxwidth)
-	let x = Math.round((value - damage) / maxhp * maxwidth)
+	let chunkwidth = Math.round(damage / maxhp * maxwidth)
+	let chunkx = value / maxhp * maxwidth
+	let x = Math.ceil(maxwidth - chunkwidth - chunkx)
 	chunk.fillStyle = color || "white"
-	chunk.fillRect(7 + maxwidth - chunkwidth - x, 2, chunkwidth, 2)
-	chunk.fillRect(6 + maxwidth - chunkwidth - x, 4, chunkwidth, 2)
-	chunk.fillRect(5 + maxwidth - chunkwidth - x, 6, chunkwidth, 1)
+	chunk.fillRect(7 + x, 2, chunkwidth, 2)
+	chunk.fillRect(6 + x, 4, chunkwidth, 2)
+	chunk.fillRect(5 + x, 6, chunkwidth, 1)
 	return chunk.canvas
 }
 
@@ -54,13 +55,11 @@ export function right(value, maxhp, faction, sprites) {
 export function rightChunk(damage, value, maxhp, sprites, color) {
 	let base = sprites.bars.right
 	let chunk = Canvas.create(base.width, base.height)
-	let pct = (maxhp - damage) / maxhp
-	let offset = Math.round(maxwidth * pct)
-	let width = maxwidth - offset
-	let x = offset - Math.ceil((maxhp - value) / maxhp * maxwidth)
+	let chunkwidth = Math.round(damage / maxhp * maxwidth)
+	let x = Math.round(value / maxhp * maxwidth)
 	chunk.fillStyle = color || "white"
-	chunk.fillRect(6 + x, 2, width, 2)
-	chunk.fillRect(7 + x, 4, width, 2)
-	chunk.fillRect(8 + x, 6, width, 1)
+	chunk.fillRect(6 + x, 2, chunkwidth, 2)
+	chunk.fillRect(7 + x, 4, chunkwidth, 2)
+	chunk.fillRect(8 + x, 6, chunkwidth, 1)
 	return chunk.canvas
 }

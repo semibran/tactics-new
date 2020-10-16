@@ -48,7 +48,7 @@ export function startReduce(hp, damage) {
 	hp.mode = {
 		type: "reduce",
 		anim: EaseLinear.create(20, { delay: 10 }),
-		damage: damage
+		damage: Math.min(hp.value, damage)
 	}
 }
 
@@ -61,7 +61,7 @@ export function endReduce(hp) {
 export function startFlash(hp, damage) {
 	hp.mode = {
 		type: "flash",
-		damage: damage
+		damage: Math.min(hp.value, damage)
 	}
 }
 
@@ -96,7 +96,10 @@ export function render(hp, screen) {
 	if (hp.mode.type === "flash") {
 		let chunk = hp.cache.chunk
 		if (!chunk) {
-			chunk = hp.cache.chunk = RenderHP[side + "Chunk"](hp.mode.damage, hp.value, hp.max, sprites)
+			let damage = Math.min(hp.mode.damage, hp.value)
+			let value = hp.value - damage
+			let hpmax = hp.max
+			chunk = hp.cache.chunk = RenderHP[side + "Chunk"](damage, value, hpmax, sprites)
 		}
 		let d = screen.time % 75 / 75
 		let opacity = (Math.sin(2 * Math.PI * d) + 1) / 2 * 0.875
@@ -112,19 +115,12 @@ export function render(hp, screen) {
 		let color = rgb(...palette.red)
 		let value = lerp(hp.mode.damage, 0, hp.mode.anim.x)
 		let inval = lerp(0, hp.mode.damage, hp.mode.anim.x)
-		let cx = x;
-		if (side === "left") {
-			cx = x + hp.mode.anim.x * (hp.mode.damage / hp.max) * RenderHP.maxwidth
-		} else {
-			cx = x - hp.mode.anim.x * (hp.mode.damage / hp.max) * RenderHP.maxwidth
-		}
-		let chunk = RenderHP[side + "Chunk"](value, hp.value, hp.max, sprites, color)
+		let chunk = RenderHP[side + "Chunk"](value, hp.value - hp.mode.damage, hp.max, sprites, color)
 		image = hp.cache.damaged = RenderHP[side](hp.value - inval, hp.max, hp.faction, sprites)
 		nodes.push({
 			layer: "ui",
 			image: chunk,
-			x: cx,
-			y, origin
+			x, y, origin
 		})
 	}
 
