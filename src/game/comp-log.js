@@ -11,7 +11,7 @@ const exitDuration = 7
 const hangDuration = 180
 const margin = 2
 const padx = 8
-const pady = 9
+const pady = 10
 
 export function create() {
 	return {

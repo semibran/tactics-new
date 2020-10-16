@@ -22,8 +22,12 @@ export function attack(unit, target, game) {
 	let dmg = Unit.dmg(unit, target)
 	if (dmg) {
 		target.hp = Math.max(0, target.hp - dmg)
-		if (target.hp < 0) {
+		if (target.hp <= 0) {
 			// remove unit from playing field
+			let index = game.map.units.indexOf(target)
+			if (index !== -1) {
+				game.map.units.splice(index, 1)
+			}
 		}
 	}
 }

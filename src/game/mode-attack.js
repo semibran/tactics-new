@@ -1,10 +1,12 @@
 import * as Log from "./comp-log"
 import * as Hp from "./comp-hp"
+import * as Camera from "./camera"
 import * as Unit from "./unit"
 import * as Cell from "../../lib/cell/"
 import * as PieceAttack from "../anims/piece-attack"
 
-const attackDuration = 45
+const attackDuration = 50
+const finalDuration = 75
 
 export function create(data) {
 	return {
@@ -79,6 +81,7 @@ export function onupdate(mode, screen) {
 	let atkr = mode.unit
 	let defr = mode.target
 	let log = mode.log
+	let camera = screen.camera
 
 	let attack = mode.attacks[0]
 	if (attack) {
@@ -96,6 +99,9 @@ export function onupdate(mode, screen) {
 				mode.atkrhp = mode.rhshp
 				mode.defrhp = mode.lhshp
 			}
+			Camera.center(camera, screen.map, atkr.cell)
+			camera.target.y -= camera.height / 2
+			camera.target.y += (camera.height - 44) / 2
 		} else if (anim && anim.connect && !attack.connect) {
 			attack.connect = true
 			Log.append(log, `${atkr.name} ${attack.counter ? "counters" : "attacks"}`)
@@ -110,14 +116,18 @@ export function onupdate(mode, screen) {
 			}
 			if (attack.damage >= defr.hp && defr.faction === "player") {
 				Log.append(log, `${defr.name} is defeated.`)
-			}
-			if (attack.damage >= defr.hp && defr.faction === "enemy") {
+			} else if (attack.damage >= defr.hp && defr.faction === "enemy") {
 				Log.append(log, `Defeated ${defr.name}.`)
 			}
 			Hp.startReduce(mode.defrhp, attack.damage)
-		} else if (!anim && screen.time - attack.time >= attackDuration) {
-			mode.commands.push({ type: "attack", unit: atkr, target: defr })
-			mode.attacks.shift()
+		} else if (!anim) {
+			let duration = mode.attacks.length === 1
+				? finalDuration
+				: attackDuration
+			if (screen.time - attack.time >= duration) {
+				mode.commands.push({ type: "attack", unit: atkr, target: defr })
+				mode.attacks.shift()
+			}
 		}
 	} else {
 		mode.commands.push({ type: "switchMode", mode: "Home" })
