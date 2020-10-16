@@ -47,24 +47,48 @@ export function onenter(mode, screen) {
 
 	let damage = Unit.dmg(atkr, defr)
 	mode.attacks.push({
+		type: "init",
 		source: atkr,
 		target: defr,
 		damage: damage,
 		time: 0,
-		connect: false,
-		counter: false
+		connect: false
 	})
 
+	let finisher = Number(damage) >= defr.hp
 	let dist = Cell.distance(defr.cell, atkr.cell)
-	if (Number(damage) < defr.hp && dist <= Unit.rng(defr)) {
+	if (!finisher && dist <= Unit.rng(defr)) {
 		let damage = Unit.dmg(defr, atkr)
 		mode.attacks.push({
+			type: "counter",
 			source: defr,
 			target: atkr,
 			damage: damage,
 			time: 0,
-			connect: false,
-			counter: true
+			connect: false
+		})
+
+		let finisher = Number(damage) >= atkr.hp
+		if (!finisher && damage && defr.stats.spd > atkr.stats.spd) {
+			mode.attacks.push({
+				type: "double",
+				source: defr,
+				target: atkr,
+				damage: damage,
+				time: 0,
+				connect: false
+			})
+		}
+	}
+
+	if (!finisher && damage && atkr.stats.spd > defr.stats.spd) {
+		mode.attacks.push({
+			type: "double",
+			source: atkr,
+			target: defr,
+			damage: damage,
+			time: 0,
+			connect: false
 		})
 	}
 }
@@ -95,19 +119,28 @@ export function onupdate(mode, screen) {
 			mode.unit = atkr
 			mode.target = defr
 			attack.time = screen.time
-			if (!attack.counter) {
+			if (attack.source === mode.atkr) {
 				mode.atkrhp = mode.lhshp
 				mode.defrhp = mode.rhshp
 			} else {
 				mode.atkrhp = mode.rhshp
 				mode.defrhp = mode.lhshp
 			}
-			Camera.center(camera, screen.map, atkr.cell)
+			Camera.center(camera, screen.map, defr.cell)
 			camera.target.y -= camera.height / 2
 			camera.target.y += (camera.height - 44) / 2
 		} else if (anim && anim.connect && !attack.connect) {
 			attack.connect = true
-			Log.append(log, `${atkr.name} ${attack.counter ? "counters" : "attacks"}`)
+			Hp.startReduce(mode.defrhp, attack.damage)
+
+			if (attack.type === "init") {
+				Log.append(log, `${atkr.name} attacks`)
+			} else if (attack.type === "counter") {
+				Log.append(log, `${atkr.name} counters`)
+			} else if (attack.type === "double") {
+				Log.append(log, `${atkr.name} has a Spd advantage`)
+			}
+
 			if (attack.damage === 0) {
 				Log.append(log, `${defr.name} blocks the attack.`)
 			} else if (attack.damage === null) {
@@ -117,12 +150,12 @@ export function onupdate(mode, screen) {
 			} else if (defr.faction === "enemy") {
 				Log.append(log, `${defr.name} receives ${attack.damage} damage.`)
 			}
+
 			if (attack.damage >= defr.hp && defr.faction === "player") {
 				Log.append(log, `${defr.name} is defeated.`)
 			} else if (attack.damage >= defr.hp && defr.faction === "enemy") {
 				Log.append(log, `Defeated ${defr.name}.`)
 			}
-			Hp.startReduce(mode.defrhp, attack.damage)
 		} else if (!anim) {
 			let duration = mode.attacks.length === 1
 				? finalDuration
