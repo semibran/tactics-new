@@ -36,8 +36,8 @@ export function exit(panel) {
 	let duration = panel.anim
 		? earlyExit(exitDuration, panel.anim.x)
 		: exitDuration
-	let opts = { delay: panel.data.offset * offsetDelay }
-	panel.anim = EaseLinear.create(duration, { src, dest: 0, opts })
+	let opts = { src, dest: 0, delay: panel.data.offset * offsetDelay }
+	panel.anim = EaseLinear.create(duration, opts)
 	panel.exit = true
 }
 

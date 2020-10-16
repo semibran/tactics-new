@@ -21,7 +21,7 @@ export function renderDmg(attacker, defender, sprites) {
 	if (dmg1 === null) {
 		dmg1 = "-"
 	}
-	if (dmg2 === null || dmg1 >= defender.stats.hp) {
+	if (dmg2 === null || dmg1 >= defender.hp) {
 		dmg2 = "-"
 	}
 	return renderPanel("DMG", dmg1, dmg2, sprites)
@@ -33,7 +33,7 @@ export function renderHit(attacker, defender, sprites) {
 	if (hit1 === null || hit1 < 0) {
 		hit1 = "-"
 	}
-	if (hit2 === null || hit2 < 0 || Unit.dmg(attacker, defender) >= defender.stats.hp) {
+	if (hit2 === null || hit2 < 0 || Unit.dmg(attacker, defender) >= defender.hp) {
 		hit2 = "-"
 	}
 	return renderPanel("HIT", hit1, hit2, sprites)

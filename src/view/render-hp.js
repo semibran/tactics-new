@@ -27,7 +27,7 @@ export function leftChunk(damage, value, maxhp, sprites, color) {
 	let chunk = Canvas.create(base.width, base.height)
 	let chunkwidth = Math.round(damage / maxhp * maxwidth)
 	let chunkx = value / maxhp * maxwidth
-	let x = Math.ceil(maxwidth - chunkwidth - chunkx)
+	let x = Math.round(maxwidth - chunkwidth - chunkx)
 	chunk.fillStyle = color || "white"
 	chunk.fillRect(7 + x, 2, chunkwidth, 2)
 	chunk.fillRect(6 + x, 4, chunkwidth, 2)

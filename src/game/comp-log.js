@@ -17,7 +17,7 @@ export function create() {
 	return {
 		id: "Log",
 		messages: [],
-		anim: EaseOut.create(enterDuration),
+		anim: EaseOut.create(enterDuration, { delay: 10 }),
 		pos: {
 			col: 0,
 			row: 0,

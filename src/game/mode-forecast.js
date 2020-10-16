@@ -29,6 +29,12 @@ export function onenter(mode, screen) {
 	Camera.center(screen.camera, screen.map, midpoint)
 	screen.camera.target.y -= screen.camera.height / 4 - 6
 
+	let atkdmg = Unit.dmg(atkr, defr)
+	let ctrdmg = 0
+	if (Number(atkdmg) < defr.hp) {
+		ctrdmg = Unit.dmg(defr, atkr)
+	}
+
 	// add attacker name tag
 	// add attacker hp
 	let atktag = Comps.Tag.create(atkr.name, atkr.faction, sprites)
@@ -38,7 +44,7 @@ export function onenter(mode, screen) {
 	)
 	mode.comps.push(atktag)
 	mode.comps.push(atkrhp)
-	Comps.Hp.startFlash(atkrhp, Unit.dmg(defr, atkr))
+	Comps.Hp.startFlash(atkrhp, ctrdmg)
 
 	// add defender tag
 	// add defender hp
@@ -49,7 +55,7 @@ export function onenter(mode, screen) {
 	)
 	mode.comps.push(deftag)
 	mode.comps.push(defrhp)
-	Comps.Hp.startFlash(defrhp, Unit.dmg(atkr, defr))
+	Comps.Hp.startFlash(defrhp, atkdmg)
 
 	// add stat panels
 	let wpn = Comps.StatPanel.create("wpn", atkr, defr, sprites)
