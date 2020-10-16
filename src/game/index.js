@@ -32,7 +32,7 @@ export function create(data) {
 		dirty: false,
 		camera: Camera.create(),
 		map: Object.assign({ tilesize, image: null }, data.map),
-		state: data,
+		data: data,
 		cache: {
 			camera: { x: 0, y: 0 }
 		}
@@ -100,11 +100,11 @@ export function onupdate(screen) {
 	if (mode.commands.length) {
 		let command = mode.commands.shift()
 		if (command.type === "move") {
-			Game.move(command.unit, command.dest, screen.state)
+			Game.move(command.unit, command.dest, screen.data)
 		} else if (command.type === "attack") {
-			Game.attack(command.unit, command.target, screen.state)
+			Game.attack(command.unit, command.target, screen.data)
 		} else if (command.type === "endTurn") {
-			Game.endTurn(command.unit, screen.state)
+			Game.endTurn(command.unit, screen.data)
 		} else if (command.type === "switchMode") {
 			if (!nextMode) {
 				transition(screen, command.mode, command.data)
@@ -274,6 +274,20 @@ export function render(screen) {
 		let x = origin.x + cell.x * map.tilesize
 		let y = origin.y + cell.y * map.tilesize
 		let z = 0
+		if (game.phase.faction === unit.faction) {
+			if (game.phase.pending.includes(unit)) {
+				if (!select || mode.unit !== unit && mode.target !== unit) {
+					nodes.push({
+						layer: "pieces",
+						image: sprites.select.glow[unit.faction],
+						x: x,
+						y: y - 2
+					})
+				}
+			} else {
+				sprite = sprites.pieces.done[unit.faction][unit.type]
+			}
+		}
 		nodes.push({
 			layer: "pieces",
 			image: sprite,
