@@ -91,6 +91,7 @@ export function onupdate(mode, screen) {
 		if (!attack.time) {
 			mode.anim = PieceAttack.create(atkr.cell, defr.cell)
 			mode.unit = atkr
+			mode.target = defr
 			attack.time = screen.time
 			if (!attack.counter) {
 				mode.atkrhp = mode.lhshp

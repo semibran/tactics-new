@@ -24,11 +24,19 @@ export function attack(unit, target, game) {
 		target.hp = Math.max(0, target.hp - dmg)
 		if (target.hp <= 0) {
 			// remove unit from playing field
-			let index = game.map.units.indexOf(target)
-			if (index !== -1) {
-				game.map.units.splice(index, 1)
-			}
+			remove(target, game)
 		}
+	}
+}
+
+export function remove(unit, game) {
+	let u = game.map.units.indexOf(unit)
+	if (u !== -1) {
+		game.map.units.splice(u, 1)
+	}
+	let p = game.phase.pending.indexOf(unit)
+	if (p !== -1) {
+		game.phase.pending.splice(p, 1)
 	}
 }
 

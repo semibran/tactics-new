@@ -20,6 +20,7 @@ export function create(data) {
 		anim: null,
 		unit: data.unit,
 		held: data.held,
+		playable: true,
 		sprites: null,
 		map: null,
 		range: null,
@@ -46,6 +47,9 @@ export function onenter(mode, screen) {
 	// cache screen refs
 	mode.sprites = screen.view.sprites
 	mode.map = screen.map
+
+	// playable flag: determines whether we can move this unit
+	mode.playable = screen.data.phase.pending.includes(unit)
 
 	// center camera (unless holdselect was used)
 	if (!mode.held) {
@@ -80,7 +84,7 @@ export function onresize(mode, viewport) {
 export function onpress(mode, screen, pointer) {
 	if (mode.anim && mode.anim.blocking) return
 	let cursor = getCell(pointer.pos, screen.map, screen.camera)
-	if (cursor) {
+	if (cursor && mode.playable) {
 		hover(mode, cursor)
 	}
 }
@@ -92,7 +96,7 @@ export function onmove(mode, screen, pointer) {
 		return
 	}
 	let cursor = getCell(pointer.pos, screen.map, screen.camera)
-	if (cursor) {
+	if (cursor && mode.playable) {
 		hover(mode, cursor)
 	}
 }
@@ -141,7 +145,7 @@ export function render(mode, screen) {
 	let selectvis = anim && (!moving || screen.time % 2)
 
 	// render ring
-	if (selectvis) {
+	if (selectvis && screen.data.phase.pending.includes(unit)) {
 		let image = sprites.select.ring[unit.faction]
 		let x = origin.x + unit.cell.x * screen.map.tilesize - 2
 		let y = origin.y + unit.cell.y * screen.map.tilesize - 2

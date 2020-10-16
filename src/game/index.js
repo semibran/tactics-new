@@ -190,6 +190,7 @@ function transition(screen, nextid, nextdata) {
 	if (onexit) {
 		onexit(mode, screen)
 	}
+	mode.exit = true
 
 	// create new mode
 	let next = screen.nextMode = Modes[nextid].create(nextdata)
@@ -276,7 +277,7 @@ export function render(screen) {
 		let z = 0
 		if (game.phase.faction === unit.faction) {
 			if (game.phase.pending.includes(unit)) {
-				if (!select || mode.unit !== unit && mode.target !== unit) {
+				if (!select || mode.unit !== unit && mode.target !== unit || mode.exit) {
 					nodes.push({
 						layer: "pieces",
 						image: sprites.select.glow[unit.faction],
@@ -284,7 +285,7 @@ export function render(screen) {
 						y: y - 2
 					})
 				}
-			} else {
+			} else if (!select || mode.unit !== unit && mode.target !== unit) {
 				sprite = sprites.pieces.done[unit.faction][unit.type]
 			}
 		}

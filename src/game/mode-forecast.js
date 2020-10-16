@@ -86,6 +86,7 @@ export function onexit(mode, screen) {
 
 export function onrelease(mode, screen, pointer) {
 	// TODO: buttons
+	// right now you are forced to attack if you enter combat forecast
 	if (pointer.mode === "click") {
 		mode.commands.push({
 			type: "switchMode",
@@ -94,6 +95,10 @@ export function onrelease(mode, screen, pointer) {
 				unit: mode.unit,
 				target: mode.target
 			}
+		})
+		mode.commands.push({
+			type: "endTurn",
+			unit: mode.unit
 		})
 	}
 }
