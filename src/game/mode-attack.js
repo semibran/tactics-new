@@ -45,48 +45,57 @@ export function onenter(mode, screen) {
 	mode.log = Log.create()
 	mode.comps.push(mode.log)
 
-	let damage = Unit.dmg(atkr, defr)
+	let atkdmg = Unit.dmg(atkr, defr)
 	mode.attacks.push({
 		type: "init",
 		source: atkr,
 		target: defr,
-		damage: damage,
+		damage: atkdmg,
 		time: 0,
 		connect: false
 	})
 
-	let finisher = Number(damage) >= defr.hp
+	let finisher = Number(atkdmg) >= defr.hp
 	let dist = Cell.distance(defr.cell, atkr.cell)
 	if (!finisher && dist <= Unit.rng(defr)) {
-		let damage = Unit.dmg(defr, atkr)
+		let ctrdmg = Unit.dmg(defr, atkr)
 		mode.attacks.push({
 			type: "counter",
 			source: defr,
 			target: atkr,
-			damage: damage,
+			damage: ctrdmg,
 			time: 0,
 			connect: false
 		})
 
-		let finisher = Number(damage) >= atkr.hp
-		if (!finisher && damage && defr.stats.spd > atkr.stats.spd) {
+		let finisher = Number(ctrdmg) >= atkr.hp
+		if (!finisher && defr.stats.spd > atkr.stats.spd) {
 			mode.attacks.push({
 				type: "double",
 				source: defr,
 				target: atkr,
-				damage: damage,
+				damage: ctrdmg,
 				time: 0,
 				connect: false
 			})
 		}
-	}
 
-	if (!finisher && damage && atkr.stats.spd > defr.stats.spd) {
+		if (!finisher && atkr.stats.spd > defr.stats.spd) {
+			mode.attacks.push({
+				type: "double",
+				source: atkr,
+				target: defr,
+				damage: atkdmg,
+				time: 0,
+				connect: false
+			})
+		}
+	} else if (!finisher && atkr.stats.spd > defr.stats.spd) {
 		mode.attacks.push({
 			type: "double",
 			source: atkr,
 			target: defr,
-			damage: damage,
+			damage: atkdmg,
 			time: 0,
 			connect: false
 		})

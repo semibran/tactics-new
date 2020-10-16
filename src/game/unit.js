@@ -59,3 +59,13 @@ export function hit(unit, target) {
 	}
 	return unit.stats.hit - target.stats.spd
 }
+
+export function canDouble(unit, target) {
+	// TODO: speed threshold?
+	return unit.stats.spd > target.stats.spd
+}
+
+// take into account range, attack order, etc.
+export function willDouble(unit, target) {
+	return canDouble(unit, target) && target.hp - Number(dmg(unit, target)) > 0 && unit.hp - Number(dmg(target, unit)) > 0
+}

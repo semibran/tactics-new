@@ -33,6 +33,12 @@ export function onenter(mode, screen) {
 	let ctrdmg = 0
 	if (Number(atkdmg) < defr.hp) {
 		ctrdmg = Unit.dmg(defr, atkr)
+		if (Number(ctrdmg) < atkr.hp && Unit.willDouble(defr, atkr)) {
+			ctrdmg *= 2
+		}
+	}
+	if (Number(ctrdmg) < atkr.hp && Unit.willDouble(atkr, defr)) {
+		atkdmg *= 2
 	}
 
 	// add attacker name tag
