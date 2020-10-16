@@ -83,7 +83,7 @@ export function render(log, screen) {
 
 	if (!log.surface) {
 		let width = viewport.width - margin * 2 - padx * 2
-		let height = log.box.height - pady * 2 + 2
+		let height = log.box.height - pady * 2 + 4
 		log.surface = Canvas.create(width, height)
 	}
 
@@ -154,7 +154,7 @@ export function render(log, screen) {
 		origin: "bottomleft",
 		image: surface.canvas,
 		x: x + padx,
-		y: y - pady
+		y: y - 7
 	})
 
 	return nodes

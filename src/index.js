@@ -8,7 +8,7 @@ let state = Game.create(map)
 loadImage("sprites.png").then(main)
 
 function main(sprites) {
-	let view = View.create(125, 125, disasm(sprites))
+	let view = View.create(160, 160, disasm(sprites))
 	document.body.appendChild(view.element)
 	View.init(view, state)
 }

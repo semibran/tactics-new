@@ -147,7 +147,7 @@ export function onupdate(mode, screen) {
 			} else if (attack.type === "counter") {
 				Log.append(log, `${atkr.name} counters`)
 			} else if (attack.type === "double") {
-				Log.append(log, `${atkr.name} has a Spd advantage`)
+				Log.append(log, `${atkr.name} attacks again`)
 			}
 
 			if (attack.damage === 0) {
