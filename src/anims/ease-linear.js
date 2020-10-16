@@ -19,7 +19,6 @@ export function update(anim) {
 	anim.time++
 	let time = Math.max(0, anim.time - anim.opts.delay)
 	anim.x = lerp(anim.opts.src, anim.opts.dest, time / anim.duration)
-	console.log(time, anim.opts.delay, anim.x)
 	if (time >= anim.duration) {
 		anim.done = true
 	}

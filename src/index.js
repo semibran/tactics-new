@@ -2,7 +2,7 @@ import loadImage from "img-load"
 import disasm from "./disasm"
 import * as View from "./view"
 import * as Game from "./game/game"
-import map from "./maps/test"
+import map from "./maps/v2"
 
 let state = Game.create(map)
 loadImage("sprites.png").then(main)

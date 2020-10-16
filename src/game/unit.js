@@ -41,7 +41,12 @@ export function dmg(unit, target) {
 	if (hit(unit, target) <= 0) {
 		return null
 	}
-	let dmg = unit.stats.atk - target.stats.def
+	let dmg = unit.stats.atk
+	if (unit.type === "mage") {
+		dmg -= target.stats.res
+	} else if (unit.type !== "fighter") {
+		dmg -= target.stats.def
+	}
 	if (dmg < 0) {
 		dmg = 0
 	}
