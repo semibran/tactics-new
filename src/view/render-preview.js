@@ -42,9 +42,9 @@ export default function renderUnitPreview(unit, sprites) {
 		content.drawImage(value, padx + label.width + 4, 2)
 		let shadow = Canvas.recolor(content.canvas, palette.taupe)
 
-		content.drawImage(sprites.bars.small, padx + label.width, 0)
 		content.drawImage(shadow, 1, 1)
 		content.drawImage(labelshadow, 1, 1)
+		content.drawImage(sprites.bars.small, padx + label.width, 0)
 		content.drawImage(health.canvas, padx + label.width + 1, 1)
 		content.drawImage(label, padx, 0)
 		content.drawImage(value, padx + label.width + 4, 2)
