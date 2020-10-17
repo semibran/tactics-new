@@ -1,15 +1,15 @@
+import * as Map from "./map"
 import * as Unit from "./unit"
 import * as Cell from "../../lib/cell"
 import astar from "../../lib/pathfind"
+import unwalkables from "./unwalkables"
 
 export default function pathfind(unit, dest, map, cache) {
 	let path = null
 	let opts = {
 		width: map.width,
 		height: map.height,
-		blacklist: map.units // make enemy units unwalkable
-			.filter(other => !Unit.allied(unit, other))
-			.map(unit => unit.cell)
+		blacklist: unwalkables(map, unit)
 	}
 
 	// add to previous path if existent

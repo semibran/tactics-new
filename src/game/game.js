@@ -5,7 +5,7 @@ import * as Cell from "../../lib/cell"
 export function create(map) {
 	let units = map.units.map(unit => Unit.create(...unit))
 	return {
-		map: Map.create(map.width, map.height, units),
+		map: Map.create(map.width, map.height, map.layout, units),
 		phase: {
 			faction: "player",
 			pending: units.filter(unit => unit.faction === "player")
