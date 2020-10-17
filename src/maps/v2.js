@@ -9,7 +9,7 @@ export default {
 			{ hp: 8,  atk: 5, hit: 8, def: 0, spd: 7, res: 6, element: "volt" },
 			{ x: 7, y: 5 } ],
 		[ "Chorizo", "knight", "player",
-			{ hp: 13, atk: 6, hit: 7, def: 7, spd: 2, res: 1, element: "ice" },
+			{ hp: 13, atk: 6, hit: 8, def: 7, spd: 2, res: 1, element: "ice" },
 			{ x: 5, y: 6 } ],
 		[ "Pepper", "archer", "player",
 			{ hp: 9,  atk: 5, hit: 8, def: 1, spd: 7, res: 2, element: "plant" },

@@ -15,6 +15,7 @@ export function create(data) {
 		id: "Forecast",
 		unit: data.unit,
 		target: data.target,
+		attack: Unit.attackData(data.unit, data.target),
 		comps: [],
 		commands: [],
 		anim: null
@@ -25,16 +26,7 @@ export function onenter(mode, screen) {
 	let sprites = screen.view.sprites
 	let atkr = mode.unit
 	let defr = mode.target
-
-	// center camera
-	let midpoint = {
-		x: (atkr.cell.x + defr.cell.x) / 2,
-		y: (atkr.cell.y + defr.cell.y) / 2
-	}
-	Camera.center(screen.camera, screen.map, midpoint)
-	screen.camera.target.y -= screen.camera.height / 4 - 6
-
-	let attack = Unit.attackData(atkr, defr)
+	let attack = mode.attack
 	if (!attack) {
 		throw new Error("Failed to create attack data: Attempting to attack an enemy out of range. Reinforce range detection procedures before entering forecast mode.")
 	}
@@ -77,6 +69,14 @@ export function onenter(mode, screen) {
 
 	// lift piece
 	mode.anim = PieceLift.create()
+
+	// center camera
+	let midpoint = {
+		x: (atkr.cell.x + defr.cell.x) / 2,
+		y: (atkr.cell.y + defr.cell.y) / 2
+	}
+	Camera.center(screen.camera, screen.map, midpoint)
+	screen.camera.target.y -= screen.camera.height / 4 - 6
 }
 
 export function onexit(mode, screen) {
@@ -91,13 +91,6 @@ export function onrelease(mode, screen, pointer) {
 	// TODO: buttons
 	// right now you are forced to attack if you enter combat forecast
 	if (pointer.mode === "click") {
-		mode.commands.push({
-			type: "switchMode",
-			mode: "Attack",
-			data: {
-				unit: mode.unit,
-				target: mode.target
-			}
-		})
+		mode.commands.push({ type: "switchMode", mode: "Attack", data: mode.attack })
 	}
 }

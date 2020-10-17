@@ -17,10 +17,18 @@ export function move(unit, dest, game) {
 	unit.cell = dest
 }
 
-export function attack(unit, target, game) {
-	Unit.attack(unit, target)
+export function attack(attack, game) {
+	let unit = attack.source
+	let target = attack.target
+	let counter = attack.counter
+	target.hp -= attack.realdmg
+	if (counter) {
+		unit.hp -= counter.realdmg
+	}
 	if (!target.hp) {
 		remove(target, game)
+	} else if (!unit.hp) {
+		remove(unit, game)
 	}
 }
 

@@ -102,7 +102,7 @@ export function onupdate(screen) {
 		if (command.type === "move") {
 			Game.move(command.unit, command.dest, screen.data)
 		} else if (command.type === "attack") {
-			Game.attack(command.unit, command.target, screen.data)
+			Game.attack(command.data, screen.data)
 		} else if (command.type === "endTurn") {
 			Game.endTurn(command.unit, screen.data)
 		} else if (command.type === "switchMode") {

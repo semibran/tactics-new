@@ -11,19 +11,19 @@ const finalDuration = 70
 export function create(data) {
 	return {
 		id: "Attack",
-		unit: data.unit,
+		comps: [],
+		commands: [],
+		exit: false,
+		data: data,
+		unit: data.source,
 		target: data.target,
-		atkr: data.unit,
-		defr: data.target,
-		log: null,
-		anim: null,
-		lhshp: null,
-		rhshp: null,
 		atkrhp: null,
 		defrhp: null,
-		attacks: [],
-		comps: [],
-		commands: []
+		lhshp: null,
+		rhshp: null,
+		log: null,
+		anim: null,
+		attacks: []
 	}
 }
 
@@ -31,6 +31,10 @@ export function onenter(mode, screen) {
 	let sprites = screen.sprites
 	let atkr = mode.unit
 	let defr = mode.target
+	let attack = mode.data
+	if (!attack) {
+		throw new Error("Failed to create attack data: Attempting to attack an enemy out of range. Reinforce range detection procedures before entering attack mode.")
+	}
 
 	for (let comp of mode.comps) {
 		if (comp.id !== "Hp") continue
@@ -45,20 +49,15 @@ export function onenter(mode, screen) {
 	mode.log = Log.create()
 	mode.comps.push(mode.log)
 
-	let attack = Unit.attackData(atkr, defr)
-	if (!attack) {
-		throw new Error("Failed to create attack data: Attempting to attack an enemy out of range. Reinforce range detection procedures before entering attack mode.")
-	}
-
 	// queue up attacks
 	mode.attacks.push({ type: "init", data: attack })
-	if (!attack.finishes && attack.counter) {
+	if (attack.dmg < attack.target.hp && attack.counter) {
 		mode.attacks.push({ type: "counter", data: attack.counter })
-		if (!attack.counter.finishes && attack.counter.doubles && attack.counter.dmg) {
+		if (attack.counter.dmg && !attack.counter.finishes && attack.counter.doubles) {
 			mode.attacks.push({ type: "double", data: attack.counter })
 		}
 	}
-	if (!attack.finishes && attack.doubles && attack.dmg
+	if (attack.dmg && attack.dmg < attack.target.hp && attack.doubles
 	&& (!attack.counter || !attack.counter.finishes)
 	) {
 		mode.attacks.push({ type: "double", data: attack })
@@ -91,7 +90,7 @@ export function onupdate(mode, screen) {
 			mode.unit = atkr
 			mode.target = defr
 			attack.time = screen.time
-			if (attack.data.source === mode.atkr) {
+			if (attack.data.source === mode.data.source) {
 				mode.atkrhp = mode.lhshp
 				mode.defrhp = mode.rhshp
 			} else {
@@ -101,9 +100,9 @@ export function onupdate(mode, screen) {
 			Camera.center(camera, screen.map, defr.cell)
 			camera.target.y -= camera.height / 2
 			camera.target.y += (camera.height - 44) / 2
-			attack.data.connect = false
-		} else if (anim && anim.connect && !attack.data.connect) {
-			attack.data.connect = true
+			attack.connect = false
+		} else if (anim && anim.connect && !attack.connect) {
+			attack.connect = true
 			Hp.startReduce(mode.defrhp, attack.data.dmg)
 
 			if (attack.type === "init") {
@@ -124,9 +123,9 @@ export function onupdate(mode, screen) {
 				Log.append(log, `${defr.name} receives ${attack.data.dmg} damage.`)
 			}
 
-			if (attack.dmg >= defr.hp && defr.faction === "player") {
+			if (attack.data.dmg >= defr.hp && Unit.allied(mode.data.source, defr)) {
 				Log.append(log, `${defr.name} is defeated.`)
-			} else if (attack.dmg >= defr.hp && defr.faction === "enemy") {
+			} else if (attack.data.dmg >= defr.hp && !Unit.allied(mode.data.source, defr)) {
 				Log.append(log, `Defeated ${defr.name}.`)
 			}
 		} else if (!anim) {
@@ -134,15 +133,13 @@ export function onupdate(mode, screen) {
 				? finalDuration
 				: attackDuration
 			if (screen.time - attack.time >= duration) {
-				mode.commands.push({ type: "attack", unit: atkr, target: defr })
 				mode.attacks.shift()
 			}
 		}
-	} else {
-		mode.commands.push({
-			type: "endTurn",
-			unit: mode.atkr
-		})
+	} else if (!mode.exit) {
+		mode.exit = true
+		mode.commands.push({ type: "attack", data: mode.data })
+		mode.commands.push({ type: "endTurn",	unit: mode.data.source })
 		mode.commands.push({ type: "switchMode", mode: "Home" })
 	}
 }

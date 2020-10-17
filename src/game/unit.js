@@ -82,7 +82,7 @@ export function attackData(unit, target) {
 
 	let hit = Math.max(0, unit.stats.hit - target.stats.spd)
 	let dmg = hit ? findDmg(unit, target) : 0
-	let realdmg = Math.min(dmg, unit.hp)
+	let realdmg = Math.min(dmg, target.hp)
 	if (dmg >= target.hp) {
 		return {
 			source: unit,
@@ -108,7 +108,7 @@ export function attackData(unit, target) {
 		}
 
 		if (canDouble(target, unit) && counter.dmg < unit.hp) {
-			counter.realdmg *= 2
+			counter.realdmg = counter.dmg * 2 >= unit.hp ? unit.hp : counter.dmg * 2
 			counter.finishes = counter.realdmg >= unit.hp
 			counter.doubles = true
 		}
@@ -117,7 +117,7 @@ export function attackData(unit, target) {
 	let finishes = false
 	let doubles = false
 	if (canDouble(unit, target) && (!counter || counter.dmg < unit.hp)) {
-		realdmg *= 2
+		realdmg = dmg * 2 >= target.hp ? target.hp : dmg * 2
 		finishes = realdmg >= target.hp
 		doubles = true
 	}
