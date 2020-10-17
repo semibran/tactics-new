@@ -19,6 +19,7 @@ export function create(data) {
 		next: null,
 		comps: [],
 		commands: [],
+		anims: [],
 		anim: null,
 		unit: data.unit,
 		held: data.held,
@@ -44,7 +45,8 @@ export function onenter(mode, screen) {
 	mode.comps.push(preview)
 
 	// add piece lift animation
-	mode.anim = PieceLift.create()
+	mode.anim = PieceLift.create({ unit })
+	mode.anims.push(mode.anim)
 
 	// cache screen refs
 	mode.sprites = screen.view.sprites
@@ -67,9 +69,10 @@ export function onenter(mode, screen) {
 
 export function onexit(mode, screen) {
 	// remove piece lift animation
-	if (mode.anim && mode.anim.id === "PieceLift") {
+	if (mode.anim && mode.anim.id === "PieceLift") { // && screen.nextMode.id !== "Home") {
 		mode.anim.done = true
-		mode.anim = PieceDrop.create(mode.anim.y)
+		// mode.anim = PieceDrop.create({ y: mode.anim.y, unit: mode.unit })
+		// mode.anims.push(mode.anim)
 	}
 }
 
@@ -139,8 +142,11 @@ export function render(mode, screen) {
 	let select = mode.select
 	let unit = mode.unit
 	let anim = mode.anim
-	let moving = anim && anim.id === "PieceMove"
+	let moving = screen.anims.find(anim => anim.id === "PieceMove")
 	let selectvis = anim && (!moving || screen.time % 2)
+	if (moving && moving.done) {
+		mode.select = null
+	}
 
 	// render ring
 	if (selectvis && screen.data.phase.pending.includes(unit)) {

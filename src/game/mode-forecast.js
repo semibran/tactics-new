@@ -19,6 +19,7 @@ export function create(data) {
 		attack: Unit.attackData(data.unit, data.target),
 		comps: [],
 		commands: [],
+		anims: [],
 		anim: null
 	}
 }
@@ -69,7 +70,8 @@ export function onenter(mode, screen) {
 	mode.comps.push(range)
 
 	// lift piece
-	mode.anim = PieceLift.create()
+	mode.anim = PieceLift.create({ unit: atkr })
+	mode.anims.push(mode.anim)
 
 	// center camera
 	let midpoint = {
@@ -84,7 +86,8 @@ export function onexit(mode, screen) {
 	// remove piece lift animation
 	if (mode.anim && mode.anim.id === "PieceLift") {
 		mode.anim.done = true
-		mode.anim = PieceDrop.create(mode.anim.y)
+		mode.anim = PieceDrop.create({ y: mode.anim.y, unit: mode.unit })
+		mode.anims.push(mode.anim)
 	}
 }
 

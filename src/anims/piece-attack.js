@@ -1,4 +1,4 @@
-export function create(src, dest) {
+export function create(src, dest, opts) {
 	let disp = { x: dest.x - src.x, y: dest.y - src.y }
 	let dist = Math.sqrt(disp.x * disp.x + disp.y * disp.y)
 	let norm = { x: disp.x / dist, y: disp.y / dist }
@@ -7,6 +7,7 @@ export function create(src, dest) {
 		src: src,
 		norm: norm,
 		cell: { x: src.x, y: src.y },
+		opts: opts,
 		time: 0,
 		blocking: true,
 		connect: false

@@ -1,10 +1,12 @@
 import { height } from "./piece-lift"
 
-export function create(y) {
+export function create(opts) {
+	Object.assign({ y: height }, opts)
 	return {
 		id: "PieceDrop",
 		done: false,
-		y: y || height
+		opts: opts,
+		y: opts.y || height
 	}
 }
 

@@ -2,22 +2,22 @@ const vienna = [ "Vienna", "thief", { faction: "player" },
 	{ hp: 8, atk: 5, hit: 8, def: 0, spd: 7, res: 6, element: "volt" } ]
 
 const chorizo = [ "Chorizo", "knight", { faction: "player" },
-	{ hp: 13, atk: 6, hit: 8, def: 7, spd: 2, res: 1, element: "ice" } ]
+	{ hp: 13, atk: 6, hit: 8, def: 7, spd: 1, res: 1, element: "ice" } ]
 
 const pepper = [ "Pepper", "archer", { faction: "player" },
-	{ hp: 9, atk: 5, hit: 8, def: 1, spd: 8, res: 2, element: "plant" } ]
+	{ hp: 9, atk: 5, hit: 8, def: 1, spd: 7, res: 2, element: "plant" } ]
 
 const frankie = [ "Frankie", "soldier", { faction: "player" },
 	{ hp: 12, atk: 8, hit: 6, def: 1, spd: 4, res: 4, element: "fire" } ]
 
-const flotsam = [ "Flotsam", "mage", { faction: "enemy", ai: "wait" },
-	{ hp: 7, atk: 7, hit: 8, def: 2, spd: 4, res: 5, element: "volt" } ]
+const flotsam = [ "Flotsam", "mage", { faction: "enemy", ai: "guard" },
+	{ hp: 7, atk: 7, hit: 8, def: 2, spd: 3, res: 5, element: "volt" } ]
 
 const jetsam = [ "Jetsam", "thief", { faction: "enemy", ai: "wait" },
 	{ hp: 9, atk: 6, hit: 8, def: 1, spd: 7, res: 3, element: "dark" } ]
 
 const lagan = [ "Lagan", "fighter", { faction: "enemy", ai: "wait" },
-	{ hp: 15, atk: 9, hit: 4, def: 1, spd: 5, res: 0, element: "fire" } ]
+	{ hp: 15, atk: 9, hit: 4, def: 1, spd: 4, res: 0, element: "fire" } ]
 
 const derelict = [ "Derelict", "archer", { faction: "enemy", ai: "wait" },
 	{ hp: 10, atk: 7, hit: 8, def: 2, spd: 4, res: 1, element: "ice" } ]

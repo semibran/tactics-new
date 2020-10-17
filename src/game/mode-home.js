@@ -8,6 +8,7 @@ export function create() {
 		id: "Home",
 		comps: [],
 		commands: [],
+		anims: [],
 		press: null
 	}
 }

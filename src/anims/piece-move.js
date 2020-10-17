@@ -1,13 +1,13 @@
 import lerp from "lerp"
 
-const speed = 3
+const speed = 4
 
-export function create(path, data) {
+export function create(path, opts) {
 	return {
 		id: "PieceMove",
 		blocking: true,
 		done: false,
-		data: data,
+		opts: opts,
 		time: 0,
 		path: path,
 		cell: {

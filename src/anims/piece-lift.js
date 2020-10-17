@@ -6,10 +6,11 @@ export const height = 4
 // > Consists of two states:
 // > - raise (floating -> false)
 // > - float (floating -> true)
-export function create() {
+export function create(opts) {
 	return {
 		id: "PieceLift",
 		done: false,
+		opts: opts,
 		y: 0,
 		time: 0,
 		floating: false

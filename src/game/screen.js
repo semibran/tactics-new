@@ -29,7 +29,7 @@ export function create(data) {
 		nextMode: null,
 		commands: [],
 		comps: [],
-		anim: null,
+		anims: [],
 		view: null,
 		time: 0,
 		dirty: false,
@@ -91,12 +91,12 @@ export function onupdate(screen) {
 	screen.time++
 	updateCamera(screen)
 
-	let anim = screen.mode.anim
-	let busy = anim && anim.blocking
+	let busy = screen.anims.find(anim => anim.blocking)
 		|| mode.comps.filter(comp => comp.exit && comp.blocking).length
 
 	// update components
-	screen.dirty |= updateModeAnim(mode)
+	screen.dirty |= updateAnims(screen)
+	screen.dirty |= updateModeAnims(mode, screen)
 	screen.dirty |= updateModeComps(mode, screen)
 	if (nextMode) {
 		screen.dirty |= updateModeComps(nextMode, screen)
@@ -129,8 +129,7 @@ export function onupdate(screen) {
 		}
 	}
 
-	anim = screen.mode.anim
-	busy = anim && anim.blocking
+	busy = screen.anims.find(anim => anim.blocking)
 		|| mode.id === "Attack" && !mode.exit
 		|| mode.comps.filter(comp => comp.exit && comp.blocking).length
 	if (busy) return
@@ -155,10 +154,15 @@ export function onupdate(screen) {
 
 function move(unit, path, screen) {
 	// animate piece movement
-	screen.mode.anim = Anims.PieceMove.create(path, { onend() {
+	let move = Anims.PieceMove.create(path, { unit, onend })
+	screen.anims.push(move)
+	// completion handler
+	function onend() {
 		let dest = path[path.length - 1]
 		Game.move(unit, dest, screen.data)
-	} })
+		console.log("onend handler")
+		// endTurn(unit, screen)
+	}
 }
 
 function attack(unit, attack, screen) {
@@ -225,22 +229,30 @@ export function updateCamera(screen) {
 	Camera.update(screen.camera)
 }
 
-function updateModeAnim(mode) {
+function updateAnims(screen) {
 	let dirty = false
-	let anim = mode.anim
-	if (anim) {
+	for (let i = 0; i < screen.anims.length; i++) {
+		let anim = screen.anims[i]
 		if (anim.done) {
-			let onend = anim.data && anim.data.onend
+			screen.anims.splice(i--, 1)
+			let onend = anim.opts && anim.opts.onend
 			if (onend) {
 				onend()
 			}
-			mode.anim = null
 		} else {
 			Anims[anim.id].update(anim)
 		}
 		dirty = true
 	}
 	return dirty
+}
+
+function updateModeAnims(mode, screen) {
+	if (mode.anims.length) {
+		screen.anims.push(...mode.anims)
+		mode.anims.length = 0
+		return true
+	}
 }
 
 function updateModeComps(mode, screen) {
@@ -278,16 +290,16 @@ function transition(screen, nextid, nextdata) {
 
 	let mode = screen.mode
 
+	// create new mode
+	let next = screen.nextMode = Modes[nextid].create(nextdata)
+	next.time = screen.time
+
 	// call old mode onexit hooks
 	let onexit = Modes[mode.id].onexit
 	if (onexit) {
 		onexit(mode, screen)
 	}
 	mode.exit = true
-
-	// create new mode
-	let next = screen.nextMode = Modes[nextid].create(nextdata)
-	next.time = screen.time
 
 	// pass persistent components to next mode
 	for (let c = 0; c < mode.comps.length; c++) {
@@ -361,7 +373,7 @@ export function render(screen) {
 	// queue units
 	let select = mode.id === "Select" || mode.id === "Forecast" || mode.id === "Attack"
 	for (let unit of map.units) {
-		if (select && mode.unit === unit) {
+		if (screen.anims.find(anim => anim.opts && anim.opts.unit === unit)) {
 			continue
 		}
 		let sprite = sprites.pieces[unit.control.faction][unit.type]
@@ -399,24 +411,21 @@ export function render(screen) {
 	}
 
 	// queue selection
-	if (select) {
-		let unit = mode.unit
+	for (let anim of screen.anims) {
+		let unit = anim.opts.unit
 		let sprite = sprites.pieces[unit.control.faction][unit.type]
-		let cell = unit.cell
+		let cell = anim.cell || anim.opts.unit.cell
 		let x = origin.x + cell.x * map.tilesize
 		let y = origin.y + cell.y * map.tilesize
 		let z = 0
-		let anim = mode.anim
-		if (anim) {
-			if (anim.id === "PieceLift" || anim.id === "PieceDrop") {
-				z = Math.round(anim.y)
-			} else if (anim.id === "PieceMove" || anim.id === "PieceAttack") {
-				x = origin.x + anim.cell.x * map.tilesize
-				y = origin.y + anim.cell.y * map.tilesize
-				if (anim.id === "PieceMove") {
-					Camera.center(camera, map, anim.cell)
-				}
-			}
+		if (anim.id === "PieceLift" || anim.id === "PieceDrop") {
+			z = Math.round(anim.y)
+		} else if (anim.id === "PieceMove" || anim.id === "PieceAttack") {
+			x = origin.x + anim.cell.x * map.tilesize
+			y = origin.y + anim.cell.y * map.tilesize
+		}
+		if (anim.id === "PieceMove") {
+			Camera.center(camera, map, anim.cell)
 		}
 		nodes.push({
 			layer: "selection",

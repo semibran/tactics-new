@@ -12,6 +12,8 @@ export function create(data) {
 		id: "Attack",
 		comps: [],
 		commands: [],
+		attacks: [],
+		anims: [],
 		exit: false,
 		data: data.attack,
 		unit: data.attack.source,
@@ -23,7 +25,6 @@ export function create(data) {
 		rhshp: null,
 		log: null,
 		anim: null,
-		attacks: []
 	}
 }
 
@@ -108,9 +109,10 @@ function init(attack, mode) {
 	let atkr = attack.data.source
 	let defr = attack.data.target
 	attack.init = true
-	mode.anim = PieceAttack.create(atkr.cell, defr.cell)
 	mode.unit = atkr
 	mode.target = defr
+	mode.anim = PieceAttack.create(atkr.cell, defr.cell, { unit: atkr })
+	mode.anims.push(mode.anim)
 	if (attack.data.source === mode.data.source) {
 		mode.atkrhp = mode.lhshp
 		mode.defrhp = mode.rhshp
@@ -167,12 +169,13 @@ export function onupdate(mode, screen) {
 			} else if (attack.data.dmg >= defr.hp && !Unit.allied(mode.data.source, defr)) {
 				Comps.Log.append(log, `Defeated ${defr.name}.`)
 			}
-		} else if (!anim) {
+		} else if (anim.done) {
 			let duration = mode.attacks.length === 1
 				? finalDuration
 				: attackDuration
 			if (screen.time - attack.time >= duration) {
 				mode.attacks.shift()
+				mode.anim = null
 			}
 		}
 	} else if (!mode.exit) {
