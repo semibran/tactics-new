@@ -8,6 +8,7 @@ import * as StatPanel from "./comp-statpanel"
 import * as Camera from "./camera"
 import * as Unit from "./unit"
 import * as Cell from "../../lib/cell"
+import nbrhd from "./neighborhood"
 
 
 export function create(data) {
@@ -62,7 +63,7 @@ export function onenter(mode, screen) {
 	let range = Range.create({
 		center: atkr.cell,
 		radius: Unit.rng(atkr),
-		squares: Cell.neighborhood(atkr.cell, Unit.rng(atkr))
+		squares: nbrhd(atkr.cell, atkr.wpn.rng)
 			.map(cell => ({ cell, type: "attack" }))
 	}, sprites)
 	mode.comps.push(range)

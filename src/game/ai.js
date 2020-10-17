@@ -1,5 +1,6 @@
 import * as Cell from "../../lib/cell"
 import * as Unit from "./unit"
+import nbrhd from "./neighborhood"
 
 const aifuncs = { attack, guard, wait }
 
@@ -45,7 +46,7 @@ function guard(unit, map) {
 
 function wait(unit, map) {
 	let commands = []
-	let targets = Cell.neighborhood(unit.cell, unit.wpn.rng.end)
+	let targets = nbrhd(unit.cell, unit.wpn.rng)
 		.map(cell => map.units.find(unit => Cell.equals(cell, unit.cell)))
 		.filter(target => !!target && !Unit.allied(unit, target))
 	let target = targets[0]

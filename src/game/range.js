@@ -1,6 +1,7 @@
 import * as Cell from "../../lib/cell"
 import * as Unit from "./unit"
 import * as Map from "./map"
+import nbrhd from "./neighborhood"
 
 // findRange(unit, map) -> range
 // > calculates the squares that a unit can act on
@@ -15,8 +16,8 @@ import * as Map from "./map"
 // > }
 export default function findRange(unit, map) {
 	let mov = unit.stats.mov
-	let rng = unit.wpn.rng.end
-	let radius = mov + rng
+	let rng = unit.wpn.rng
+	let radius = mov + rng.end
 	let range = {
 		center: unit.cell,
 		radius: radius,
@@ -58,7 +59,7 @@ export default function findRange(unit, map) {
 				range.squares.push({ type: "attack", cell: neighbor, target: target })
 			}
 			// maximum steps
-			if (node.steps < mov - 1) {
+			if (node.steps + 1 < mov) {
 				// we can consider cells with allied units. it's
 				// fine since they aren't added to the movement range
 				if (!target || Unit.allied(unit, target)) {
@@ -67,9 +68,10 @@ export default function findRange(unit, map) {
 						cell: neighbor
 					})
 				}
-			} else {
+			}
+			if (node.steps >= mov - rng.end) {
 				// we've reached the extent of the range
-				// range perimeter. take a note of this cell
+				// perimeter. take a note of this cell
 				edges.push(neighbor)
 			}
 		}
@@ -79,7 +81,7 @@ export default function findRange(unit, map) {
 	// without this section, we wouldn't be able to attack enemies
 	// unless they are `mov` steps away from the central unit
 	for (let edge of edges) {
-		for (let neighbor of Cell.neighborhood(edge, rng)) {
+		for (let neighbor of nbrhd(edge, rng)) {
 			if (!Map.contains(map, neighbor)
 				|| !Map.walkable(map, neighbor, edge)
 				|| Cell.equals(unit.cell, neighbor)

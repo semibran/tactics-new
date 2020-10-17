@@ -5,9 +5,11 @@ import * as PieceDrop from "../anims/piece-drop"
 import * as PieceMove from "../anims/piece-move"
 import * as Cell from "../../lib/cell"
 import * as Unit from "./unit"
-import findRange from "./range"
+import nbrhd from "./neighborhood"
 import getCell from "../helpers/get-cell"
 import pathfind from "./pathfind"
+import findRange from "./range"
+import inRange from "in-range"
 
 const tilesize = 16
 
@@ -258,16 +260,16 @@ function hover(mode, cell) {
 				target = null
 			}
 
-			// simple case: selecting adjacent enemy
-			if (!cpath && square.target && Cell.adjacent(unit.cell, cell)) {
+			// simple case: selecting nearby enemy
+			if (!cpath && square.target && Unit.inRange(unit, cell)) {
 				path = [ unit.cell ]
 			} else {
-				let rng = Unit.rng(unit)
+				let rng = unit.wpn.rng
 				if (square.target) {
 					// if out of range
-					if (Cell.steps(cdest || unit.cell, cell) > rng) {
+					if (!inRange(Cell.steps(cdest || unit.cell, cell), rng)) {
 						// find closest square to attack from
-						let neighbors = Cell.neighborhood(dest, rng)
+						let neighbors = nbrhd(dest, rng)
 							.filter(cell => !map.units.find(unit => Cell.equals(cell, unit.cell)))
 							.sort((a, b) => Cell.steps(a, unit.cell) - Cell.steps(b, unit.cell))
 						dest = neighbors[0]
