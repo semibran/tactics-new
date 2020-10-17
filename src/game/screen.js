@@ -322,6 +322,7 @@ function transition(screen, nextid, nextdata) {
 function switchMode(screen) {
 	screen.mode = screen.nextMode
 	screen.nextMode = null
+	screen.dirty = true
 }
 
 export function render(screen) {
