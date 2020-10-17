@@ -149,7 +149,7 @@ export function render(mode, screen) {
 	}
 
 	// render ring
-	if (selectvis && screen.data.phase.pending.includes(unit)) {
+	if (selectvis && screen.data.phase.pending.includes(unit) && !screen.nextMode) {
 		let image = sprites.select.ring[unit.control.faction]
 		let x = origin.x + unit.cell.x * screen.map.tilesize - 2
 		let y = origin.y + unit.cell.y * screen.map.tilesize - 2

@@ -383,7 +383,7 @@ export function render(screen) {
 		let z = 0
 		if (game.phase.faction === "player" && unit.control.faction === "player") {
 			if (game.phase.pending.includes(unit)) {
-				if (!select || mode.unit !== unit && mode.target !== unit || mode.exit) {
+				if (!select || mode.unit !== unit && mode.target !== unit) {
 					nodes.push({
 						layer: "pieces",
 						image: sprites.select.glow[unit.control.faction],
