@@ -275,7 +275,6 @@ function hover(mode, cell) {
 							}))
 							.sort((a, b) => Cell.steps(a, unit.cell) - Cell.steps(b, unit.cell))
 						dest = neighbors[0]
-						console.log(neighbors)
 					} else if (!cpath) {
 						// simple case: if no path is cached and the enemy is in range, we can just attack from the start cell
 						path = [ unit.cell ]
@@ -338,6 +337,10 @@ function hover(mode, cell) {
 }
 
 function unhover(mode) {
+	let target = mode.select && mode.select.target
+	if (target) {
+		Comps.Preview.exit(target.preview)
+	}
 	mode.select = null
 }
 
