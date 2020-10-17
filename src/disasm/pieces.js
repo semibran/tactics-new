@@ -1,10 +1,14 @@
 import * as Canvas from "../../lib/canvas"
 import * as pixels from "../../lib/pixels"
 
+const white = [ 255, 255, 255, 255 ]
+const shadowcolor = [ 0, 0, 0, 191 ]
+
 export default function disasmPieces(base, icons, palette) {
 	let pieces = {
 		done: {},
-		shadow: Canvas.recolor(base, [ 0, 0, 0, 191 ])
+		flash: Piece(base, null, { normal: white, dark: white }),
+		shadow: Canvas.recolor(base, shadowcolor)
 	}
 	for (let faction in palette.factions) {
 		pieces[faction] = {}
@@ -35,6 +39,8 @@ export default function disasmPieces(base, icons, palette) {
 		let piece = Canvas.create(base.width, base.height + 2)
 		piece.drawImage(bottom, 0, 2)
 		piece.drawImage(top, 0, 0)
+
+		if (!icon) return piece.canvas
 
 		let tmp = Canvas.create(8, 8)
 		let template = icon.getContext("2d")

@@ -3,6 +3,7 @@ import * as Camera from "./camera"
 import * as Unit from "./unit"
 import * as Cell from "../../lib/cell/"
 import * as PieceAttack from "../anims/piece-attack"
+import * as PieceFlinch from "../anims/piece-flinch"
 
 const attackDuration = 50
 const finalDuration = 70
@@ -146,6 +147,10 @@ export function onupdate(mode, screen) {
 			attack.connect = true
 			Comps.Hp.startReduce(mode.defrhp, attack.data.dmg)
 
+			let flinch = PieceFlinch.create(defr.cell, atkr.cell, { unit: defr })
+			mode.anims.push(flinch)
+
+			// log line 1 - attack context
 			if (attack.type === "init") {
 				Comps.Log.append(log, `${atkr.name} attacks`)
 			} else if (attack.type === "counter") {
@@ -154,6 +159,7 @@ export function onupdate(mode, screen) {
 				Comps.Log.append(log, `${atkr.name} attacks again`)
 			}
 
+			// log line 2 - attack result
 			if (!attack.data.hit) {
 				Comps.Log.append(log, `${defr.name} dodges the attack.`)
 			} else if (!attack.data.dmg) {
@@ -164,6 +170,7 @@ export function onupdate(mode, screen) {
 				Comps.Log.append(log, `${defr.name} receives ${attack.data.dmg} damage.`)
 			}
 
+			// log line 3 - attack final outcome
 			if (attack.data.dmg >= defr.hp && Unit.allied(mode.data.source, defr)) {
 				Comps.Log.append(log, `${defr.name} is defeated.`)
 			} else if (attack.data.dmg >= defr.hp && !Unit.allied(mode.data.source, defr)) {

@@ -432,11 +432,19 @@ export function render(screen) {
 		let z = 0
 		if (anim.id === "PieceLift" || anim.id === "PieceDrop") {
 			z = Math.round(anim.y)
-		} else if (anim.id === "PieceMove" || anim.id === "PieceAttack") {
+		}
+		if (anim.id === "PieceFlinch" && !anim.flashing) {
+			sprite = sprites.pieces.flash
+		}
+		if (anim.id === "PieceFade" && !anim.visible) {
+			continue
+		}
+		if (anim.id === "PieceMove"
+		|| anim.id === "PieceAttack"
+		|| anim.id === "PieceFlinch"
+		) {
 			x = origin.x + anim.cell.x * map.tilesize
 			y = origin.y + anim.cell.y * map.tilesize
-		} else if (anim.id === "PieceFade" && !anim.visible) {
-			continue
 		}
 		if (anim.id === "PieceMove") {
 			Camera.center(camera, map, anim.cell)
