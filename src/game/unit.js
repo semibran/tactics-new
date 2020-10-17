@@ -101,18 +101,19 @@ export function attackData(unit, target) {
 	if (inRange(target, unit.cell)) {
 		let hit = Math.max(0, target.stats.hit - unit.stats.spd)
 		let dmg = hit ? findDmg(target, unit) : 0
+		let realdmg = Math.min(dmg, unit.hp)
 		counter = {
 			source: target,
 			target: unit,
 			hit: hit,
 			dmg: dmg,
-			realdmg: dmg,
+			realdmg: realdmg,
 			finishes: false,
 			doubles: false
 		}
 
 		if (canDouble(target, unit) && counter.dmg < unit.hp) {
-			counter.realdmg = counter.dmg * 2 >= unit.hp ? unit.hp : counter.dmg * 2
+			counter.realdmg = Math.min(counter.dmg * 2, unit.hp)
 			counter.finishes = counter.realdmg >= unit.hp
 			counter.doubles = true
 		}
@@ -121,7 +122,7 @@ export function attackData(unit, target) {
 	let finishes = false
 	let doubles = false
 	if (canDouble(unit, target) && (!counter || counter.dmg < unit.hp)) {
-		realdmg = dmg * 2 >= target.hp ? target.hp : dmg * 2
+		realdmg = Math.min(dmg * 2, target.hp)
 		finishes = realdmg >= target.hp
 		doubles = true
 	}

@@ -25,9 +25,9 @@ export function attack(attack, game) {
 	if (counter) {
 		unit.hp -= counter.realdmg
 	}
-	if (target.hp <= 0) {
+	if (!target.hp) {
 		remove(target, game)
-	} else if (unit.hp <= 0) {
+	} else if (!unit.hp) {
 		remove(unit, game)
 	}
 }
