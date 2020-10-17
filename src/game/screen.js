@@ -48,6 +48,10 @@ export function onenter(screen, view) {
 	let sprites = view.sprites
 	screen.view = view
 	screen.map.image = renderMap(screen.map, sprites)
+
+	let unit = screen.data.phase.pending[0]
+	Camera.center(screen.camera, screen.map, unit.cell)
+	Camera.reset(screen.camera)
 }
 
 export function onresize(screen, viewport) {
@@ -229,6 +233,7 @@ function endTurn(unit, screen) {
 			Game.endTurn(unit, screen.data)
 		}
 	}
+	Camera.center(screen.camera, screen.map, unit.cell)
 }
 
 export function updateCamera(screen) {

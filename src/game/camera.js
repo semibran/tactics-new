@@ -19,6 +19,12 @@ export function update(camera) {
 	camera.vel.y += ((camera.target.y - camera.pos.y) / 8 - camera.vel.y) / 2
 }
 
+export function reset(camera) {
+	// hard reset camera position
+	camera.pos.x = camera.target.x
+	camera.pos.y = camera.target.y
+}
+
 export function startPan(camera) {
 	camera.offset = {
 		x: camera.pos.x * camera.zoom,

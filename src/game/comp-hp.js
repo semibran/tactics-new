@@ -113,7 +113,9 @@ export function render(hp, screen) {
 	}
 
 	if (hp.mode.type === "reduce" && hp.mode.anim) {
-		let color = rgb(...palette.red)
+		let color = screen.time % 2
+			? rgb(...palette.red)
+			: rgb(...palette.white)
 		let value = lerp(hp.mode.damage, 0, hp.mode.anim.x)
 		let inval = lerp(0, hp.mode.damage, hp.mode.anim.x)
 		let chunk = RenderHP[side + "Chunk"](value, hp.value - hp.mode.damage, hp.max, sprites, color)

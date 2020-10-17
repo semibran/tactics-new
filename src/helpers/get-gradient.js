@@ -8,10 +8,13 @@
 //   blue   -> 12..14
 //   indigo -> 15
 export default function getGradient(hp, faction, palette, reverse) {
-	let start = faction === "player"
-		? palette.hp.opal
-		: palette.hp.red
-	let end = palette.hp.red
+	let start = palette.hp.opal
+	if (faction === "enemy") {
+		start = palette.hp.red
+	} else if (faction === "ally") {
+		start = palette.lime
+	}
+	let end = palette.maroon
 	if (hp === 15) {
 		end = palette.hp.indigo
 	} else if (hp >= 12) {
