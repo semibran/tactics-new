@@ -104,3 +104,7 @@ function guard(unit, map) {
 function attack(unit, map) {
 	return []
 }
+
+function priority(attack) {
+
+}

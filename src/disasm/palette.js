@@ -1,22 +1,21 @@
 import * as pixels from "../../lib/pixels"
 
 const matrix = [
-	[ "white",  "opal",   "pink",   "opalhp", "orangehp" ],
-	[ "black",  "blue",   "red",    "redhp",  "yellowhp" ],
-	[ "silver", "navy",   "maroon", "beige",  "greenhp"  ],
-	[ "gray",   null,     "purple", "taupe",  "cyanhp"   ],
-	[ "coal",   "yellow", "gold",   "brass",  "bluehp"   ],
-	[ "jet",    "cream",  "sage",   "brown",  "indigohp" ]
+	[ "white",  "opal",   "pink",   "lime",  "opalhp", "redhp"    ],
+	[ "black",  "blue",   "red",    "green", null,     "orangehp" ],
+	[ "silver", "navy",   "purple", "teal",  "beige",  "yellowhp" ],
+	[ "gray",   null,     "maroon", "moss",  "taupe",  "greenhp"  ],
+	[ "coal",   null,     "yellow", "gold",  "brass",  "bluehp"   ],
+	[ "jet",    null,      "cream",  "sage",  "brown",  "indigohp" ]
 ]
 
 const mappings = {
 	hp: {
-		opal: "opalhp",
-		red: "redhp",
+		opal: "opal",
+		red: "red",
 		orange: "orangehp",
 		yellow: "yellowhp",
 		green: "greenhp",
-		cyan: "cyanhp",
 		blue: "bluehp",
 		indigo: "indigohp"
 	},
@@ -30,6 +29,11 @@ const mappings = {
 			light: "pink",
 			normal: "red",
 			dark: "purple"
+		},
+		ally: {
+			light: "lime",
+			normal: "green",
+			dark: "teal"
 		}
 	}
 }

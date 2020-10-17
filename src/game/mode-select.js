@@ -69,10 +69,10 @@ export function onenter(mode, screen) {
 
 export function onexit(mode, screen) {
 	// remove piece lift animation
-	if (mode.anim && mode.anim.id === "PieceLift") { // && screen.nextMode.id !== "Home") {
+	if (mode.anim && mode.anim.id === "PieceLift" && !mode.anim.done) {
 		mode.anim.done = true
-		// mode.anim = PieceDrop.create({ y: mode.anim.y, unit: mode.unit })
-		// mode.anims.push(mode.anim)
+		mode.anim = PieceDrop.create({ y: mode.anim.y, unit: mode.unit })
+		mode.anims.push(mode.anim)
 	}
 }
 

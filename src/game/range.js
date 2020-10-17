@@ -72,7 +72,9 @@ export default function findRange(unit, map) {
 			if (node.steps >= mov - rng.end) {
 				// we've reached the extent of the range
 				// perimeter. take a note of this cell
-				edges.push(neighbor)
+				if (!target || Unit.allied(unit, target)) {
+					edges.push(neighbor)
+				}
 			}
 		}
 	}

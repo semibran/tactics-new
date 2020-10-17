@@ -4,6 +4,14 @@ import * as Cell from "../../lib/cell"
 
 export function create(map) {
 	let units = map.units.map(unit => Unit.create(...unit))
+	for (let i = 0; i < units.length; i++) {
+		let unit = units[i]
+		if (unit.control.convert) {
+			let other = map.units.find(other => unit.control.convert[2] === other[2])
+			let index = map.units.indexOf(other)
+			unit.control.convert = units[index]
+		}
+	}
 	return {
 		map: Map.create(map.width, map.height, map.layout, units),
 		phase: {
@@ -33,6 +41,14 @@ export function attack(attack, game) {
 }
 
 export function remove(unit, game) {
+	for (let other of game.map.units) {
+		console.log(other)
+		if (other.control.convert !== unit) continue
+		other.control = { faction: "player" }
+		if (game.phase.faction === "player") {
+			game.phase.pending.push(other)
+		}
+	}
 	let u = game.map.units.indexOf(unit)
 	if (u !== -1) {
 		game.map.units.splice(u, 1)
