@@ -178,14 +178,17 @@ function attack(unit, attack, screen) {
 		let map = screen.map
 		let cache = screen.cache
 		if (map.units.length !== cache.units.length) {
+			cache.units = map.units.slice()
 			let unit = null
 			if (!map.units.includes(attack.target)) {
 				unit = attack.target
 			} else if (!map.units.includes(attack.source)) {
 				unit = attack.source
 			}
-			let fade = Anims.PieceFade.create({ unit })
-			screen.anims.push(fade)
+			if (unit) {
+				let fade = Anims.PieceFade.create({ unit })
+				screen.anims.push(fade)
+			}
 		}
 	} })
 }

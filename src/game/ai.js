@@ -88,7 +88,13 @@ function guard(unit, map) {
 				.sort((a, b) => Cell.steps(a, unit.cell) - Cell.steps(b, unit.cell))
 			let dest = neighbors[0]
 			let path = pathfind(unit, dest, map)
-			return [ { type: "move", unit, path } ]
+			unit.cell = dest
+
+			let attack = Unit.attackData(unit, target)
+			return [
+				{ type: "move", unit, path },
+				{ type: "attack", unit, attack }
+			]
 		}
 	}
 	return []

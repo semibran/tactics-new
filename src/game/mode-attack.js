@@ -147,8 +147,10 @@ export function onupdate(mode, screen) {
 			attack.connect = true
 			Comps.Hp.startReduce(mode.defrhp, attack.data.dmg)
 
-			let flinch = PieceFlinch.create(defr.cell, atkr.cell, { unit: defr })
-			mode.anims.push(flinch)
+			if (attack.data.dmg) {
+				let flinch = PieceFlinch.create(defr.cell, atkr.cell, { unit: defr })
+				mode.anims.push(flinch)
+			}
 
 			// log line 1 - attack context
 			if (attack.type === "init") {
