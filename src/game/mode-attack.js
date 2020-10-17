@@ -105,8 +105,8 @@ export function onrelease(mode, screen, pointer) {
 }
 
 function init(attack, mode) {
-	let atkr = mode.unit
-	let defr = mode.target
+	let atkr = attack.data.source
+	let defr = attack.data.target
 	attack.init = true
 	mode.anim = PieceAttack.create(atkr.cell, defr.cell)
 	mode.unit = atkr
