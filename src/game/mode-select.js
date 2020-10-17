@@ -291,7 +291,7 @@ function hover(mode, cell) {
 					}
 				}
 				if (!path && dest && cpath) {
-					if (!square.target || !inRange(Cell.steps(cdest, dest), rng)) {
+					if (!square.target || !inRange(Cell.steps(cdest, cell), rng)) {
 						path = pathfind(unit, dest, map, cpath)
 					} else {
 						path = cpath
