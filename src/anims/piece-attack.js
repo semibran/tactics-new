@@ -8,6 +8,7 @@ export function create(src, dest) {
 		norm: norm,
 		cell: { x: src.x, y: src.y },
 		time: 0,
+		blocking: true,
 		connect: false
 	}
 }

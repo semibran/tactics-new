@@ -20,7 +20,7 @@ const lagan = [ "Lagan", "fighter", { faction: "enemy", ai: "wait" },
 	{ hp: 15, atk: 9, hit: 4, def: 1, spd: 5, res: 0, element: "fire" } ]
 
 const derelict = [ "Derelict", "archer", { faction: "enemy", ai: "wait" },
-	{ hp: 10, atk: 7, hit: 8, def: 3, spd: 4, res: 1, element: "ice" } ]
+	{ hp: 10, atk: 7, hit: 8, def: 2, spd: 4, res: 1, element: "ice" } ]
 
 export default {
 	id: "test",
@@ -40,12 +40,12 @@ export default {
 	].join(""),
 	units: [
 		[ ...vienna,   { x: 7, y: 5 } ],
-		// [ ...chorizo,  { x: 5, y: 6 } ],
-		// [ ...pepper,   { x: 7, y: 7 } ],
-		// [ ...frankie,  { x: 4, y: 8 } ],
+		[ ...chorizo,  { x: 5, y: 6 } ],
+		[ ...pepper,   { x: 7, y: 7 } ],
+		[ ...frankie,  { x: 4, y: 8 } ],
 		[ ...flotsam,  { x: 4, y: 3 } ],
-		// [ ...jetsam,   { x: 2, y: 5 } ],
-		// [ ...lagan,    { x: 2, y: 2 } ],
-		// [ ...derelict, { x: 1, y: 4 } ]
+		[ ...jetsam,   { x: 2, y: 5 } ],
+		[ ...lagan,    { x: 2, y: 2 } ],
+		[ ...derelict, { x: 1, y: 4 } ]
 	]
 }

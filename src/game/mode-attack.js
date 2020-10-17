@@ -37,7 +37,7 @@ export function onenter(mode, screen) {
 	}
 
 	for (let comp of mode.comps) {
-		if (comp.id !== "Hp") continue
+		if (comp.id !== "Hp" || comp.exit) continue
 		comp.mode = "static"
 		if (!comp.opts.flipped) {
 			mode.lhshp = comp
@@ -85,7 +85,9 @@ export function onenter(mode, screen) {
 		mode.attacks.push({ type: "double", data: attack })
 	}
 
+	init(mode.attacks[0], mode)
 	console.log("attacks", ...mode.attacks)
+	console.log(mode.anim)
 }
 
 export function onexit(mode) {
@@ -99,6 +101,22 @@ export function onrelease(mode, screen, pointer) {
 	// TODO: buttons
 	if (pointer.mode === "click") {
 		// mode.commands.push({ type: "switchMode", mode: "Home" })
+	}
+}
+
+function init(attack, mode) {
+	let atkr = mode.unit
+	let defr = mode.target
+	attack.init = true
+	mode.anim = PieceAttack.create(atkr.cell, defr.cell)
+	mode.unit = atkr
+	mode.target = defr
+	if (attack.data.source === mode.data.source) {
+		mode.atkrhp = mode.lhshp
+		mode.defrhp = mode.rhshp
+	} else {
+		mode.atkrhp = mode.rhshp
+		mode.defrhp = mode.lhshp
 	}
 }
 
@@ -116,17 +134,8 @@ export function onupdate(mode, screen) {
 		let defr = attack.data.target
 		let anim = mode.anim
 		if (!attack.time) {
-			mode.anim = PieceAttack.create(atkr.cell, defr.cell)
-			mode.unit = atkr
-			mode.target = defr
 			attack.time = screen.time
-			if (attack.data.source === mode.data.source) {
-				mode.atkrhp = mode.lhshp
-				mode.defrhp = mode.rhshp
-			} else {
-				mode.atkrhp = mode.rhshp
-				mode.defrhp = mode.lhshp
-			}
+			if (!attack.init) init(attack, mode)
 			Camera.center(camera, screen.map, defr.cell)
 			camera.target.y -= camera.height / 2
 			camera.target.y += (camera.height - 44) / 2

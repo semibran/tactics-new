@@ -91,12 +91,16 @@ export function onupdate(screen) {
 	screen.time++
 	updateCamera(screen)
 
+	let anim = screen.mode.anim
+	let busy = anim && anim.blocking
+		|| mode.comps.filter(comp => comp.exit && comp.blocking).length
+
 	// update components
 	screen.dirty |= updateModeAnim(mode)
 	screen.dirty |= updateModeComps(mode, screen)
 	if (nextMode) {
 		screen.dirty |= updateModeComps(nextMode, screen)
-		if (!mode.comps.filter(comp => comp.blocking).length && nextMode) {
+		if (!busy && nextMode) {
 			switchMode(screen)
 		}
 	}
@@ -109,7 +113,7 @@ export function onupdate(screen) {
 
 	if (mode.commands.length) {
 		let command = mode.commands.shift()
-		console.log("cmd mode " + mode.id, command)
+		console.log(screen.time, "cmd mode " + mode.id, command)
 		if (command.type === "select") {
 			screen.commands.push({ type: "switchMode", mode: "Select", data: command.data })
 		} else if (command.type === "forecast") {
@@ -125,14 +129,14 @@ export function onupdate(screen) {
 		}
 	}
 
-	let anim = screen.mode.anim
-	let busy = anim && anim.blocking
+	anim = screen.mode.anim
+	busy = anim && anim.blocking
+		|| mode.id === "Attack" && !mode.exit
 		|| mode.comps.filter(comp => comp.exit && comp.blocking).length
-
 	if (busy) return
 	if (screen.commands.length) {
 		let command = screen.commands.shift()
-		console.log("cmd screen", command)
+		console.log(screen.time, "cmd screen", command)
 		if (command.type === "move") {
 			move(command.unit, command.path, screen)
 		} else if (command.type === "attack") {
@@ -158,36 +162,52 @@ function move(unit, path, screen) {
 }
 
 function attack(unit, attack, screen) {
-	screen.commands.push({
-		type: "switchMode",
-		mode: "Attack",
-		data: { attack, onend() {
-			Game.attack(attack, screen.data)
-		} }
-	})
+	transition(screen, "Attack", { attack, onend() {
+		console.log(...screen.commands.map(cmd => cmd.type))
+		Game.attack(attack, screen.data)
+		if (!screen.commands.length) {
+			screen.commands.push({
+				type: "switchMode",
+				mode: "Home"
+			})
+		}
+	} })
 }
 
 function endTurn(unit, screen) {
 	let game = screen.data
 	let cache = screen.cache
 	let phase = game.phase
-	let phaseChanged = Game.endTurn(unit, screen.data)
+	Game.endTurn(unit, screen.data)
 	screen.commands.push({
 		type: "switchMode",
 		mode: "Home"
 	})
 
+	console.log("ended", unit.name + "'s turn")
+	console.log(phase.pending.map(unit => unit.name).join(", "), "remains")
+
 	// if phase has changed
-	if (!phaseChanged || phase.faction !== "enemy" || !phase.pending.length) {
+	let newphase = phase.faction !== cache.phase
+	if (newphase) cache.phase = phase.faction
+	if (!newphase || phase.faction !== "enemy" || !phase.pending.length) {
 		return
 	}
+	console.log("phase switched")
 	let strategy = analyze(game.map, phase.pending)
+	let stratmap = new Map()
 	for (let i = 0; i < strategy.length; i++) {
 		let commands = strategy[i]
 		let unit = phase.pending[i]
-		screen.commands.push(...commands)
-		if (!commands.length) {
-			screen.commands({ type: "endTurn", unit: unit })
+		stratmap.set(unit, commands)
+	}
+	for (let [ unit, commands ] of stratmap) {
+		console.log(unit.name, commands)
+		if (commands.length) {
+			screen.commands.push(...commands)
+		} else {
+			console.log("no commands for", unit.name)
+			Game.endTurn(unit, screen.data)
 		}
 	}
 }
@@ -286,7 +306,7 @@ function transition(screen, nextid, nextdata) {
 	}
 
 	// switch immediately if not animating
-	if (!mode.comps.length) {
+	if (!mode.comps.filter(comp => comp.exit && comp.blocking).length) {
 		switchMode(screen)
 	}
 

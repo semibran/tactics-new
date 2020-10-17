@@ -22,6 +22,7 @@ export default function analyze(map, units) {
 		for (let command of sequence) {
 			if (command.type !== "attack") continue
 			let attack = command.attack
+			if (!attack) continue
 			attack.source = attack.source.real
 			attack.target = attack.target.real
 			if (!attack.counter) continue
@@ -46,10 +47,12 @@ function wait(unit, map) {
 	let commands = []
 	let targets = Cell.neighborhood(unit.cell, unit.wpn.rng.end)
 		.map(cell => map.units.find(unit => Cell.equals(cell, unit.cell)))
-		.filter(item => !!item)
+		.filter(target => !!target && !Unit.allied(unit, target))
 	let target = targets[0]
 	if (target) {
+		console.log(unit.name, "can target", targets.map(target => target.name).join(", "))
 		let attack = Unit.attackData(unit, target)
+		console.log("Chose", target.name, attack)
 		commands.push({ type: "attack", attack })
 	}
 	return commands
