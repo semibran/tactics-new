@@ -11,7 +11,7 @@ const frankie = [ "Frankie", "soldier", { faction: "player" },
 	{ hp: 12, atk: 8, hit: 6, def: 1, spd: 4, res: 4, element: "fire" } ]
 
 const flotsam = [ "Flotsam", "mage", { faction: "enemy", ai: "guard" },
-	{ hp: 7, atk: 7, hit: 8, def: 2, spd: 3, res: 5, element: "volt" } ]
+	{ hp: 7, atk: 8, hit: 8, def: 2, spd: 3, res: 5, element: "volt" } ]
 
 const jetsam = [ "Jetsam", "thief", { faction: "enemy", ai: "wait" },
 	{ hp: 9, atk: 6, hit: 8, def: 1, spd: 7, res: 3, element: "dark" } ]

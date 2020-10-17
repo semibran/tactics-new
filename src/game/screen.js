@@ -38,7 +38,8 @@ export function create(data) {
 		data: data,
 		cache: {
 			camera: { x: 0, y: 0 },
-			phase: "player"
+			phase: "player",
+			units: data.map.units.slice()
 		}
 	}
 }
@@ -160,7 +161,6 @@ function move(unit, path, screen) {
 	function onend() {
 		let dest = path[path.length - 1]
 		Game.move(unit, dest, screen.data)
-		console.log("onend handler")
 		// endTurn(unit, screen)
 	}
 }
@@ -174,6 +174,18 @@ function attack(unit, attack, screen) {
 				type: "switchMode",
 				mode: "Home"
 			})
+		}
+		let map = screen.map
+		let cache = screen.cache
+		if (map.units.length !== cache.units.length) {
+			let unit = null
+			if (!map.units.includes(attack.target)) {
+				unit = attack.target
+			} else if (!map.units.includes(attack.source)) {
+				unit = attack.source
+			}
+			let fade = Anims.PieceFade.create({ unit })
+			screen.anims.push(fade)
 		}
 	} })
 }
@@ -423,6 +435,8 @@ export function render(screen) {
 		} else if (anim.id === "PieceMove" || anim.id === "PieceAttack") {
 			x = origin.x + anim.cell.x * map.tilesize
 			y = origin.y + anim.cell.y * map.tilesize
+		} else if (anim.id === "PieceFade" && !anim.visible) {
+			continue
 		}
 		if (anim.id === "PieceMove") {
 			Camera.center(camera, map, anim.cell)
