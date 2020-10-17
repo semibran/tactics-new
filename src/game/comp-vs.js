@@ -12,6 +12,7 @@ export function create(sprites) {
 		anim: EaseOut.create(enterDuration),
 		image: sprites.vs,
 		persist: true,
+		blocking: true,
 		exit: false
 	}
 }

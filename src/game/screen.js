@@ -6,6 +6,7 @@ import * as Unit from "./unit"
 import * as Game from "./game"
 import renderMap from "../view/render-map"
 import getOrigin from "../helpers/get-origin"
+import analyze from "./ai"
 
 export const tilesize = 16
 export const layerseq = [
@@ -26,7 +27,9 @@ export function create(data) {
 		id: "Game",
 		mode: Modes.Home.create(),
 		nextMode: null,
+		commands: [],
 		comps: [],
+		anim: null,
 		view: null,
 		time: 0,
 		dirty: false,
@@ -34,7 +37,8 @@ export function create(data) {
 		map: Object.assign({ tilesize, image: null }, data.map),
 		data: data,
 		cache: {
-			camera: { x: 0, y: 0 }
+			camera: { x: 0, y: 0 },
+			phase: "player"
 		}
 	}
 }
@@ -92,23 +96,8 @@ export function onupdate(screen) {
 	screen.dirty |= updateModeComps(mode, screen)
 	if (nextMode) {
 		screen.dirty |= updateModeComps(nextMode, screen)
-		if (!mode.comps.length && nextMode) {
+		if (!mode.comps.filter(comp => comp.blocking).length && nextMode) {
 			switchMode(screen)
-		}
-	}
-
-	if (mode.commands.length) {
-		let command = mode.commands.shift()
-		if (command.type === "move") {
-			Game.move(command.unit, command.dest, screen.data)
-		} else if (command.type === "attack") {
-			Game.attack(command.data, screen.data)
-		} else if (command.type === "endTurn") {
-			Game.endTurn(command.unit, screen.data)
-		} else if (command.type === "switchMode") {
-			if (!nextMode) {
-				transition(screen, command.mode, command.data)
-			}
 		}
 	}
 
@@ -116,6 +105,90 @@ export function onupdate(screen) {
 	let onupdate = Modes[mode.id].onupdate
 	if (onupdate) {
 		onupdate(mode, screen)
+	}
+
+	if (mode.commands.length) {
+		let command = mode.commands.shift()
+		console.log("cmd mode " + mode.id, command)
+		if (command.type === "select") {
+			screen.commands.push({ type: "switchMode", mode: "Select", data: command.data })
+		} else if (command.type === "forecast") {
+			screen.commands.push({
+				type: "switchMode",
+				mode: "Forecast",
+				data: { unit: command.unit, target: command.target }
+			})
+		} else if (command.type === "cancel") {
+			screen.commands.push({ type: "switchMode", mode: "Home" })
+		} else {
+			screen.commands.push(command)
+		}
+	}
+
+	let anim = screen.mode.anim
+	let busy = anim && anim.blocking
+		|| mode.comps.filter(comp => comp.exit && comp.blocking).length
+
+	if (busy) return
+	if (screen.commands.length) {
+		let command = screen.commands.shift()
+		console.log("cmd screen", command)
+		if (command.type === "move") {
+			move(command.unit, command.path, screen)
+		} else if (command.type === "attack") {
+			attack(command.unit, command.attack, screen)
+		} else if (command.type === "endTurn") {
+			endTurn(command.unit, screen)
+		} else if (command.type === "switchMode") {
+			if (!nextMode) {
+				transition(screen, command.mode, command.data)
+			}
+		}
+	} else if (screen.data.phase.faction === "enemy") {
+
+	}
+}
+
+function move(unit, path, screen) {
+	// animate piece movement
+	screen.mode.anim = Anims.PieceMove.create(path, { onend() {
+		let dest = path[path.length - 1]
+		Game.move(unit, dest, screen.data)
+	} })
+}
+
+function attack(unit, attack, screen) {
+	screen.commands.push({
+		type: "switchMode",
+		mode: "Attack",
+		data: { attack, onend() {
+			Game.attack(attack, screen.data)
+		} }
+	})
+}
+
+function endTurn(unit, screen) {
+	let game = screen.data
+	let cache = screen.cache
+	let phase = game.phase
+	let phaseChanged = Game.endTurn(unit, screen.data)
+	screen.commands.push({
+		type: "switchMode",
+		mode: "Home"
+	})
+
+	// if phase has changed
+	if (!phaseChanged || phase.faction !== "enemy" || !phase.pending.length) {
+		return
+	}
+	let strategy = analyze(game.map, phase.pending)
+	for (let i = 0; i < strategy.length; i++) {
+		let commands = strategy[i]
+		let unit = phase.pending[i]
+		screen.commands.push(...commands)
+		if (!commands.length) {
+			screen.commands({ type: "endTurn", unit: unit })
+		}
 	}
 }
 
@@ -275,7 +348,7 @@ export function render(screen) {
 		let x = origin.x + cell.x * map.tilesize
 		let y = origin.y + cell.y * map.tilesize
 		let z = 0
-		if (game.phase.faction === unit.control.faction) {
+		if (game.phase.faction === "player" && unit.control.faction === "player") {
 			if (game.phase.pending.includes(unit)) {
 				if (!select || mode.unit !== unit && mode.target !== unit || mode.exit) {
 					nodes.push({

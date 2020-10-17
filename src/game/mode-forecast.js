@@ -2,9 +2,9 @@ import * as PieceLift from "../anims/piece-lift"
 import * as PieceDrop from "../anims/piece-drop"
 import * as Hp from "./comp-hp"
 import * as Tag from "./comp-tag"
-import * as StatPanel from "./comp-statpanel"
 import * as Vs from "./comp-vs"
 import * as Range from "./comp-range"
+import * as StatPanel from "./comp-statpanel"
 import * as Camera from "./camera"
 import * as Unit from "./unit"
 import * as Cell from "../../lib/cell"
@@ -46,6 +46,10 @@ export function onenter(mode, screen) {
 	mode.comps.push(defrhp)
 	Hp.startFlash(defrhp, attack.realdmg)
 
+	// add vs diamond
+	let vs = Vs.create(sprites)
+	mode.comps.push(vs)
+
 	// add stat panels
 	let wpn = StatPanel.create("wpn", attack, sprites)
 	let dmg = StatPanel.create("dmg", attack, sprites, { offset: 1 })
@@ -53,10 +57,6 @@ export function onenter(mode, screen) {
 	mode.comps.push(wpn)
 	mode.comps.push(dmg)
 	mode.comps.push(hit)
-
-	// add vs diamond
-	let vs = Vs.create(sprites)
-	mode.comps.push(vs)
 
 	// add attack range
 	let range = Range.create({
@@ -91,6 +91,6 @@ export function onrelease(mode, screen, pointer) {
 	// TODO: buttons
 	// right now you are forced to attack if you enter combat forecast
 	if (pointer.mode === "click") {
-		mode.commands.push({ type: "switchMode", mode: "Attack", data: mode.attack })
+		mode.commands.push({ type: "attack", unit: mode.attack.source, attack: mode.attack })
 	}
 }

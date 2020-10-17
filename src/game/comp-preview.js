@@ -22,8 +22,9 @@ export function create(unit, corner, sprites) {
 		unit: unit,
 		corner: corner,
 		image: image,
+		blocking: true,
 		exit: false,
-		renders: 0
+		renders: 0,
 	}
 }
 

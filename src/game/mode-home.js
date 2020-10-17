@@ -33,11 +33,13 @@ export function onmove(mode, screen, pointer) {
 	if (mode.press && pointer.mode !== "click") {
 		mode.press = null
 	}
-	Camera.pan(screen.camera, pointer)
+	if (screen.data.phase.faction === "player") {
+		Camera.pan(screen.camera, pointer)
+	}
 }
 
 export function onrelease(mode, screen, pointer) {
-	if (mode.press && pointer.mode === "click") {
+	if (screen.data.phase.faction === "player" && mode.press && pointer.mode === "click") {
 		select(mode, mode.press.unit)
 	}
 	mode.press = null
@@ -51,12 +53,5 @@ export function onupdate(mode, screen) {
 }
 
 function select(mode, unit, held) {
-	mode.commands.push({
-		type: "switchMode",
-		mode: "Select",
-		data: {
-			unit: unit,
-			held: !!held
-		}
-	})
+	mode.commands.push({ type: "select", data: { unit, held } })
 }

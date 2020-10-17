@@ -50,6 +50,7 @@ export function create(type, attack, sprites, opts) {
 		image: image,
 		opts: opts,
 		double: double,
+		blocking: true,
 		exit: false
 	}
 }

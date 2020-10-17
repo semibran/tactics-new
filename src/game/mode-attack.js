@@ -1,5 +1,4 @@
-import * as Log from "./comp-log"
-import * as Hp from "./comp-hp"
+import * as Comps from "./comps"
 import * as Camera from "./camera"
 import * as Unit from "./unit"
 import * as Cell from "../../lib/cell/"
@@ -14,9 +13,10 @@ export function create(data) {
 		comps: [],
 		commands: [],
 		exit: false,
-		data: data,
-		unit: data.source,
-		target: data.target,
+		data: data.attack,
+		unit: data.attack.source,
+		target: data.attack.target,
+		onend: data.onend,
 		atkrhp: null,
 		defrhp: null,
 		lhshp: null,
@@ -28,7 +28,7 @@ export function create(data) {
 }
 
 export function onenter(mode, screen) {
-	let sprites = screen.sprites
+	let sprites = screen.view.sprites
 	let atkr = mode.unit
 	let defr = mode.target
 	let attack = mode.data
@@ -46,7 +46,29 @@ export function onenter(mode, screen) {
 		}
 	}
 
-	mode.log = Log.create()
+	// not attacking from forecast (probably an enemy)
+	// TODO: make this entire thing into a component
+	if (!mode.lhshp && !mode.rhshp) {
+		// add attacker name tag & hp
+		let atktag = Comps.Tag.create(atkr.name, atkr.control.faction, sprites)
+		let atkrhp = Comps.Hp.create(atkr.hp, atkr.stats.hp, atkr.control.faction)
+		mode.comps.push(atktag)
+		mode.comps.push(atkrhp)
+		mode.lhshp = atkrhp
+
+		// add defender tag & hp
+		let deftag = Comps.Tag.create(defr.name, defr.control.faction, sprites, { flipped: true })
+		let defrhp = Comps.Hp.create(defr.hp, defr.stats.hp, defr.control.faction, { flipped: true })
+		mode.comps.push(deftag)
+		mode.comps.push(defrhp)
+		mode.rhshp = defrhp
+
+		// add vs diamond
+		let vs = Comps.Vs.create(sprites)
+		mode.comps.push(vs)
+	}
+
+	mode.log = Comps.Log.create()
 	mode.comps.push(mode.log)
 
 	// queue up attacks
@@ -62,12 +84,20 @@ export function onenter(mode, screen) {
 	) {
 		mode.attacks.push({ type: "double", data: attack })
 	}
+
+	console.log("attacks", ...mode.attacks)
+}
+
+export function onexit(mode) {
+	for (let comp of mode.comps) {
+		if (comp.id === "Home") continue
+		Comps[comp.id].exit(comp)
+	}
 }
 
 export function onrelease(mode, screen, pointer) {
 	// TODO: buttons
 	if (pointer.mode === "click") {
-
 		// mode.commands.push({ type: "switchMode", mode: "Home" })
 	}
 }
@@ -103,30 +133,30 @@ export function onupdate(mode, screen) {
 			attack.connect = false
 		} else if (anim && anim.connect && !attack.connect) {
 			attack.connect = true
-			Hp.startReduce(mode.defrhp, attack.data.dmg)
+			Comps.Hp.startReduce(mode.defrhp, attack.data.dmg)
 
 			if (attack.type === "init") {
-				Log.append(log, `${atkr.name} attacks`)
+				Comps.Log.append(log, `${atkr.name} attacks`)
 			} else if (attack.type === "counter") {
-				Log.append(log, `${atkr.name} counters`)
+				Comps.Log.append(log, `${atkr.name} counters`)
 			} else if (attack.type === "double") {
-				Log.append(log, `${atkr.name} attacks again`)
+				Comps.Log.append(log, `${atkr.name} attacks again`)
 			}
 
 			if (!attack.data.hit) {
-				Log.append(log, `${defr.name} dodges the attack.`)
+				Comps.Log.append(log, `${defr.name} dodges the attack.`)
 			} else if (!attack.data.dmg) {
-				Log.append(log, `${defr.name} blocks the attack.`)
+				Comps.Log.append(log, `${defr.name} blocks the attack.`)
 			} else  if (Unit.allied(defr, mode.data.source)) {
-				Log.append(log, `${defr.name} suffers ${attack.data.dmg} damage.`)
+				Comps.Log.append(log, `${defr.name} suffers ${attack.data.dmg} damage.`)
 			} else if (!Unit.allied(defr, mode.data.source)) {
-				Log.append(log, `${defr.name} receives ${attack.data.dmg} damage.`)
+				Comps.Log.append(log, `${defr.name} receives ${attack.data.dmg} damage.`)
 			}
 
 			if (attack.data.dmg >= defr.hp && Unit.allied(mode.data.source, defr)) {
-				Log.append(log, `${defr.name} is defeated.`)
+				Comps.Log.append(log, `${defr.name} is defeated.`)
 			} else if (attack.data.dmg >= defr.hp && !Unit.allied(mode.data.source, defr)) {
-				Log.append(log, `Defeated ${defr.name}.`)
+				Comps.Log.append(log, `Defeated ${defr.name}.`)
 			}
 		} else if (!anim) {
 			let duration = mode.attacks.length === 1
@@ -138,8 +168,7 @@ export function onupdate(mode, screen) {
 		}
 	} else if (!mode.exit) {
 		mode.exit = true
-		mode.commands.push({ type: "attack", data: mode.data })
 		mode.commands.push({ type: "endTurn",	unit: mode.data.source })
-		mode.commands.push({ type: "switchMode", mode: "Home" })
+		mode.onend && mode.onend()
 	}
 }

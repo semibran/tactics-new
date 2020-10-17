@@ -9,7 +9,8 @@ export function create(range, sprites) {
 		anim: RangeExpand.create(range),
 		image: renderRange(range, sprites),
 		sprites: sprites,
-		exit: false
+		exit: false,
+		blocking: true,
 	}
 }
 

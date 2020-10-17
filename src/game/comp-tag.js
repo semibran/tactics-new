@@ -15,6 +15,7 @@ export function create(name, faction, sprites, defending) {
 		image: renderNameTag(name, faction, sprites),
 		flipped: !!defending,
 		persist: true,
+		blocking: true,
 		exit: false
 	}
 }

@@ -19,6 +19,7 @@ export function create(value, max, faction, opts) {
 		anim: EaseOut.create(enterDuration),
 		mode: { type: "static" },
 		persist: true,
+		blocking: true,
 		init: false,
 		exit: false,
 		cache: { image: null, full: null, damaged: null, chunk: null }

@@ -106,7 +106,9 @@ export function attackData(unit, target) {
 			target: unit,
 			hit: hit,
 			dmg: dmg,
-			realdmg: dmg
+			realdmg: dmg,
+			finishes: false,
+			doubles: false
 		}
 
 		if (canDouble(target, unit) && counter.dmg < unit.hp) {

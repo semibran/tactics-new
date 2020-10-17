@@ -27,6 +27,7 @@ export function create() {
 		box: null,
 		surface: null,
 		persist: true,
+		blocking: false,
 		exit: false,
 		cache: [],
 	}

@@ -105,7 +105,7 @@ export function onrelease(mode, screen, pointer) {
 	if (mode.anim && mode.anim.blocking) return
 	let { select, unit } = mode
 	if (pointer.mode === "click" && !mode.held && !select) {
-		mode.commands.push({ type: "switchMode", mode: "Home" })
+		mode.commands.push({ type: "cancel" })
 	} else if (select && select.valid) {
 		let path = select.path
 		let dest = path[path.length - 1]
@@ -113,13 +113,9 @@ export function onrelease(mode, screen, pointer) {
 		if (Cell.equals(unit.cell, dest)) {
 			// end turn
 			if (target) {
-				mode.commands.push({
-					type: "switchMode",
-					mode: "Forecast",
-					data: { unit, target }
-				})
+				mode.commands.push({ type: "forecast", unit, target })
 			} else {
-				mode.commands.push({ type: "switchMode", mode: "Home" })
+				mode.commands.push({ type: "endTurn", unit })
 			}
 		} else {
 			// move to dest
@@ -340,10 +336,6 @@ function unhover(mode) {
 	mode.select = null
 }
 
-function endTurn() {
-
-}
-
 function move(mode, path, target) {
 	// close range component
 	let rangecomp = mode.comps.find(comp => comp.id === "Range")
@@ -352,24 +344,14 @@ function move(mode, path, target) {
 	// add piecemove animation
 	if (path.length > 1) {
 		let unit = mode.unit
-		let dest = path[path.length - 1]
 		mode.anim.done = true
-		mode.anim = PieceMove.create(path, {
-			onend() {
-				mode.commands.push({ type: "move", unit: unit, dest: dest })
-				if (target) {
-					mode.commands.push({
-						type: "switchMode",
-						mode: "Forecast",
-						data: { unit, target }
-					})
-				} else {
-					mode.commands.push({ type: "endTurn", unit: unit })
-					mode.commands.push({ type: "switchMode", mode: "Home" })
-				}
-			}
-		})
+		mode.commands.push({ type: "move", unit, path })
+		if (target) {
+			mode.commands.push({ type: "forecast", unit, target })
+		} else {
+			mode.commands.push({ type: "endTurn", unit })
+		}
 	} else {
-		mode.commands.push({ type: "switchMode", mode: "Home" })
+		mode.commands.push({ type: "cancel" })
 	}
 }
