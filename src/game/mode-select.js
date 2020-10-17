@@ -146,7 +146,7 @@ export function render(mode, screen) {
 
 	// render ring
 	if (selectvis && screen.data.phase.pending.includes(unit)) {
-		let image = sprites.select.ring[unit.faction]
+		let image = sprites.select.ring[unit.control.faction]
 		let x = origin.x + unit.cell.x * screen.map.tilesize - 2
 		let y = origin.y + unit.cell.y * screen.map.tilesize - 2
 		nodes.push({
@@ -171,7 +171,7 @@ export function render(mode, screen) {
 	if (cursor && selectvis && !Cell.equals(cursor.target, unit.cell)) {
 		nodes.push({
 			layer: "cursor",
-			image: sprites.select.cursor[mode.unit.faction],
+			image: sprites.select.cursor[unit.control.faction],
 			x: origin.x + cursor.pos.x - 1,
 			y: origin.y + cursor.pos.y - 1
 		})
@@ -179,7 +179,7 @@ export function render(mode, screen) {
 
 	// render mirage
 	if (select && anim && !moving && (!cursor || !Cell.equals(cursor.target, unit.cell))) {
-		let image = sprites.pieces[unit.faction][unit.type]
+		let image = sprites.pieces[unit.control.faction][unit.type]
 		let x = pointer.pos.x / viewport.scale - image.width / 2
 		let y = pointer.pos.y / viewport.scale - image.height - 8
 		let opacity = 0.75
@@ -320,7 +320,7 @@ function hover(mode, cell) {
 			select.cursor.target = cell
 		}
 		select.valid = true
-		select.arrow = sprites.Arrow(path, unit.faction)
+		select.arrow = sprites.Arrow(path, unit.control.faction)
 		select.path = path
 	} else if (mode.select) {
 		select.valid = false

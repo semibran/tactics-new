@@ -8,7 +8,7 @@ export function create(map) {
 		map: Map.create(map.width, map.height, map.layout, units),
 		phase: {
 			faction: "player",
-			pending: units.filter(unit => unit.faction === "player")
+			pending: units.filter(unit => unit.control.faction === "player")
 		}
 	}
 }
@@ -68,7 +68,7 @@ export function switchPhase(game) {
 	} else if (phase.faction === "enemy") {
 		phase.faction = "player"
 	}
-	phase.pending = map.units.filter(unit => unit.faction === phase.faction)
+	phase.pending = map.units.filter(unit => unit.control.faction === phase.faction)
 	if (!phase.pending.length) {
 		switchPhase(game)
 	}

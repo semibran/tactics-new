@@ -270,23 +270,23 @@ export function render(screen) {
 		if (select && mode.unit === unit) {
 			continue
 		}
-		let sprite = sprites.pieces[unit.faction][unit.type]
+		let sprite = sprites.pieces[unit.control.faction][unit.type]
 		let cell = unit.cell
 		let x = origin.x + cell.x * map.tilesize
 		let y = origin.y + cell.y * map.tilesize
 		let z = 0
-		if (game.phase.faction === unit.faction) {
+		if (game.phase.faction === unit.control.faction) {
 			if (game.phase.pending.includes(unit)) {
 				if (!select || mode.unit !== unit && mode.target !== unit || mode.exit) {
 					nodes.push({
 						layer: "pieces",
-						image: sprites.select.glow[unit.faction],
+						image: sprites.select.glow[unit.control.faction],
 						x: x,
 						y: y - 2
 					})
 				}
 			} else if (!select || mode.unit !== unit && mode.target !== unit) {
-				sprite = sprites.pieces.done[unit.faction][unit.type]
+				sprite = sprites.pieces.done[unit.control.faction][unit.type]
 			}
 		}
 		nodes.push({
@@ -307,7 +307,7 @@ export function render(screen) {
 	// queue selection
 	if (select) {
 		let unit = mode.unit
-		let sprite = sprites.pieces[unit.faction][unit.type]
+		let sprite = sprites.pieces[unit.control.faction][unit.type]
 		let cell = unit.cell
 		let x = origin.x + cell.x * map.tilesize
 		let y = origin.y + cell.y * map.tilesize

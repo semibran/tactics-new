@@ -3,7 +3,7 @@ import * as Cell from "../../lib/cell"
 import getWeapon from "./weapon"
 import _inRange from "in-range"
 
-export function create(name, type, faction, stats, cell) {
+export function create(name, type, control, stats, cell) {
 	stats = Object.assign({ mov: 5 }, stats)
 	if (type === "knight") {
 		stats.mov = 4
@@ -13,7 +13,7 @@ export function create(name, type, faction, stats, cell) {
 	return {
 		name: name,
 		type: type,
-		faction: faction,
+		control: control,
 		cell: cell,
 		stats: stats,
 		hp: stats.hp,
@@ -35,7 +35,9 @@ export function attack(unit, target) {
 }
 
 export function allied(a, b) {
-	return a.faction === b.faction
+	a = a.control.faction
+	b = b.control.faction
+	return a === b || a === "player" && b === "ally" || a === "ally" && b === "player"
 }
 
 // finds the extent of the unit's stationary attack range.

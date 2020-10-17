@@ -117,9 +117,9 @@ export function onupdate(mode, screen) {
 				Log.append(log, `${defr.name} dodges the attack.`)
 			} else if (!attack.data.dmg) {
 				Log.append(log, `${defr.name} blocks the attack.`)
-			} else  if (defr.faction === "player") {
+			} else  if (Unit.allied(defr, mode.data.source)) {
 				Log.append(log, `${defr.name} suffers ${attack.data.dmg} damage.`)
-			} else if (defr.faction === "enemy") {
+			} else if (!Unit.allied(defr, mode.data.source)) {
 				Log.append(log, `${defr.name} receives ${attack.data.dmg} damage.`)
 			}
 

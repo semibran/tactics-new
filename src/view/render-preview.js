@@ -12,7 +12,7 @@ export default function renderUnitPreview(unit, sprites) {
 	let { fonts, palette } = sprites
 
 	// unit name
-	let tag = renderTag(unit.name, unit.faction, sprites)
+	let tag = renderTag(unit.name, unit.control.faction, sprites)
 
 	// health bar
 	let content = (_ => {
@@ -26,7 +26,7 @@ export default function renderUnitPreview(unit, sprites) {
 		// draw hp bar
 		let health = Canvas.create(48, 3)
 		let width = Math.round((health.canvas.width - 2) * unit.hp / unit.stats.hp)
-		let [ start, end ] = getGradient(unit.hp, unit.faction, palette)
+		let [ start, end ] = getGradient(unit.hp, unit.control.faction, palette)
 		let gradient = health.createLinearGradient(0, 1, health.canvas.width - 2, 1)
 		gradient.addColorStop(0, rgb(...start))
 		gradient.addColorStop(1, rgb(...end))

@@ -33,15 +33,15 @@ export function onenter(mode, screen) {
 	console.log(attack)
 
 	// add attacker name tag & hp
-	let atktag = Tag.create(atkr.name, atkr.faction, sprites)
-	let atkrhp = Hp.create(atkr.hp, atkr.stats.hp, atkr.faction)
+	let atktag = Tag.create(atkr.name, atkr.control.faction, sprites)
+	let atkrhp = Hp.create(atkr.hp, atkr.stats.hp, atkr.control.faction)
 	mode.comps.push(atktag)
 	mode.comps.push(atkrhp)
 	Hp.startFlash(atkrhp, attack.counter ? attack.counter.realdmg : 0)
 
 	// add defender tag & hp
-	let deftag = Tag.create(defr.name, defr.faction, sprites, { flipped: true })
-	let defrhp = Hp.create(defr.hp, defr.stats.hp, defr.faction, { flipped: true })
+	let deftag = Tag.create(defr.name, defr.control.faction, sprites, { flipped: true })
+	let defrhp = Hp.create(defr.hp, defr.stats.hp, defr.control.faction, { flipped: true })
 	mode.comps.push(deftag)
 	mode.comps.push(defrhp)
 	Hp.startFlash(defrhp, attack.realdmg)
