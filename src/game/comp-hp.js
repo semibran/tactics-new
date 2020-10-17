@@ -102,7 +102,7 @@ export function render(hp, screen) {
 			chunk = hp.cache.chunk = RenderHP[side + "Chunk"](damage, value, hpmax, sprites)
 		}
 		let d = screen.time % 75 / 75
-		let opacity = (Math.sin(2 * Math.PI * d) + 1) / 2 * 0.875
+		let opacity = (Math.sin(2 * Math.PI * d) + 1) / 2 * 0.5 + 0.5
 		screen.dirty = true
 		nodes.push({
 			layer: "ui",

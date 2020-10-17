@@ -3,40 +3,23 @@ import * as Canvas from "../../lib/canvas"
 import * as Unit from "../game/unit"
 import renderText from "./render-text"
 import drawShadow from "./style-shadow"
-import getBadge from "./unit-badge"
 
-export function renderWpn(attacker, defender, sprites) {
+export function renderWpn(atkwpn, ctrwpn, sprites) {
 	let palette = sprites.palette
 	let panel = renderBase("WPN", sprites).getContext("2d")
 	let badges = Canvas.create(panel.canvas.width, panel.canvas.height)
-	badges.drawImage(getBadge(attacker, sprites.badges), 4, 1)
-	badges.drawImage(getBadge(defender, sprites.badges), 51, 1)
+	badges.drawImage(sprites.badges[atkwpn], 4, 1)
+	badges.drawImage(sprites.badges[ctrwpn], 51, 1)
 	panel.drawImage(drawShadow(badges.canvas, palette.sage), 0, 0)
 	return panel.canvas
 }
 
-export function renderDmg(attacker, defender, sprites) {
-	let dmg1 = Unit.dmg(attacker, defender)
-	let dmg2 = Unit.dmg(defender, attacker)
-	if (dmg1 === null) {
-		dmg1 = "-"
-	}
-	if (dmg2 === null || dmg1 >= defender.hp) {
-		dmg2 = "-"
-	}
-	return renderPanel("DMG", dmg1, dmg2, sprites)
+export function renderDmg(atkdmg, ctrdmg, sprites) {
+	return renderPanel("DMG", atkdmg, ctrdmg, sprites)
 }
 
-export function renderHit(attacker, defender, sprites) {
-	let hit1 = Unit.hit(attacker, defender)
-	let hit2 = Unit.hit(defender, attacker)
-	if (hit1 === null || hit1 < 0) {
-		hit1 = "-"
-	}
-	if (hit2 === null || hit2 < 0 || Unit.dmg(attacker, defender) >= defender.hp) {
-		hit2 = "-"
-	}
-	return renderPanel("HIT", hit1, hit2, sprites)
+export function renderHit(atkhit, ctrhit, sprites) {
+	return renderPanel("HIT", atkhit, ctrhit, sprites)
 }
 
 function renderPanel(text, val1, val2, sprites) {

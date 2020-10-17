@@ -29,12 +29,14 @@ js:
 sprites:
 	bin/sprites.js $(shell find src/sprites -type f -name '*.png')
 
-serve: clean html css sprites js
-	chokidar "src/**/*.js" -c "make js" \
+watch:
+	chokidar "src/**/*.js" "lib/*.js" -c "make js" \
 	& chokidar "src/**/*.scss" -c "make css" \
 	& chokidar "src/**/*.html" -c "make html" \
 	& chokidar "src/**/*.png" -c "make sprites js" \
-	& browser-sync start --server dist --files dist
+
+serve: clean html css sprites js
+	browser-sync start --server dist --files dist
 
 deploy: all
 	gh-pages -d dist -m "updates"

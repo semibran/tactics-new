@@ -6,7 +6,6 @@ import renderText from "./render-text"
 import renderBox from "./render-box"
 import drawOutline from "./style-outline"
 import drawShadow from "./style-shadow"
-import getBadge from "./unit-badge"
 import getGradient from "../helpers/get-gradient"
 
 export default function renderUnitPreview(unit, sprites) {
@@ -64,7 +63,8 @@ export default function renderUnitPreview(unit, sprites) {
 			const spacing = 21
 			let x = 0
 			let stat = unit.stats.atk
-			let badge = getBadge(unit, sprites.badges)
+			let badgetype = unit.type === "mage" ? unit.stats.element : unit.wpn.type
+			let badge = sprites.badges[badgetype]
 			let value = renderText(stat, {
 				font: fonts.numbers,
 				color: palette.jet

@@ -269,11 +269,11 @@ function hover(mode, cell) {
 				let rng = Unit.rng(unit)
 				if (square.target) {
 					// if out of range
-					if (Cell.distance(cdest || unit.cell, cell) > rng) {
+					if (Cell.steps(cdest || unit.cell, cell) > rng) {
 						// find closest square to attack from
 						let neighbors = Cell.neighborhood(dest, rng)
 							.filter(cell => !map.units.find(unit => Cell.equals(cell, unit.cell)))
-							.sort((a, b) => Cell.distance(a, unit.cell) - Cell.distance(b, unit.cell))
+							.sort((a, b) => Cell.steps(a, unit.cell) - Cell.steps(b, unit.cell))
 						dest = neighbors[0]
 					} else if (!cpath) {
 						// simple case: if no path is cached and the enemy is in range, we can just attack from the start cell
@@ -281,7 +281,7 @@ function hover(mode, cell) {
 					}
 				}
 				if (!path && dest && cpath) {
-					if (!square.target || Cell.distance(cdest, cell) > rng) {
+					if (!square.target || Cell.steps(cdest, cell) > rng) {
 						path = pathfind(unit, dest, map, cpath)
 					} else {
 						path = cpath

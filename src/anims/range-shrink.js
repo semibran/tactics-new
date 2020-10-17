@@ -1,4 +1,4 @@
-import { distance } from "../../lib/cell"
+import { steps } from "../../lib/cell"
 
 export function create(range) {
 	return {
@@ -12,7 +12,7 @@ export function update(anim) {
 	if (anim.done) return
 	for (let i = 0; i < anim.range.squares.length; i++) {
 		let square = anim.range.squares[i]
-		if (distance(anim.range.center, square.cell) === anim.range.radius) {
+		if (steps(anim.range.center, square.cell) === anim.range.radius) {
 			anim.range.squares.splice(i--, 1)
 		}
 	}

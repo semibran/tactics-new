@@ -35,7 +35,7 @@ export default function pathfind(unit, dest, map, cache) {
 		if (!path) {
 			// add addendum to cached if it's not too long
 			let length = cpath.length + apath.length - 2
-			if (length <= Unit.mov(unit)) {
+			if (length <= unit.stats.mov) {
 				path = cpath.concat(apath.slice(1))
 			}
 		}

@@ -1,6 +1,6 @@
 import * as EaseOut from "../anims/ease-out"
 import * as EaseLinear from "../anims/ease-linear"
-import * as RenderStats from "../view/render-forecast"
+import * as RenderStats from "../view/render-statpanel"
 import * as Config from "./config"
 import * as Unit from "./unit"
 import earlyExit from "../helpers/early-exit"
@@ -11,29 +11,44 @@ const exitDuration = 7
 const offsetDelay = 5
 const offsetY = 13
 
-export function create(type, attacker, defender, sprites, data) {
+export function create(type, attack, sprites, opts) {
+	opts = Object.assign({ offset: 0 }, opts)
+
 	let image = null
 	if (type === "wpn") {
-		image = RenderStats.renderWpn(attacker, defender, sprites)
+		let atkwpn = attack.source.wpn.type
+		let ctrwpn = attack.target.wpn.type
+		if (attack.source.type === "mage") {
+			atkwpn = attack.source.stats.element
+		}
+		if (attack.target.type === "mage") {
+			ctrwpn = attack.target.stats.element
+		}
+		image = RenderStats.renderWpn(atkwpn, ctrwpn, sprites)
 	} else if (type === "dmg") {
-		image = RenderStats.renderDmg(attacker, defender, sprites)
+		let atkdmg = attack.hit ? attack.dmg : "-"
+		let ctrdmg = attack.counter && attack.counter.hit ? attack.counter.dmg : "-"
+		image = RenderStats.renderDmg(atkdmg, ctrdmg, sprites)
 	} else if (type === "hit") {
-		image = RenderStats.renderHit(attacker, defender, sprites)
+		let atkhit = attack.hit
+		let ctrhit = attack.counter && attack.counter.hit || "-"
+		image = RenderStats.renderHit(atkhit, ctrhit, sprites)
 	} else {
 		throw new Error(`Failed to render statpanel component: type ${type} is not defined`)
 	}
-	data = Object.assign({ offset: 0 }, data)
+
 	let double = null
-	if (type === "dmg" && Unit.willDouble(attacker, defender)) {
+	if (type === "dmg" && attack.doubles && attack.dmg) {
 		double = "attacker"
-	} else if (type === "dmg" && Unit.willDouble(defender, attacker)) {
+	} else if (type === "dmg" && attack.counter && attack.counter.doubles && attack.counter.dmg) {
 		double = "defender"
 	}
+
 	return {
 		id: "StatPanel",
-		anim: EaseOut.create(enterDuration, { delay: data.offset * offsetDelay }),
+		anim: EaseOut.create(enterDuration, { delay: opts.offset * offsetDelay }),
 		image: image,
-		data: data,
+		opts: opts,
 		double: double,
 		exit: false
 	}
@@ -44,7 +59,7 @@ export function exit(panel) {
 	let duration = panel.anim
 		? earlyExit(exitDuration, panel.anim.x)
 		: exitDuration
-	let opts = { src, dest: 0, delay: panel.data.offset * offsetDelay }
+	let opts = { src, dest: 0, delay: panel.opts.offset * offsetDelay }
 	panel.anim = EaseLinear.create(duration, opts)
 	panel.exit = true
 }
@@ -54,7 +69,7 @@ export function render(panel, screen) {
 	let anim = panel.anim
 	let image = panel.image
 	let x = screen.camera.width / 2
-	let y = screen.camera.height - Config.forecastOffset + 28 + panel.data.offset * offsetY
+	let y = screen.camera.height - Config.forecastOffset + 28 + panel.opts.offset * offsetY
 	let height = anim ? image.height * anim.x : image.height
 	let parent = {
 		layer: "ui",

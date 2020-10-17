@@ -14,8 +14,8 @@ import * as Map from "./map"
 // >   cell: cell
 // > }
 export default function findRange(unit, map) {
-	let mov = Unit.mov(unit)
-	let rng = Unit.rng(unit)
+	let mov = unit.stats.mov
+	let rng = unit.wpn.rng.end
 	let radius = mov + rng
 	let range = {
 		center: unit.cell,

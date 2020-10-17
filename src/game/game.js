@@ -18,14 +18,9 @@ export function move(unit, dest, game) {
 }
 
 export function attack(unit, target, game) {
-	if (Cell.distance(unit.cell, target.cell) > Unit.rng(unit)) return false
-	let dmg = Unit.dmg(unit, target)
-	if (dmg) {
-		target.hp = Math.max(0, target.hp - dmg)
-		if (target.hp <= 0) {
-			// remove unit from playing field
-			remove(target, game)
-		}
+	Unit.attack(unit, target)
+	if (!target.hp) {
+		remove(target, game)
 	}
 }
 

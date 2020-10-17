@@ -1,9 +1,14 @@
-import * as Comps from "./comps"
-import * as Unit from "./unit"
-import * as Camera from "./camera"
-import * as Cell from "../../lib/cell"
 import * as PieceLift from "../anims/piece-lift"
 import * as PieceDrop from "../anims/piece-drop"
+import * as Hp from "./comp-hp"
+import * as Tag from "./comp-tag"
+import * as StatPanel from "./comp-statpanel"
+import * as Vs from "./comp-vs"
+import * as Range from "./comp-range"
+import * as Camera from "./camera"
+import * as Unit from "./unit"
+import * as Cell from "../../lib/cell"
+
 
 export function create(data) {
 	return {
@@ -29,54 +34,40 @@ export function onenter(mode, screen) {
 	Camera.center(screen.camera, screen.map, midpoint)
 	screen.camera.target.y -= screen.camera.height / 4 - 6
 
-	let atkdmg = Unit.dmg(atkr, defr)
-	let ctrdmg = 0
-	if (Number(atkdmg) < defr.hp) {
-		ctrdmg = Unit.dmg(defr, atkr)
-		if (Number(ctrdmg) < atkr.hp && Unit.willDouble(defr, atkr)) {
-			ctrdmg *= 2
-		}
+	let attack = Unit.attackData(atkr, defr)
+	if (!attack) {
+		throw new Error("Failed to create attack data: Attempting to attack an enemy out of range. Reinforce range detection procedures before entering forecast mode.")
 	}
-	if (Number(ctrdmg) < atkr.hp && Unit.willDouble(atkr, defr)) {
-		atkdmg *= 2
-	}
+	console.log(attack)
 
-	// add attacker name tag
-	// add attacker hp
-	let atktag = Comps.Tag.create(atkr.name, atkr.faction, sprites)
-	let atkrhp = Comps.Hp.create(
-		atkr.hp, atkr.stats.hp,
-		atkr.faction
-	)
+	// add attacker name tag & hp
+	let atktag = Tag.create(atkr.name, atkr.faction, sprites)
+	let atkrhp = Hp.create(atkr.hp, atkr.stats.hp, atkr.faction)
 	mode.comps.push(atktag)
 	mode.comps.push(atkrhp)
-	Comps.Hp.startFlash(atkrhp, ctrdmg)
+	Hp.startFlash(atkrhp, attack.counter ? attack.counter.realdmg : 0)
 
-	// add defender tag
-	// add defender hp
-	let deftag = Comps.Tag.create(defr.name, defr.faction, sprites, { flipped: true })
-	let defrhp = Comps.Hp.create(
-		defr.hp, defr.stats.hp,
-		defr.faction, { flipped: true }
-	)
+	// add defender tag & hp
+	let deftag = Tag.create(defr.name, defr.faction, sprites, { flipped: true })
+	let defrhp = Hp.create(defr.hp, defr.stats.hp, defr.faction, { flipped: true })
 	mode.comps.push(deftag)
 	mode.comps.push(defrhp)
-	Comps.Hp.startFlash(defrhp, atkdmg)
+	Hp.startFlash(defrhp, attack.realdmg)
 
 	// add stat panels
-	let wpn = Comps.StatPanel.create("wpn", atkr, defr, sprites)
-	let dmg = Comps.StatPanel.create("dmg", atkr, defr, sprites, { offset: 1 })
-	let hit = Comps.StatPanel.create("hit", atkr, defr, sprites, { offset: 2 })
+	let wpn = StatPanel.create("wpn", attack, sprites)
+	let dmg = StatPanel.create("dmg", attack, sprites, { offset: 1 })
+	let hit = StatPanel.create("hit", attack, sprites, { offset: 2 })
 	mode.comps.push(wpn)
 	mode.comps.push(dmg)
 	mode.comps.push(hit)
 
 	// add vs diamond
-	let vs = Comps.Vs.create(sprites)
+	let vs = Vs.create(sprites)
 	mode.comps.push(vs)
 
 	// add attack range
-	let range = Comps.Range.create({
+	let range = Range.create({
 		center: atkr.cell,
 		radius: Unit.rng(atkr),
 		squares: Cell.neighborhood(atkr.cell, Unit.rng(atkr))

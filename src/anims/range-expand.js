@@ -1,4 +1,4 @@
-import { distance } from "../../lib/cell"
+import { steps } from "../../lib/cell"
 
 export function create(range) {
 	return {
@@ -29,8 +29,8 @@ function sort(range) {
 		sorted[i] = []
 	}
 	for (let square of range.squares) {
-		let steps = distance(range.center, square.cell)
-		sorted[steps].push(square)
+		let dist = steps(range.center, square.cell)
+		sorted[dist].push(square)
 	}
 	return sorted
 }

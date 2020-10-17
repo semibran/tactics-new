@@ -1,5 +1,6 @@
 dependencies:
   img-load: 2.0.0
+  in-range: 2.0.0
   lerp: 1.0.3
   manhattan: 1.0.0
 devDependencies:
@@ -2976,6 +2977,12 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-oDM0kUSNFC31ShNxHKUyfZKy8ZeXZBWMjMdZHKLOk13uvT27VTL/QzRGfRUcevJhpkZAvlhPYuXkF7eNWrtyxQ==
+  /in-range/2.0.0:
+    dev: false
+    engines:
+      node: '>=8'
+    resolution:
+      integrity: sha512-qcbuBQ9FdrlPHZsQTCrSkY1vj90aSO/rx8KOiVO1ZtSJ+vWLaNKjTZODKHL84iZEvdD4fZISZFdQ6lMyHIJeuw==
   /indent-string/2.1.0:
     dependencies:
       repeating: 2.0.1
@@ -5762,6 +5769,7 @@ specifiers:
   gh-pages: ^3.1.0
   html-minifier: ^4.0.0
   img-load: ^2.0.0
+  in-range: ^2.0.0
   jimp: ^0.16.1
   key-state: ^1.0.1
   lerp: ^1.0.3
