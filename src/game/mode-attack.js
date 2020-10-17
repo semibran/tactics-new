@@ -173,9 +173,13 @@ export function onupdate(mode, screen) {
 			}
 
 			// log line 3 - attack final outcome
-			if (attack.data.dmg >= defr.hp && Unit.allied(mode.data.source, defr)) {
+			if (attack.data.dmg >= mode.defrhp.value
+			&& Unit.allied(mode.data.source, defr)
+			) {
 				Comps.Log.append(log, `${defr.name} is defeated.`)
-			} else if (attack.data.dmg >= defr.hp && !Unit.allied(mode.data.source, defr)) {
+			} else if (attack.data.dmg >= mode.defrhp.value
+			&& !Unit.allied(mode.data.source, defr)
+			) {
 				Comps.Log.append(log, `Defeated ${defr.name}.`)
 			}
 		} else if (anim.done) {

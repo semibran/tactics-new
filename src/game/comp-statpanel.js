@@ -31,7 +31,7 @@ export function create(type, attack, sprites, opts) {
 		image = RenderStats.renderDmg(atkdmg, ctrdmg, sprites)
 	} else if (type === "hit") {
 		let atkhit = attack.hit
-		let ctrhit = attack.counter && attack.counter.hit || "-"
+		let ctrhit = attack.counter ? attack.counter.hit : "-"
 		image = RenderStats.renderHit(atkhit, ctrhit, sprites)
 	} else {
 		throw new Error(`Failed to render statpanel component: type ${type} is not defined`)

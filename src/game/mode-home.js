@@ -42,6 +42,11 @@ export function onmove(mode, screen, pointer) {
 export function onrelease(mode, screen, pointer) {
 	if (screen.data.phase.faction === "player" && mode.press && pointer.mode === "click") {
 		select(mode, mode.press.unit)
+	} else {
+		let cell = getCell(pointer.pos, screen.map, screen.camera)
+		if (Map.contains(screen.map, cell)) {
+			console.log(cell)
+		}
 	}
 	mode.press = null
 }

@@ -32,6 +32,7 @@ export function create(data) {
 		anims: [],
 		view: null,
 		time: 0,
+		pause: 0,
 		dirty: false,
 		camera: Camera.create(),
 		map: Object.assign({ tilesize, image: null }, data.map),
@@ -152,8 +153,6 @@ export function onupdate(screen) {
 				transition(screen, command.mode, command.data)
 			}
 		}
-	} else if (screen.data.phase.faction === "enemy") {
-
 	}
 }
 
@@ -233,7 +232,11 @@ function endTurn(unit, screen) {
 			Game.endTurn(unit, screen.data)
 		}
 	}
-	Camera.center(screen.camera, screen.map, unit.cell)
+
+	let next = phase.pending[0]
+	if (next) {
+		Camera.center(screen.camera, screen.map, next.cell)
+	}
 }
 
 export function updateCamera(screen) {

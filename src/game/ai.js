@@ -69,40 +69,53 @@ function wait(unit, map) {
 // stay in one place, but give chase if an enemy is in range
 // TODO: store initial pos and return there if no enemies to attack
 // OR: use initial range instead of current range
-function guard(unit, map) {
-	let range = findRange(unit, map)
+function guard(unit, map, opts) {
+	Object.assign({}, opts)
+	let range = opts.range
+	if (!range) range = findRange(unit, map)
 	let targets = range.squares
 		.filter(square => square.target)
 		.map(square => square.target)
 	// TODO: sort targets
 	let target = targets[0]
-	if (target) {
-		if (inRange(Cell.steps(unit.cell, target.cell), unit.wpn.rng)) {
-			let attack = Unit.attackData(unit, target)
-			return [ { type: "attack", attack } ]
-		} else {
-			let neighbors = nbrhd(target.cell, unit.wpn.rng)
-				.filter(cell => range.squares.find(square => {
-					return square.type === "move" && Cell.equals(square.cell, cell)
-				}))
-				.sort((a, b) => Cell.steps(a, unit.cell) - Cell.steps(b, unit.cell))
-			let dest = neighbors[0]
-			let path = pathfind(unit, dest, map)
-			unit.cell = dest
+	if (!target) return []
+	if (inRange(Cell.steps(unit.cell, target.cell), unit.wpn.rng)) {
+		let attack = Unit.attackData(unit, target)
+		return [ { type: "attack", attack } ]
+	} else {
+		let neighbors = nbrhd(target.cell, unit.wpn.rng)
+			.filter(cell => range.squares.find(square => {
+				return square.type === "move" && Cell.equals(square.cell, cell)
+			}))
+			.sort((a, b) => Cell.steps(a, unit.cell) - Cell.steps(b, unit.cell))
+		let dest = neighbors[0]
+		let path = pathfind(unit, dest, map)
+		unit.cell = dest
 
-			let attack = Unit.attackData(unit, target)
-			return [
-				{ type: "move", unit, path },
-				{ type: "attack", unit, attack }
-			]
-		}
+		let attack = Unit.attackData(unit, target)
+		return [
+			{ type: "move", unit, path },
+			{ type: "attack", unit, attack }
+		]
 	}
 	return []
 }
 
 // bullrush the closest enemy
 function attack(unit, map) {
-	return []
+	let range = findRange(unit, map)
+	let cmd = guard(unit, map, { range })
+	if (cmd.length) return cmd
+	let targets = map.units.filter(other => !Unit.allied(unit, other))
+		.sort((a, b) => Cell.steps(a.cell, unit.cell) - Cell.steps(b.cell, unit.cell))
+	let target = targets[0]
+	if (!target) return []
+	let moves = range.squares.filter(square => square.type === "move")
+		.map(square => square.cell)
+	moves.sort((a, b) => Cell.steps(a, target.cell) - Cell.steps(b, target.cell))
+	let dest = moves[0]
+	let path = pathfind(unit, dest, map)
+	return [ { type: "move", unit, path } ]
 }
 
 function priority(attack) {

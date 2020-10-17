@@ -1,6 +1,6 @@
 import lerp from "lerp"
 
-const speed = 4
+const speed = 5
 
 export function create(path, opts) {
 	return {
