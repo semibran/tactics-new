@@ -42,7 +42,6 @@ export function attack(attack, game) {
 
 export function remove(unit, game) {
 	for (let other of game.map.units) {
-		console.log(other)
 		if (other.control.convert !== unit) continue
 		other.control = { faction: "player" }
 		if (game.phase.faction === "player") {

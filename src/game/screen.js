@@ -398,7 +398,10 @@ export function render(screen) {
 		let z = 0
 		if (game.phase.faction === "player" && unit.control.faction === "player") {
 			if (game.phase.pending.includes(unit)) {
-				if (!select || mode.unit !== unit && mode.target !== unit) {
+				if (!select
+				|| mode.unit !== unit && mode.target !== unit
+				// || mode.id === "Select" && mode.exit
+				) {
 					nodes.push({
 						layer: "pieces",
 						image: sprites.select.glow[unit.control.faction],
@@ -436,6 +439,15 @@ export function render(screen) {
 		if (anim.id === "PieceLift" || anim.id === "PieceDrop") {
 			z = Math.round(anim.y)
 		}
+		// if (anim.id === "PieceDrop" && game.phase.pending.includes(unit)) {
+		// 	nodes.push({
+		// 		layer: "pieces",
+		// 		image: sprites.select.glow[unit.control.faction],
+		// 		x: x,
+		// 		y: y - 2,
+		// 		z: z
+		// 	})
+		// }
 		if (anim.id === "PieceFlinch" && !anim.flashing) {
 			sprite = sprites.pieces.flash
 		}
