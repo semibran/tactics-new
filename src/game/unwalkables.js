@@ -12,7 +12,9 @@ export default function unwalkables(map, unit) {
 				continue
 			}
 			let enemy = map.units.find(other => {
-				return Cell.equals(other.cell, cell) && !Unit.allied(unit, other)
+				return Cell.equals(other.cell, cell)
+						&& !Cell.equals(other.cell, unit.cell)
+				    && !Unit.allied(unit, other)
 			})
 			if (enemy) {
 				unwalkables.push(cell)

@@ -357,7 +357,9 @@ function unhover(mode) {
 function move(mode, path, target) {
 	// close range component
 	let rangecomp = mode.comps.find(comp => comp.id === "Range")
-	Comps.Range.exit(rangecomp)
+	if (rangecomp) {
+		Comps.Range.exit(rangecomp)
+	}
 
 	// add piecemove animation
 	if (path.length > 1) {

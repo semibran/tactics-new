@@ -21,7 +21,8 @@ export default function findRange(unit, map) {
 	let range = {
 		center: unit.cell,
 		radius: radius,
-		squares: []
+		squares: [],
+		edges: []
 	}
 
 	let start = { steps: 0, cell: unit.cell }

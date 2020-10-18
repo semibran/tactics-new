@@ -32,7 +32,7 @@ export function create(data) {
 		anims: [],
 		view: null,
 		time: 0,
-		pause: 0,
+		wait: 0,
 		dirty: false,
 		camera: Camera.create(),
 		map: Object.assign({ tilesize, image: null }, data.map),
@@ -95,10 +95,12 @@ export function onupdate(screen) {
 	let { mode, nextMode } = screen
 
 	screen.time++
+	screen.wait = Math.max(0, screen.wait - 1)
 	updateCamera(screen)
 
 	let busy = screen.anims.find(anim => anim.blocking)
 		|| mode.comps.filter(comp => comp.exit && comp.blocking).length
+		|| screen.wait
 
 	// update components
 	screen.dirty |= updateAnims(screen)
@@ -138,6 +140,7 @@ export function onupdate(screen) {
 	busy = screen.anims.find(anim => anim.blocking)
 		|| mode.id === "Attack" && !mode.exit
 		|| mode.comps.filter(comp => comp.exit && comp.blocking).length
+		|| screen.wait
 	if (busy) return
 	if (screen.commands.length) {
 		let command = screen.commands.shift()
@@ -211,11 +214,20 @@ function endTurn(unit, screen) {
 
 	// if phase has changed
 	let newphase = phase.faction !== cache.phase
-	if (newphase) cache.phase = phase.faction
+	if (newphase) {
+		cache.phase = phase.faction
+		// wait(10, screen)
+
+		let next = phase.pending[0]
+		if (next && (!next.control.ai || next.control.ai !== "wait")) {
+			Camera.center(screen.camera, screen.map, next.cell)
+		}
+	}
+
 	if (!newphase || phase.faction !== "enemy" || !phase.pending.length) {
 		return
 	}
-	console.log("phase switched")
+
 	let strategy = analyze(game.map, phase.pending)
 	let stratmap = new Map()
 	for (let i = 0; i < strategy.length; i++) {
@@ -232,11 +244,10 @@ function endTurn(unit, screen) {
 			Game.endTurn(unit, screen.data)
 		}
 	}
+}
 
-	let next = phase.pending[0]
-	if (next) {
-		Camera.center(screen.camera, screen.map, next.cell)
-	}
+function wait(time, screen) {
+	screen.wait = time
 }
 
 export function updateCamera(screen) {

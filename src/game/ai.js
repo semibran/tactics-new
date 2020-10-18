@@ -1,9 +1,12 @@
 import * as Cell from "../../lib/cell"
 import * as Unit from "./unit"
+import * as Map from "./map"
 import nbrhd from "./neighborhood"
 import findRange from "./range"
 import inRange from "in-range"
 import pathfind from "./pathfind"
+import astar from "../../lib/pathfind"
+import unwalkables from "./unwalkables"
 
 const aifuncs = { attack, guard, wait }
 
@@ -74,7 +77,7 @@ function guard(unit, map, opts) {
 	let range = opts.range
 	if (!range) range = findRange(unit, map)
 	let targets = range.squares
-		.filter(square => square.target)
+		.filter(square => square.target && square.target.control.faction === "player")
 		.map(square => square.target)
 	// TODO: sort targets
 	let target = targets[0]
@@ -106,14 +109,22 @@ function attack(unit, map) {
 	let range = findRange(unit, map)
 	let cmd = guard(unit, map, { range })
 	if (cmd.length) return cmd
-	let targets = map.units.filter(other => !Unit.allied(unit, other))
+	let targets = map.units.filter(other => other.control.faction === "player")
 		.sort((a, b) => Cell.steps(a.cell, unit.cell) - Cell.steps(b.cell, unit.cell))
 	let target = targets[0]
 	if (!target) return []
 	let moves = range.squares.filter(square => square.type === "move")
 		.map(square => square.cell)
-	moves.sort((a, b) => Cell.steps(a, target.cell) - Cell.steps(b, target.cell))
-	let dest = moves[0]
+	let opts = {
+		width: map.width,
+		height: map.height,
+		blacklist: unwalkables(map, unit)
+	}
+	let paths = moves.map(cell => astar(target.cell, cell, opts))
+	let indices = moves.map((_, i) => i)
+	indices.sort((a, b) => paths[a].length - paths[b].length)
+	let index = indices[0]
+	let dest = moves[index]
 	let path = pathfind(unit, dest, map)
 	return [ { type: "move", unit, path } ]
 }
