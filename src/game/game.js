@@ -6,10 +6,16 @@ export function create(map) {
 	let units = map.units.map(unit => Unit.create(...unit))
 	for (let i = 0; i < units.length; i++) {
 		let unit = units[i]
+		// use pointers instead of original data
+		// in conversion criteria
 		if (unit.control.convert) {
 			let other = map.units.find(other => unit.control.convert[2] === other[2])
 			let index = map.units.indexOf(other)
 			unit.control.convert = units[index]
+		}
+		// display move for waiting units as 0
+		if (unit.control.ai === "wait" && unit.control.faction === "enemy") {
+			unit.stats.mov = 0
 		}
 	}
 	return {

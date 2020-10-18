@@ -73,7 +73,7 @@ function wait(unit, map) {
 // TODO: store initial pos and return there if no enemies to attack
 // OR: use initial range instead of current range
 function guard(unit, map, opts) {
-	Object.assign({}, opts)
+	opts = Object.assign({}, opts)
 	let range = opts.range
 	if (!range) range = findRange(unit, map)
 	let targets = range.squares

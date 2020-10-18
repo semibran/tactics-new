@@ -1,7 +1,7 @@
 import { height } from "./piece-lift"
 
 export function create(opts) {
-	Object.assign({ y: height }, opts)
+	opts = Object.assign({ y: height }, opts)
 	return {
 		id: "PieceDrop",
 		done: false,
