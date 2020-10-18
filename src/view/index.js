@@ -8,7 +8,7 @@
 // import pathfind from "../lib/pathfind"
 // import Anims from "./anims"
 import Screens from "../screens"
-import drawNodes from "./draw-nodes"
+import drawNodes from "./node-draw"
 import getPosition from "../helpers/get-position"
 import getCell from "../helpers/get-cell"
 import getQuadrance from "../helpers/get-quadrance"
@@ -92,6 +92,8 @@ export function init(view, game) {
 			if (pointer.mode === "click") {
 				let cursor = pointer.pos
 				let origin = pointer.presspos
+				// check if distance from pressed pos is greater than threshold `maxdist`
+				// uses quadrance instead of distance here for minor perf gains
 				const maxdist = 3
 				if (getQuadrance(origin, cursor) > Math.pow(maxdist, 2)) {
 					pointer.mode = "drag"

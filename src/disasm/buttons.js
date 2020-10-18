@@ -4,7 +4,7 @@ import extract from "../../lib/img-extract"
 import renderText from "../view/render-text"
 
 const texts = {
-	back: "Back",
+	back: "Cancel",
 	move: "Move",
 	wait: "Wait",
 	attack: "Attack",
@@ -30,7 +30,7 @@ export default function disasmButtons(image, fonts, palette) {
 		})
 		let result = Canvas.create(image.width + 2 + text.width, image.height)
 		result.drawImage(image, 0, 0)
-		result.drawImage(text, image.width + 2, image.height - text.height)
+		result.drawImage(text, image.width - 6, image.height - text.height + 1)
 		buttons[name] = result.canvas
 	}
 	return buttons

@@ -5,6 +5,7 @@ import * as Modes from "./modes"
 import * as Unit from "./unit"
 import * as Game from "./game"
 import renderMap from "../view/render-map"
+import contains from "../view/bbox-contains"
 import getOrigin from "../helpers/get-origin"
 import analyze from "./ai"
 
@@ -40,7 +41,8 @@ export function create(data) {
 		cache: {
 			camera: { x: 0, y: 0 },
 			phase: "player",
-			units: data.map.units.slice()
+			units: data.map.units.slice(),
+			unitcell: null
 		}
 	}
 }
@@ -84,6 +86,28 @@ export function onmove(screen, pointer) {
 }
 
 export function onrelease(screen, pointer) {
+	if (pointer.mode === "click") {
+		// scale down pointer pos
+		// we could use another field or function for this
+		let viewport = screen.view.viewport
+		let pos = {
+			x: pointer.pos.x / viewport.scale,
+			y: pointer.pos.y / viewport.scale
+		}
+
+		let comps = screen.mode.comps
+		// do we need to add components from the mode transitioning in?
+		// probably not, because they're animating
+		// if (screen.nextmode) {
+		// 	comps = comps.concat(screen.nextmode.comps)
+		// }
+		let comp = comps.find(comp => comp.bbox && contains(pos, comp.bbox))
+		if (comp) {
+			Comps[comp.id].onclick(comp, screen)
+			return // block mode onrelease hook
+		}
+	}
+
 	// call mode onrelease hook
 	let onrelease = Modes[screen.mode.id].onrelease
 	if (onrelease) {
@@ -151,6 +175,11 @@ export function onupdate(screen) {
 			attack(command.unit, command.attack, screen)
 		} else if (command.type === "endTurn") {
 			endTurn(command.unit, screen)
+		} else if (command.type === "cancel") {
+			cancel(command.unit, screen)
+			if (!nextmode) {
+				transition(screen, "Home")
+			}
 		} else if (command.type === "switchMode") {
 			if (!nextmode) {
 				transition(screen, command.mode, command.data)
@@ -163,10 +192,21 @@ export function onupdate(screen) {
 	}
 }
 
+function cancel(unit, screen) {
+	let cache = screen.cache
+	let game = screen.data
+	if (!cache.unitcell) {
+		throw new Error("Failed to cancel selection: No origin cell in memory")
+	}
+	Game.move(unit, cache.unitcell, game)
+	cache.unitcell = null
+}
+
 function move(unit, path, screen) {
 	// animate piece movement
 	let move = Anims.PieceMove.create(path, { unit, onend })
 	screen.anims.push(move)
+	screen.cache.unitcell = unit.cell
 	// completion handler
 	function onend() {
 		let dest = path[path.length - 1]
@@ -208,6 +248,10 @@ function endTurn(unit, screen) {
 	let phase = game.phase
 	let cache = screen.cache
 	Game.endTurn(unit, screen.data)
+
+	// we don't need to remember the cell we moved from anymore
+	// unless we're adding undo states :flushed:
+	cache.unitcell = null
 
 	console.log("ended", unit.name + "'s turn")
 	console.log(phase.pending.map(unit => unit.name).join(", "), "remains")
@@ -356,17 +400,6 @@ function transition(screen, nextid, nextdata) {
 		onexit(mode, screen)
 	}
 	mode.exit = true
-
-	// pass persistent components to next mode
-	for (let c = 0; c < mode.comps.length; c++) {
-		let comp = mode.comps[c]
-		if (comp.persist) {
-			// can we remove persistent flag after one carry?
-			comp.persist = false
-			mode.comps.splice(c--, 1)
-			next.comps.push(comp)
-		}
-	}
 
 	// close remaining components
 	for (let comp of mode.comps) {

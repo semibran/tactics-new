@@ -3,6 +3,7 @@ import * as PieceDrop from "../anims/piece-drop"
 import * as Hp from "./comp-hp"
 import * as Tag from "./comp-tag"
 import * as Vs from "./comp-vs"
+import * as Back from "./comp-back"
 import * as Range from "./comp-range"
 import * as StatPanel from "./comp-statpanel"
 import * as Camera from "./camera"
@@ -60,6 +61,10 @@ export function onenter(mode, screen) {
 	mode.comps.push(dmg)
 	mode.comps.push(hit)
 
+	// add back button
+	let back = Back.create(sprites)
+	mode.comps.push(back)
+
 	// add attack range
 	let range = Range.create({
 		center: atkr.cell,
@@ -83,11 +88,26 @@ export function onenter(mode, screen) {
 }
 
 export function onexit(mode, screen) {
+	let next = screen.nextmode
+
 	// remove piece lift animation
 	if (mode.anim && mode.anim.id === "PieceLift") {
 		mode.anim.done = true
-		mode.anim = PieceDrop.create({ y: mode.anim.y, unit: mode.unit })
-		mode.anims.push(mode.anim)
+		// mode.anim = PieceDrop.create({ y: mode.anim.y, unit: mode.unit })
+		// mode.anims.push(mode.anim)
+	}
+
+	// only pass persistent components if attacking
+	if (next.id !== "Attack") return
+
+	// pass persistent components to next mode
+	const persist = [ "Vs", "Hp", "Tag" ]
+	for (let c = 0; c < mode.comps.length; c++) {
+		let comp = mode.comps[c]
+		if (persist.includes(comp.id)) {
+			mode.comps.splice(c--, 1)
+			next.comps.push(comp)
+		}
 	}
 }
 
