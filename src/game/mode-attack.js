@@ -94,7 +94,7 @@ export function onenter(mode, screen) {
 
 export function onexit(mode, screen) {
 	for (let comp of mode.comps) {
-		// if (comp.id === "Log" && screen.nextMode.id === "Home") continue
+		// if (comp.id === "Log" && screen.nextmode.id === "Home") continue
 		Comps[comp.id].exit(comp)
 	}
 }
@@ -193,7 +193,6 @@ export function onupdate(mode, screen) {
 		}
 	} else if (!mode.exit) {
 		mode.exit = true
-		mode.commands.push({ type: "endTurn",	unit: mode.data.source })
 		mode.onend && mode.onend()
 	}
 }

@@ -26,7 +26,7 @@ export function create(data) {
 	return {
 		id: "Game",
 		mode: Modes.Home.create(),
-		nextMode: null,
+		nextmode: null,
 		commands: [],
 		comps: [],
 		anims: [],
@@ -92,7 +92,7 @@ export function onrelease(screen, pointer) {
 }
 
 export function onupdate(screen) {
-	let { mode, nextMode } = screen
+	let { mode, nextmode } = screen
 
 	screen.time++
 	screen.wait = Math.max(0, screen.wait - 1)
@@ -106,9 +106,9 @@ export function onupdate(screen) {
 	screen.dirty |= updateAnims(screen)
 	screen.dirty |= updateModeAnims(mode, screen)
 	screen.dirty |= updateModeComps(mode, screen)
-	if (nextMode) {
-		screen.dirty |= updateModeComps(nextMode, screen)
-		if (!busy && nextMode) {
+	if (nextmode) {
+		screen.dirty |= updateModeComps(nextmode, screen)
+		if (!busy && nextmode) {
 			switchMode(screen)
 		}
 	}
@@ -152,9 +152,13 @@ export function onupdate(screen) {
 		} else if (command.type === "endTurn") {
 			endTurn(command.unit, screen)
 		} else if (command.type === "switchMode") {
-			if (!nextMode) {
+			if (!nextmode) {
 				transition(screen, command.mode, command.data)
 			}
+		}
+	} else if (mode.id !== "Home" && mode.id !== "Forecast" && mode.id !== "Select") {
+		if (!nextmode) {
+			transition(screen, "Home")
 		}
 	}
 }
@@ -173,13 +177,16 @@ function move(unit, path, screen) {
 
 function attack(unit, attack, screen) {
 	transition(screen, "Attack", { attack, onend() {
-		console.log(...screen.commands.map(cmd => cmd.type))
 		Game.attack(attack, screen.data)
-		if (!screen.commands.length) {
-			screen.commands.push({
-				type: "switchMode",
-				mode: "Home"
-			})
+		console.log(...screen.commands)
+		let nextcommand = screen.commands[2]
+		if (!screen.commands.length
+		&& !(nextcommand && nextcommand.type === "attack")
+		) {
+
+			if (!screen.nextmode) {
+				transition(screen, "Home")
+			}
 		}
 		let map = screen.map
 		let cache = screen.cache
@@ -201,34 +208,50 @@ function attack(unit, attack, screen) {
 
 function endTurn(unit, screen) {
 	let game = screen.data
-	let cache = screen.cache
 	let phase = game.phase
+	let cache = screen.cache
 	Game.endTurn(unit, screen.data)
-	screen.commands.push({
-		type: "switchMode",
-		mode: "Home"
-	})
 
 	console.log("ended", unit.name + "'s turn")
 	console.log(phase.pending.map(unit => unit.name).join(", "), "remains")
 
-	// if phase has changed
-	let newphase = phase.faction !== cache.phase
-	if (newphase) {
-		cache.phase = phase.faction
-		// wait(10, screen)
+	// only continue if phase has changed
+	if (phase.faction === cache.phase) return
+	cache.phase = phase.faction
+	// wait(10, screen)
 
-		let next = phase.pending[0]
-		if (next && (!next.control.ai || next.control.ai !== "wait")) {
-			Camera.center(screen.camera, screen.map, next.cell)
-		}
+	if (!screen.commands.length) {
+		screen.commands.push({
+			type: "switchMode",
+			mode: "Home"
+		})
 	}
 
-	if (!newphase || phase.faction !== "enemy" || !phase.pending.length) {
-		return
+	if (phase.faction === "enemy" && phase.pending.length) {
+		let cmd = initAi(screen)
+		screen.commands.push(...cmd)
+		// do not center camera if ai hasn't inputted any commands
+		// prevents screen swing on phase complete
+		if (!cmd.length) return
 	}
 
-	let strategy = analyze(game.map, phase.pending)
+	let next = phase.pending[0]
+	if (next) {
+		Camera.center(screen.camera, screen.map, next.cell)
+	}
+}
+
+// initAi(game) -> commandlist
+// > returns a list of commands for all
+// > pending units in the current phase
+// > has side effect of ending turns
+// > is there a better way of doing this?
+function initAi(screen) {
+	let cmd = []
+	let game = screen.data
+	let map = game.map
+	let phase = game.phase
+	let strategy = analyze(map, phase.pending)
 	let stratmap = new Map()
 	for (let i = 0; i < strategy.length; i++) {
 		let commands = strategy[i]
@@ -236,14 +259,16 @@ function endTurn(unit, screen) {
 		stratmap.set(unit, commands)
 	}
 	for (let [ unit, commands ] of stratmap) {
-		console.log(unit.name, commands)
-		if (commands.length) {
-			screen.commands.push(...commands)
+		console.log(unit.name, ...commands)
+		let command = commands[0]
+		if (command && command.type !== "endTurn") {
+			cmd.push(...commands)
 		} else {
 			console.log("no commands for", unit.name)
-			Game.endTurn(unit, screen.data)
+			endTurn(unit, screen)
 		}
 	}
+	return cmd
 }
 
 function wait(time, screen) {
@@ -325,7 +350,7 @@ function transition(screen, nextid, nextdata) {
 	let mode = screen.mode
 
 	// create new mode
-	let next = screen.nextMode = Modes[nextid].create(nextdata)
+	let next = screen.nextmode = Modes[nextid].create(nextdata)
 	next.time = screen.time
 
 	// call old mode onexit hooks
@@ -366,15 +391,15 @@ function transition(screen, nextid, nextdata) {
 }
 
 function switchMode(screen) {
-	screen.mode = screen.nextMode
-	screen.nextMode = null
+	screen.mode = screen.nextmode
+	screen.nextmode = null
 	screen.dirty = true
 }
 
 export function render(screen) {
 	let nodes = []
 
-	let { map, mode, nextMode, cache, camera } = screen
+	let { map, mode, nextmode, cache, camera } = screen
 	let game = screen.data
 	let sprites = screen.view.sprites
 	let origin = camera.origin = getOrigin(map, screen.camera)
@@ -394,8 +419,8 @@ export function render(screen) {
 
 	// queue components
 	let comps = mode.comps.slice()
-	if (nextMode) {
-		comps.push(...nextMode.comps)
+	if (nextmode) {
+		comps.push(...nextmode.comps)
 	}
 	for (let comp of comps) {
 		let compnodes = Comps[comp.id].render(comp, screen)

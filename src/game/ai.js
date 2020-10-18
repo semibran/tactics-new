@@ -62,6 +62,7 @@ function wait(unit, map) {
 	let target = targets[0]
 	if (target) {
 		let attack = Unit.attackData(unit, target)
+		Unit.attack(unit, target, { map, data: attack })
 		cmd.push({ type: "attack", attack })
 		console.log(unit.name, "can target", targets.map(target => target.name).join(", "))
 		console.log("Chose", target.name, attack)

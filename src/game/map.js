@@ -40,3 +40,13 @@ export function unitAt(map, cell) {
 		}
 	}
 }
+
+export function remove(map, unit) {
+	let u = map.units.indexOf(unit)
+	if (u !== -1) {
+		map.units.splice(u, 1)
+		return true
+	} else {
+		return false
+	}
+}

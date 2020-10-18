@@ -30,8 +30,26 @@ export function move(unit, dest, map) {
 	}
 }
 
-export function attack(unit, target) {
-
+export function attack(unit, target, opts) {
+	opts = Object.assign({}, opts)
+	if (!opts.data) opts.data = attackData(unit, target)
+	if (!opts.data) return false
+	let attack = opts.data
+	target.hp -= attack.realdmg
+	if (attack.counter) {
+		unit.hp -= attack.counter.realdmg
+	}
+	if (target.hp <= 0) {
+		return opts.map
+			? Map.remove(opts.map, target)
+			: true
+	}
+	if (unit.hp <= 0) {
+		return opts.map
+			? Map.remove(opts.map, unit)
+			: true
+	}
+	return false
 }
 
 export function allied(a, b) {

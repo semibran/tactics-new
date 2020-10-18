@@ -150,7 +150,7 @@ export function render(mode, screen) {
 
 	// render ring
 	if (selectvis && screen.data.phase.pending.includes(unit)
-	&& (!screen.nextMode || mode.anims
+	&& (!screen.nextmode || mode.anims
 		.concat(screen.anims)
 		.find(anim => anim.id === "PieceDrop"))
 	) {

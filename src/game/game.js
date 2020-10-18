@@ -31,18 +31,20 @@ export function move(unit, dest, game) {
 	unit.cell = dest
 }
 
+// attack function, but from the highest relevant context
+// in this case, it just adds removing from the pending
+// list if one unit is incapacitated
+// could we place these into hooks or something?
 export function attack(attack, game) {
 	let unit = attack.source
 	let target = attack.target
-	let counter = attack.counter
-	target.hp -= attack.realdmg
-	if (counter) {
-		unit.hp -= counter.realdmg
+	let opts = {
+		map: game.map,
+		data: attack
 	}
-	if (!target.hp) {
+	let removed = Unit.attack(unit, target, opts)
+	if (removed) {
 		remove(target, game)
-	} else if (!unit.hp) {
-		remove(unit, game)
 	}
 }
 
@@ -54,6 +56,9 @@ export function remove(unit, game) {
 			game.phase.pending.push(other)
 		}
 	}
+	// removing from map is technically unnecessary
+	// but only if this function is being called
+	// from the attack function
 	let u = game.map.units.indexOf(unit)
 	if (u !== -1) {
 		game.map.units.splice(u, 1)

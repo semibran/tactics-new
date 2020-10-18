@@ -2,7 +2,7 @@ const chorizo = [ "Chorizo", "soldier", { faction: "player" },
 	{ hp: 11, atk: 6, hit: 9, def: 3, spd: 5, res: 4, element: "plant" } ]
 
 const gemma = [ "Gemma", "mage", { faction: "player" },
-	{ hp: 7, atk: 7, hit: 8, def: 2, spd: 4, res: 6, element: "fire" } ]
+	{ hp: 7, atk: 7, hit: 8, def: 2, spd: 4, res: 6, element: "volt" } ]
 
 const orc1 = [ "Orc", "fighter", { faction: "enemy", ai: "attack" },
 	{ hp: 10, atk: 7, hit: 6, def: 1, spd: 4, res: 2, element: "volt" } ]
@@ -11,7 +11,7 @@ const goblin1 = [ "Goblin", "thief", { faction: "enemy", ai: "wait" },
 	{ hp: 6, atk: 5, hit: 6, def: 2, spd: 7, res: 5, element: "dark" } ]
 
 const irving = [ "Irving", "fighter", { faction: "ally", ai: "wait", convert: goblin1 },
-	{ hp: 14, atk: 7, hit: 6, def: 2, spd: 3, res: 0, element: "volt" } ]
+	{ hp: 14, atk: 7, hit: 6, def: 2, spd: 3, res: 0, element: "fire" } ]
 
 const troll1 = [ "Troll", "knight", { faction: "enemy", ai: "attack" },
 	{ hp: 11, atk: 7, hit: 6, def: 5, spd: 2, res: 3, element: "fire" } ]
@@ -90,8 +90,8 @@ export default {
 		[ ...orc3,     { x:  3, y:  1 } ],
 		[ ...skeleton, { x:  6, y:  5 } ],
 		[ ...goblin2,  { x:  4, y:  6 } ],
-		[ ...golem,    { x:  8, y:  0 } ],
-		[ ...lagan,    { x:  7, y:  2 } ],
-		[ ...shiva,    { x:  6, y:  1 } ],
+		// [ ...golem,    { x:  8, y:  0 } ],
+		// [ ...lagan,    { x:  7, y:  2 } ],
+		// [ ...shiva,    { x:  6, y:  1 } ],
 	]
 }
