@@ -6,9 +6,9 @@ export function create(duration, opts) {
 		id: "EaseLinear",
 		done: false,
 		duration: duration,
+		x: opts.src || 0,
 		src: opts.src || 0,
 		dest: opts.dest === undefined ? 1 : opts.dest,
-		x: opts.src || 0,
 		opts: opts,
 		time: 0
 	}

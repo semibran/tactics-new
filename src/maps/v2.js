@@ -41,7 +41,7 @@ const golem = [ "Golem", "knight", { faction: "enemy", ai: "guard" },
 	{ hp: 15, atk: 8, hit: 8, def: 8, spd: 1, res: 5, element: "dark" } ]
 
 const lagan = [ "Lagan", "fighter", { faction: "enemy", ai: "guard" },
-	{ hp: 15, atk: 9, hit: 5, def: 3, spd: 4, res: 4, element: "dark" } ]
+	{ hp: 15, atk: 9, hit: 6, def: 3, spd: 3, res: 4, element: "dark" } ]
 
 const shiva = [ "Shiva", "mage", { faction: "enemy", ai: "wait" },
 	{ hp: 15, atk: 9, hit: 9, def: 4, spd: 4, res: 6, element: "dark" } ]
@@ -79,19 +79,23 @@ export default {
 	units: [
 		[ ...chorizo,  { x:  5, y: 21 } ],
 		[ ...gemma,    { x:  7, y: 22 } ],
+		[ ...irving,   { x:  3, y: 13 } ],
+		[ ...eileen,   { x: 12, y:  7 } ],
 		[ ...orc1,     { x:  8, y: 18 } ],
 		[ ...troll1,   { x: 12, y: 11 } ],
 		[ ...goblin1,  { x:  5, y: 14 } ],
-		[ ...irving,   { x:  3, y: 13 } ],
 		[ ...kobold,   { x:  7, y:  8 } ],
 		[ ...troll2,   { x: 11, y:  8 } ],
-		[ ...eileen,   { x: 12, y:  7 } ],
 		[ ...orc2,     { x: 13, y: 13 } ],
 		[ ...orc3,     { x:  3, y:  1 } ],
 		[ ...skeleton, { x:  6, y:  5 } ],
 		[ ...goblin2,  { x:  4, y:  6 } ],
 		[ ...golem,    { x:  8, y:  0 } ],
 		[ ...lagan,    { x:  7, y:  2 } ],
+		// [ ...chorizo,  { x:  6, y:  3 } ],
+		// [ ...gemma,    { x:  5, y:  2 } ],
+		// [ ...irving,   { x:  7, y:  2 } ],
+		// [ ...eileen,   { x:  8, y:  1 } ],
 		[ ...shiva,    { x:  6, y:  1 } ],
 	]
 }

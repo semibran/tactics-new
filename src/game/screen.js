@@ -172,7 +172,7 @@ export function onupdate(screen) {
 		if (command.type === "move") {
 			move(command.unit, command.path, screen)
 		} else if (command.type === "attack") {
-			attack(command.unit, command.attack, screen)
+			attack(command.attack.source, command.attack, screen)
 		} else if (command.type === "endTurn") {
 			endTurn(command.unit, screen)
 		} else if (command.type === "cancel") {
@@ -215,6 +215,7 @@ function move(unit, path, screen) {
 		let acting = command && command.unit === unit
 		let phase = screen.data.phase
 		if (phase.faction === "enemy" && !acting || screen.mode.id === "Forecast") {
+			console.log("ending turn from move", unit)
 			endTurn(unit, screen)
 		}
 	}
@@ -230,7 +231,8 @@ function attack(unit, attack, screen) {
 		console.log("commands left", ...screen.commands)
 		let command = screen.commands[0]
 		if (!command || command.unit !== unit) {
-			endTurn(unit, screen)
+			console.log("ending turn from attack", attack.source)
+			endTurn(attack.source, screen)
 		}
 		if (!screen.commands.length
 		|| !(screen.commands[0] && screen.commands[0].type === "attack")
@@ -472,9 +474,7 @@ export function render(screen) {
 		let z = 0
 		if (game.phase.faction === "player" && unit.control.faction === "player") {
 			if (game.phase.pending.includes(unit)) {
-				if (!(mode.unit === unit || mode.target === unit)
-				&& (mode.id === "Home" || mode.id === "Select")
-				) {
+				if (!(mode.unit === unit || mode.target === unit)) {
 					nodes.push({
 						layer: "pieces",
 						image: sprites.select.glow[unit.control.faction],

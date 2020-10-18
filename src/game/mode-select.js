@@ -120,7 +120,8 @@ export function onrelease(mode, screen, pointer) {
 			if (target) {
 				mode.commands.push({ type: "forecast", unit, target })
 			} else {
-				mode.commands.push({ type: "endTurn", unit })
+				mode.commands.push({ type: "cancel" })
+				// mode.commands.push({ type: "endTurn", unit })
 			}
 		} else {
 			// move to dest

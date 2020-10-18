@@ -3,8 +3,6 @@
 PATH := $(PWD)/node_modules/.bin:$(PATH)
 SHELL := /bin/bash
 
-# .SILENT:
-
 all: clean
 	make sprites js
 	babel dist/index.js --presets=env | uglifyjs -o dist/index.js -c
@@ -29,14 +27,12 @@ js:
 sprites:
 	bin/sprites.js $(shell find src/sprites -type f -name '*.png')
 
-watch:
+dev:
 	chokidar "src/**/*.js" "lib/*.js" -c "make js" \
 	& chokidar "src/**/*.scss" -c "make css" \
 	& chokidar "src/**/*.html" -c "make html" \
 	& chokidar "src/**/*.png" -c "make sprites js" \
-
-serve: clean html css sprites js
-	browser-sync start --server dist --files dist
+	& serve dist
 
 deploy: all
 	gh-pages -d dist -m "updates"
