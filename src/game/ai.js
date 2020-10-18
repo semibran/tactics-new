@@ -42,7 +42,7 @@ export default function analyze(map, units) {
 				counter.target = counter.target.real
 			}
 		}
-		sequence.push({ type: "endTurn", unit })
+		// sequence.push({ type: "endTurn", unit })
 	}
 
 	return strategy

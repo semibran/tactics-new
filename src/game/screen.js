@@ -171,36 +171,33 @@ function move(unit, path, screen) {
 	function onend() {
 		let dest = path[path.length - 1]
 		Game.move(unit, dest, screen.data)
-		// endTurn(unit, screen)
+		let command = screen.commands[0]
+		let acting = command && command.unit === unit
+		let phase = screen.data.phase
+		if (phase.faction === "enemy" && !acting || screen.mode.id === "Forecast") {
+			endTurn(unit, screen)
+		}
 	}
 }
 
 function attack(unit, attack, screen) {
 	transition(screen, "Attack", { attack, onend() {
-		Game.attack(attack, screen.data)
-		console.log(...screen.commands)
-		let nextcommand = screen.commands[2]
+		let removal = Game.attack(attack, screen.data)
+		if (removal) {
+			let fade = Anims.PieceFade.create({ unit: removal })
+			screen.anims.push(fade)
+		}
+		console.log("commands left", ...screen.commands)
+		let command = screen.commands[0]
+		if (!command || command.unit !== unit) {
+			endTurn(unit, screen)
+		}
 		if (!screen.commands.length
-		&& !(nextcommand && nextcommand.type === "attack")
+		|| !(screen.commands[0] && screen.commands[0].type === "attack")
+		// && !(screen.commands[1] && screen.commands[1].type === "attack")
 		) {
-
 			if (!screen.nextmode) {
 				transition(screen, "Home")
-			}
-		}
-		let map = screen.map
-		let cache = screen.cache
-		if (map.units.length !== cache.units.length) {
-			cache.units = map.units.slice()
-			let unit = null
-			if (!map.units.includes(attack.target)) {
-				unit = attack.target
-			} else if (!map.units.includes(attack.source)) {
-				unit = attack.source
-			}
-			if (unit) {
-				let fade = Anims.PieceFade.create({ unit })
-				screen.anims.push(fade)
 			}
 		}
 	} })
@@ -215,17 +212,18 @@ function endTurn(unit, screen) {
 	console.log("ended", unit.name + "'s turn")
 	console.log(phase.pending.map(unit => unit.name).join(", "), "remains")
 
-	// only continue if phase has changed
-	if (phase.faction === cache.phase) return
-	cache.phase = phase.faction
-	// wait(10, screen)
-
+	console.log("commands left", ...screen.commands)
 	if (!screen.commands.length) {
 		screen.commands.push({
 			type: "switchMode",
 			mode: "Home"
 		})
 	}
+
+	// only continue if phase has changed
+	if (phase.faction === cache.phase) return
+	cache.phase = phase.faction
+	// wait(10, screen)
 
 	if (phase.faction === "enemy" && phase.pending.length) {
 		let cmd = initAi(screen)
@@ -260,12 +258,11 @@ function initAi(screen) {
 	}
 	for (let [ unit, commands ] of stratmap) {
 		console.log(unit.name, ...commands)
-		let command = commands[0]
-		if (command && command.type !== "endTurn") {
-			cmd.push(...commands)
-		} else {
+		if (!commands.length) {
 			console.log("no commands for", unit.name)
 			endTurn(unit, screen)
+		} else {
+			cmd.push(...commands)
 		}
 	}
 	return cmd
@@ -442,9 +439,8 @@ export function render(screen) {
 		let z = 0
 		if (game.phase.faction === "player" && unit.control.faction === "player") {
 			if (game.phase.pending.includes(unit)) {
-				if (!select
-				|| mode.unit !== unit && mode.target !== unit
-				// || mode.id === "Select" && mode.exit
+				if (!(mode.unit === unit || mode.target === unit)
+				&& (mode.id === "Home" || mode.id === "Select")
 				) {
 					nodes.push({
 						layer: "pieces",

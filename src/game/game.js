@@ -42,10 +42,12 @@ export function attack(attack, game) {
 		map: game.map,
 		data: attack
 	}
-	let removed = Unit.attack(unit, target, opts)
-	if (removed) {
-		remove(target, game)
+	let removal = Unit.attack(unit, target, opts)
+	if (removal) {
+		remove(removal, game)
+		return removal
 	}
+	return removal
 }
 
 export function remove(unit, game) {

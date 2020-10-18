@@ -90,8 +90,8 @@ export default {
 		[ ...orc3,     { x:  3, y:  1 } ],
 		[ ...skeleton, { x:  6, y:  5 } ],
 		[ ...goblin2,  { x:  4, y:  6 } ],
-		// [ ...golem,    { x:  8, y:  0 } ],
-		// [ ...lagan,    { x:  7, y:  2 } ],
-		// [ ...shiva,    { x:  6, y:  1 } ],
+		[ ...golem,    { x:  8, y:  0 } ],
+		[ ...lagan,    { x:  7, y:  2 } ],
+		[ ...shiva,    { x:  6, y:  1 } ],
 	]
 }
