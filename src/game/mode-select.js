@@ -97,7 +97,7 @@ export function onpress(mode, screen, pointer) {
 export function onmove(mode, screen, pointer) {
 	if (mode.anim && mode.anim.blocking) return
 	if (!mode.select) {
-		Camera.pan(screen.camera, pointer)
+		Camera.pan(screen.camera, screen.map, pointer)
 		return
 	}
 	let cursor = getCell(pointer.pos, screen.map, screen.camera)

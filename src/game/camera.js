@@ -32,7 +32,7 @@ export function startPan(camera) {
 	}
 }
 
-export function pan(camera, pointer) {
+export function pan(camera, map, pointer) {
 	let delta = {
 		x: pointer.pos.x - pointer.presspos.x,
 		y: pointer.pos.y - pointer.presspos.y
@@ -41,10 +41,10 @@ export function pan(camera, pointer) {
 	camera.target.x = (delta.x + camera.offset.x) / camera.zoom
 	camera.target.y = (delta.y + camera.offset.y) / camera.zoom
 
-	let left = camera.width / 2
-	let right = -camera.width / 2
-	let top = camera.height / 2
-	let bottom = -camera.height / 2
+	let left = map.image.width / 2
+	let right = -map.image.width / 2
+	let top = map.image.height / 2
+	let bottom = -map.image.height / 2
 	if (camera.target.x > left) {
 		camera.target.x = left
 	} else if (camera.target.x < right) {

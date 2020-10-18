@@ -35,7 +35,7 @@ export function onmove(mode, screen, pointer) {
 		mode.press = null
 	}
 	if (screen.data.phase.faction === "player") {
-		Camera.pan(screen.camera, pointer)
+		Camera.pan(screen.camera, screen.map, pointer)
 	}
 }
 
