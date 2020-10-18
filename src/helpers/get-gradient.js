@@ -1,9 +1,9 @@
 // color selection
 // start -> varies based on faction (blue/red)
 // end -> varies based on value:
-//   red    -> 1..2
-//   orange -> 4..5
-//   yellow -> 6..8
+//   red    -> 1..3
+//   orange -> 4..6
+//   yellow -> 7..8
 //   green  -> 9..11
 //   blue   -> 12..14
 //   indigo -> 15
@@ -21,7 +21,7 @@ export default function getGradient(hp, faction, palette, reverse) {
 		end = palette.hp.blue
 	} else if (hp >= 9) {
 		end = palette.hp.green
-	} else if (hp >= 6) {
+	} else if (hp >= 7) {
 		end = palette.hp.yellow
 	} else if (hp >= 4) {
 		end = palette.hp.orange

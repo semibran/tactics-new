@@ -91,7 +91,16 @@ function guard(unit, map, opts) {
 				return square.type === "move" && Cell.equals(square.cell, cell)
 			}))
 			.sort((a, b) => Cell.steps(a, unit.cell) - Cell.steps(b, unit.cell))
-		let dest = neighbors[0]
+
+		let dest = neighbors.shift()
+		while (!dest && neighbors.length) {
+			dest = neighbors.shift()
+		}
+
+		if (!dest) {
+			return []
+		}
+
 		let path = pathfind(unit, dest, map)
 		unit.cell = dest
 

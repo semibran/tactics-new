@@ -92,9 +92,9 @@ export function onenter(mode, screen) {
 	console.log(mode.anim)
 }
 
-export function onexit(mode) {
+export function onexit(mode, screen) {
 	for (let comp of mode.comps) {
-		if (comp.id === "Home") continue
+		// if (comp.id === "Log" && screen.nextMode.id === "Home") continue
 		Comps[comp.id].exit(comp)
 	}
 }
