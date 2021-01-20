@@ -22,3 +22,6 @@ $ pnpm i
 $ make dev
 $ pnpx serve dist
 ```
+
+## License
+[MIT](https://opensource.org/licenses/MIT) © [Brandon Semilla](https://git.io/semibran)
