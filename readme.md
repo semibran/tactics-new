@@ -23,7 +23,7 @@ The demo currently demonstrates six unit classes. A unit's class is indicated by
 - 🛡 Knight: Heavily armored, boasting high DEF and HIT, but suffers from lack of mobility. Weapon is LANCE.
 - 🗡 Thief: Quick but flimsy. Able to dodge most attacks and deliver twin DAGGER attacks to slower enemies. Can also move farther than most units per turn.
 - 🏹 Archer: Fast and can snipe targets from a distance with BOW attacks, but prove vulnerable at close range.
-- 🧙‍♂️ Mage: Can hit from near and afar with powerful magic attacks, but may suffer from low HIT, SPD. or DEF.
+- 🧙‍♂️ Mage: Can hit from near and afar with powerful magic attacks, but may suffer from low HIT, SPD, or DEF.
 
 ## Stats
 Unlike in the [prototype], each unit has its own set of stats which directly influence its performance in combat. The intent of this change is to add variety between units of the same class, make boss units more difficult to overcome, and eventually pave the way for skills that would temporarily reduce relevant stats on usage. The latter change would ideally further encourage participation of the player's entire army.
